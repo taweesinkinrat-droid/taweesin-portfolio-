@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ทวีสิน กลิ่นรัตน์ — Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#111417; --card:#1b2026; --card-2:#222931; --line:#2c353e;
+  --text:#e8edf1; --muted:#95a3ae; --cyan:#22d3ee; --cyan-soft:rgba(34,211,238,.12);
+  --gold:#f5c451; --silver:#cbd5dc; --bronze:#d99a62;
+  --r:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:"IBM Plex Sans Thai",sans-serif;line-height:1.65;-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+a{color:var(--cyan);text-decoration:none}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;border-radius:6px}
+.wrap{width:min(1040px,100%);margin:0 auto}
+
+/* ---------- profile header ---------- */
+.cover{
+  height:clamp(150px,26vw,280px);border-radius:0 0 var(--r) var(--r);overflow:hidden;position:relative;
+  background:#0f2a33 url("images/photos/wrg-team.jpg") center 35%/cover;
+}
+.cover::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(17,20,23,.05) 0%,rgba(17,20,23,.35) 55%,rgba(17,20,23,.97) 100%)}
+.head{display:flex;align-items:flex-end;gap:20px;padding:0 24px;margin-top:-38px;position:relative;z-index:2;flex-wrap:wrap}
+.avatar{
+  width:150px;height:150px;border-radius:50%;border:5px solid var(--bg);background:#223 center/cover;flex:0 0 auto;
+  box-shadow:0 0 0 2px var(--cyan),0 0 30px -6px rgba(34,211,238,.6);
+}
+.who{flex:1;min-width:220px;padding-bottom:10px}
+.who h1{font-size:clamp(1.6rem,4vw,2.2rem);line-height:1.2;text-shadow:0 2px 14px rgba(0,0,0,.7)}
+.who .sub{color:var(--muted);text-shadow:0 2px 10px rgba(0,0,0,.7)}
+.badge-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.pill{font-size:.82rem;padding:3px 10px;border-radius:999px;background:rgba(27,32,38,.9);border:1px solid var(--line);backdrop-filter:blur(4px)}
+.pill.hl{border-color:rgba(245,196,81,.5);color:var(--gold);background:rgba(30,24,10,.85)}
+.head-actions{display:flex;gap:8px;padding-bottom:14px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:10px;font-weight:600;font-size:.95rem}
+.btn-main{background:var(--cyan);color:#07202a}
+.btn-sub{background:var(--card-2);border:1px solid var(--line);color:var(--text)}
+.lang{display:flex;background:var(--card-2);border:1px solid var(--line);border-radius:10px;padding:3px}
+.lang button{padding:5px 11px;border-radius:7px;font-size:.85rem;font-weight:600;color:var(--muted)}
+.lang button.on{background:var(--cyan);color:#07202a}
+
+/* ---------- tabs ---------- */
+.tabs{
+  position:sticky;top:0;z-index:20;background:rgba(17,20,23,.95);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);margin-top:14px;padding:10px 0;
+}
+.tabs .wrap{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:0 16px}
+.tabs .wrap::-webkit-scrollbar{display:none}
+.tab{
+  white-space:nowrap;padding:10px 16px;font-weight:600;font-size:.95rem;color:var(--muted);
+  display:flex;align-items:center;gap:8px;border-radius:999px;border:1px solid transparent;
+  background:var(--card);transition:background .15s,color .15s,border-color .15s,transform .15s;
+}
+.tab svg{width:18px;height:18px;flex:0 0 18px}
+.tab:hover{color:var(--text);border-color:var(--line);transform:translateY(-1px)}
+.tab.on{color:#07202a;background:var(--cyan);border-color:var(--cyan);box-shadow:0 4px 16px -4px rgba(34,211,238,.7)}
+
+main{padding:18px 16px 60px}
+.panel{display:none}
+.panel.on{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.card + .card{margin-top:14px}
+.card h2{font-size:1.2rem;margin-bottom:10px}
+.card h3{font-size:1.05rem;line-height:1.35}
+.muted{color:var(--muted)}
+.cols{display:grid;grid-template-columns:340px 1fr;gap:16px;align-items:start}
+@media (max-width:820px){.cols{grid-template-columns:1fr}.head{justify-content:center;text-align:center}.who{text-align:center}.badge-row{justify-content:center}.head-actions{width:100%;justify-content:center}}
+
+/* intro list */
+.info{list-style:none;display:grid;gap:10px}
+.info li{display:flex;gap:10px;align-items:flex-start}
+.info svg{width:20px;height:20px;flex:0 0 20px;color:var(--muted);margin-top:3px}
+
+/* photo grid (small) */
+.mini-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;border-radius:10px;overflow:hidden}
+.mini-grid img{aspect-ratio:1;object-fit:cover;width:100%;cursor:zoom-in}
+
+/* post (feed) */
+.post-head{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+.post-head .av{width:40px;height:40px;border-radius:50%;background:center/cover}
+.post-head b{display:block;line-height:1.2}
+.post-head small{color:var(--muted)}
+.post p{margin-bottom:10px}
+.tag-medal{display:inline-flex;gap:6px;align-items:center;font-size:.82rem;font-weight:600;padding:3px 10px;border-radius:999px;margin-bottom:8px}
+.m-gold{color:var(--gold);background:rgba(245,196,81,.1);border:1px solid rgba(245,196,81,.4)}
+.m-cyan{color:var(--cyan);background:var(--cyan-soft);border:1px solid rgba(34,211,238,.4)}
+.pics{display:grid;gap:4px;border-radius:10px;overflow:hidden;margin-top:6px}
+.pics.n1{grid-template-columns:1fr}
+.pics.n2{grid-template-columns:1fr 1fr}
+.pics.n3{grid-template-columns:2fr 1fr;grid-template-rows:1fr 1fr}
+.pics.n3 img:first-child{grid-row:1/3}
+.pics.n4{grid-template-columns:1fr 1fr}
+.pics img{width:100%;height:100%;object-fit:cover;aspect-ratio:4/3;cursor:zoom-in;background:var(--card-2)}
+.pics.n3 img:first-child{aspect-ratio:auto}
+.specs{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.chip{font-size:.8rem;padding:3px 10px;border-radius:8px;background:var(--card-2);border:1px solid var(--line);color:#c9d4db}
+
+/* filter chips */
+.filters{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin-bottom:14px;padding-bottom:2px}
+.filters::-webkit-scrollbar{display:none}
+.filter{white-space:nowrap;padding:7px 14px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-weight:500;font-size:.92rem}
+.filter.on{background:var(--cyan-soft);border-color:var(--cyan);color:var(--cyan)}
+.filter .n{opacity:.7;margin-left:4px;font-size:.8rem}
+
+/* certificates */
+.cert-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.cert{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:zoom-in;transition:border-color .2s}
+.cert:hover{border-color:var(--cyan)}
+.cert img{width:100%;aspect-ratio:1.414;object-fit:cover;object-position:top;background:#fff}
+.cert .t{padding:10px 12px}
+.cert .t b{display:block;font-size:.92rem;line-height:1.4;font-weight:600}
+.cert .t span{font-size:.8rem;color:var(--muted)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+@media (max-width:480px){.cert-grid{grid-template-columns:1fr 1fr;gap:8px}.cert .t b{font-size:.84rem}}
+
+/* photos */
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px}
+.photo-grid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;cursor:zoom-in}
+@media (max-width:480px){.photo-grid{grid-template-columns:repeat(3,1fr);gap:3px}.photo-grid img{border-radius:4px}}
+
+/* projects / 3D */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:760px){.grid2{grid-template-columns:1fr}}
+.card .card-img{margin:-18px -18px 14px;border-radius:var(--r) var(--r) 0 0;overflow:hidden}
+.card .card-img img{width:100%;aspect-ratio:16/9;object-fit:cover;cursor:zoom-in}
+.bp{aspect-ratio:16/9;display:grid;place-items:center;color:var(--cyan);
+  background:linear-gradient(rgba(34,211,238,.07) 1px,transparent 1px) 0 0/16px 16px,linear-gradient(90deg,rgba(34,211,238,.07) 1px,transparent 1px) 0 0/16px 16px,#13212a}
+.bp svg{width:46%;height:70%}
+ul.dots{padding-left:18px;margin:6px 0 10px}
+ul.dots li{margin-bottom:4px}
+
+/* videos */
+.vid{aspect-ratio:16/9;background:var(--card-2);border-radius:10px;display:grid;place-items:center;color:var(--muted);overflow:hidden;margin:-4px 0 10px}
+.vid iframe,.vid video{width:100%;height:100%;border:0}
+
+/* timeline */
+.tl{list-style:none;border-left:2px solid var(--line);padding-left:16px;display:grid;gap:14px}
+.tl li{position:relative}
+.tl li::before{content:"";position:absolute;left:-23px;top:7px;width:12px;height:12px;border-radius:50%;background:var(--bg);border:2px solid var(--cyan)}
+
+/* lightbox */
+.lb{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:100;display:none;flex-direction:column;align-items:center;justify-content:center;padding:16px}
+.lb.open{display:flex}
+.lb img{max-width:100%;max-height:78vh;border-radius:6px}
+.lb .cap{margin-top:12px;text-align:center;max-width:720px}
+.lb .cap span{color:var(--muted);font-size:.85rem}
+.lb-btn{position:absolute;width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.1);display:grid;place-items:center;font-size:1.4rem}
+.lb-btn:hover{background:rgba(255,255,255,.2)}
+.lb-close{top:14px;right:14px}.lb-prev{left:14px;top:50%}.lb-next{right:14px;top:50%}
+@media (max-width:600px){.lb-prev,.lb-next{top:auto;bottom:18px}}
+footer{text-align:center;color:var(--muted);font-size:.85rem;padding:20px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="cover" role="img" aria-label="WRG team"></div>
+  <div class="head">
+    <div class="avatar" style="background-image:url(images/photos/profile.jpg)"></div>
+    <div class="who">
+      <h1 id="name"></h1>
+      <div class="sub" id="tagline"></div>
+      <div class="badge-row" id="badges"></div>
+    </div>
+    <div class="head-actions">
+      <a class="btn btn-main" href="mailto:Taweesinkinrat@gmail.com" id="btnContact"></a>
+      <div class="lang"><button data-l="th" class="on">TH</button><button data-l="en">EN</button></div>
+    </div>
+  </div>
+</div>
+
+<nav class="tabs"><div class="wrap" id="tabs"></div></nav>
+
+<main class="wrap">
+  <section class="panel" id="p-home"></section>
+  <section class="panel" id="p-robots"></section>
+  <section class="panel" id="p-projects"></section>
+  <section class="panel" id="p-design"></section>
+  <section class="panel" id="p-certs"></section>
+  <section class="panel" id="p-photos"></section>
+  <section class="panel" id="p-videos"></section>
+  <section class="panel" id="p-about"></section>
+</main>
+<footer>© 2026 ทวีสิน กลิ่นรัตน์ · Taweesin Kinrat</footer>
+
+<div class="lb" id="lb">
+  <button class="lb-btn lb-close" id="lbClose" aria-label="close">✕</button>
+  <button class="lb-btn lb-prev" id="lbPrev" aria-label="previous">‹</button>
+  <button class="lb-btn lb-next" id="lbNext" aria-label="next">›</button>
+  <img id="lbImg" alt="">
+  <div class="cap"><b id="lbT"></b><br><span id="lbS"></span></div>
+</div>
+
+<script>
+/* =====================================================================
+   ✏️ แก้ข้อมูลทั้งหมดได้ในส่วนนี้
+   ===================================================================== */
+const P = "images/photos/", C = "images/certs/";
+
+const ME = {
+  name:{th:"ทวีสิน กลิ่นรัตน์",en:"Taweesin Kinrat"},
+  tagline:{th:"นักเรียนสายหุ่นยนต์ · ออกแบบ สร้าง และเขียนโปรแกรมหุ่นเอง",en:"Robotics student · I design, build and program my own robots"},
+  badges:[{th:"🏆 แชมป์ WRG Thailand 2026",en:"🏆 WRG Thailand 2026 Champion",hl:1},{th:"👑 ถ้วยพระราชทาน TO BE NUMBER ONE",en:"👑 Royal Trophy, TO BE NUMBER ONE",hl:1},{th:"🇯🇵 ตัวแทนไทย WRG ญี่ปุ่น",en:"🇯🇵 Team Thailand, WRG Japan"}],
+};
+
+const ROBOTS = [
+  {date:{th:"7–9 ส.ค. 2569",en:"Aug 7–9, 2026"}, medal:"gold",
+   title:{th:"ชนะเลิศ WRG Thailand Championship 2026 — Hit the Box (Senior)",en:"Champion — WRG Thailand Championship 2026, Hit the Box (Senior)"},
+   text:{th:"ออกแบบและสร้างหุ่นเองทั้งหมด ตั้งแต่ตัวหุ่น ฮาร์ดแวร์ จนถึงโปรแกรมควบคุม ทดสอบและแก้ไขหลายรอบจนหุ่นทำภารกิจได้ทั้งเร็วและแม่น ได้สิทธิ์เป็นตัวแทนประเทศไทยไปแข่ง WRG รอบนานาชาติที่เมืองชิบะ ประเทศญี่ปุ่น 15–20 พ.ย. 2569",
+         en:"I designed and built the whole robot — frame, hardware and control code — testing and fixing it until it ran fast and accurately. The win qualified me for Team Thailand at the WRG international round in Chiba, Japan, Nov 15–20, 2026."},
+   specs:["ESP32 / ATX-2i","TB6612FNG","16× IR + 2× CD74HC4067","2× HM-500MG servo","25×25 cm"],
+   pics:[P+"wrg-stage.jpg",P+"wrg-team.jpg",P+"wrg-field.jpg",C+"champ-01-wrg-hitthebox-2026.jpg"]},
+  {date:{th:"พ.ค. 2569",en:"May 2026"}, medal:"gold",
+   title:{th:"ชนะเลิศระดับประเทศ ถ้วยรางวัลพระราชทาน — TO BE NUMBER ONE Robot Championship",en:"National Champion with Royal Trophy — TO BE NUMBER ONE Robot Championship"},
+   text:{th:"รายการ Quick Box Drop Challenge ม.ปลาย ได้รับถ้วยรางวัลพระราชทาน ทูลกระหม่อมหญิงอุบลรัตนราชกัญญา สิริวัฒนาพรรณวดี คืนก่อนแข่งผมแก้โครงหุ่นใหม่และต้องพิมพ์ 3D ใหม่หลายรอบ ไปแข่งทั้งที่ยังไม่ได้นอน แต่ก็ได้ชนะเลิศ พร้อมเหรียญทองรองชนะเลิศอันดับ 3 รายการ MINI Robotic Athletics",
+         en:"Quick Box Drop Challenge, upper secondary — royal trophy of HRH Princess Ubolratana Rajakanya. The night before, I redesigned the frame and reprinted 3D parts several times, went in without sleep, and still won. Also took gold, 3rd runner-up, in MINI Robotic Athletics."},
+   pics:[P+"tbn1-trophy.jpg",P+"tbn1-stage-1.jpg",P+"tbn1-stage-2.jpg",C+"champ-02-tbn1-quickboxdrop-royal-2026.jpg"]},
+  {date:{th:"ม.ค. 2569",en:"Jan 2026"}, medal:"gold",
+   title:{th:"ชนะเลิศ 2 รายการ — ศิลปหัตถกรรมนักเรียน ระดับเขตพื้นที่ ครั้งที่ 73",en:"Two regional titles — 73rd Student Arts & Crafts Festival"},
+   text:{th:"เหรียญทอง ชนะเลิศ การแข่งขันหุ่นยนต์ระดับกลาง และเหรียญทอง ชนะเลิศ การเขียนโปรแกรมด้วยภาษาคอมพิวเตอร์ ระดับ ม.4–ม.6 สพม.อุทัยธานี ชัยนาท",
+         en:"Gold, champion in intermediate robotics, and gold, champion in computer programming (upper secondary), Uthai Thani–Chai Nat secondary education area."},
+   pics:[C+"champ-04-sesa-robot-2026.jpg",C+"champ-05-sesa-programming-2026.jpg"]},
+  {date:{th:"ส.ค.–ต.ค. 2568",en:"Aug–Oct 2025"}, medal:"gold",
+   title:{th:"เหรียญทอง 5 รายการ — Robot Realm Robotic Olympiad 2025",en:"Five gold medals — Robot Realm Robotic Olympiad 2025"},
+   text:{th:"Wall Tracking Rescue (เหรียญทอง), Robot Athletic (เหรียญทอง), Robot Athletic (รองอันดับ 4), Rescue Survival Bag (รองอันดับ 4) และหุ่นยนต์ขาเตะจุดโทษ (รองอันดับ 4) ได้ลองใช้ไจโรสโคปกับอัลตร้าโซนิค และการเลี้ยวด้วยไจโรที่แม่นกว่าการกะเวลา",
+         en:"Wall Tracking Rescue (gold), Robot Athletic (gold), Robot Athletic (4th runner-up), Rescue Survival Bag (4th runner-up) and a legged penalty-kick robot (4th runner-up). I learned to use gyroscope and ultrasonic sensors and gyro-based turning."},
+   pics:[C+"award-04-robotrealm-wall-rescue-2025.jpg",C+"award-02-robotrealm-athletic-gold-2025.jpg",C+"award-05-robotrealm-survival-bag-2025.jpg",C+"award-06-robotrealm-penalty-kick-2025.jpg"]},
+  {date:{th:"2568–2569",en:"2025–2026"}, medal:"cyan",
+   title:{th:"เวทีนานาชาติ — FIRST Tech Challenge และ Global Robotics Competition",en:"International stage — FIRST Tech Challenge & Global Robotics Competition"},
+   text:{th:"สมาชิกทีม FTC #32899 TW1 ฤดูกาล 2025–2026 (ทีมได้ Best Booth Presentation Award ที่ Thailand Championship) และเข้าร่วม GRC 2025 ที่ Robot Realm Arena ได้เรียนรู้การทำหุ่นอย่างเป็นระบบ ตั้งแต่วางแผน ออกแบบ ทดลอง จนปรับปรุง",
+         en:"Member of FTC team #32899 TW1, 2025–2026 season (team won the Best Booth Presentation Award at the Thailand Championship), and competed at GRC 2025, Robot Realm Arena — a full cycle of planning, designing, testing and improving."},
+   pics:[P+"ftc-team.jpg",C+"award-14-ftc-best-booth-2025.jpg",P+"grc-team.jpg",C+"join-02-grc-2025.jpg"]},
+  {date:{th:"2567–2568",en:"2024–2025"}, medal:"gold",
+   title:{th:"TO BE NUMBER ONE, Robotic Thai Youth League และรายการอื่น ๆ",en:"TO BE NUMBER ONE, Robotic Thai Youth League and more"},
+   text:{th:"ชนะเลิศ Robotic Thai Youth League Division 3 (ม.4–6), เหรียญทอง Network School Robot, เหรียญทอง Rescue Survival Bag, รางวัลยอดเยี่ยม Mitr Phol Grand Robotics, เหรียญเงิน Wall Line Track และเหรียญทองแดง LINE Fast (CPU ASEAN Grand Prix)",
+         en:"Champion, Robotic Thai Youth League Division 3; gold in Network School Robot and Rescue Survival Bag; Excellent Award at Mitr Phol Grand Robotics; silver in Wall Line Track and bronze in LINE Fast at the CPU ASEAN Grand Prix."},
+   pics:[P+"gallery-17.jpg",C+"champ-03-rtyl-division3-2024.jpg",C+"award-09-mitrphol-excellent-2025.jpg",P+"gallery-06.jpg"]},
+];
+
+const PROJECTS = [
+  {img:P+"sc-fall-detect.jpg", title:"Smart Classroom AI",
+   badge:{th:"ผ่านเข้ารอบ National Coding & AI Competition (depa) ภาคเหนือตอนล่าง",en:"National Coding & AI Competition (depa), lower-north round"},
+   text:{th:"กล้อง AI ในห้องเรียน ตรวจจับเหตุฉุกเฉินแล้วแจ้งเตือนครูทันที",en:"An AI camera for classrooms that detects emergencies and alerts teachers instantly."},
+   list:{th:["ตรวจจับคนล้มด้วย YOLO11s-pose","ตรวจจับควัน ไฟ และผู้ต้องสงสัย (ถ่ายรูปและเทรนโมเดลเอง)","เซนเซอร์ MQ-2 และ PIR บน ESP32","เว็บแดชบอร์ด Flask อัปเดตเรียลไทม์ผ่าน MQTT over WebSocket"],
+         en:["Fall detection with YOLO11s-pose","Smoke, fire and suspicious-person detection (my own photos and training)","MQ-2 and PIR sensors on ESP32","Flask dashboard with real-time MQTT over WebSocket"]},
+   tags:["Python","YOLO11","ESP32","MQTT","Flask","Raspberry Pi 5"], more:[P+"sc-team.jpg",P+"sc-poster.jpg",P+"sc-regional-list.jpg"]},
+  {img:"", title:"ROBOT LAB",
+   text:{th:"เว็บจำลองหุ่นยนต์เดินตามเส้นภาษาไทย ฟิสิกส์ล้อ differential drive เซนเซอร์ IR 5 ตัว เขียนโค้ดได้ทั้งแบบบล็อกและข้อความ มี 10 บทเรียนตั้งแต่คุมมอเตอร์ถึง PID",
+         en:"A Thai-language line-following robot simulator: differential-drive physics, 5 IR sensors, block and text coding, 10 lessons from motors to PID."},
+   tags:["JavaScript","Simulation","Education"]},
+  {img:"", title:{th:"ไลบรารี PID เซนเซอร์ 16 ช่อง",en:"16-channel PID line library"},
+   text:{th:"ไลบรารีเดินตามเส้นสำหรับบอร์ด ATX-2i อ่าน IR 16 ตัวผ่านมัลติเพล็กเซอร์ พร้อมจูนความเร็วเลี้ยวสำหรับสนามแข่ง ใช้ในหุ่น WRG",
+         en:"Line-following library for the ATX-2i board, reading 16 IR sensors through multiplexers with tuned turn speeds — used in my WRG robot."},
+   tags:["C++","PID","ATX-2i"]},
+  {img:C+"award-12-nsru-invention-silver-2024.jpg", title:{th:"โครงงานวิทยาศาสตร์ประเภทสิ่งประดิษฐ์",en:"Science invention projects"},
+   badge:{th:"เหรียญเงิน ม.ราชภัฏนครสวรรค์",en:"Silver medal, Nakhon Sawan Rajabhat University"},
+   text:{th:"Electronic control box prefect system และ Eco Student Bot หุ่นยนต์เก็บขยะเพื่อโรงเรียน ประกวดที่ ม.นเรศวร (2567)",
+         en:"Electronic control box prefect system and Eco Student Bot, a trash-collecting robot for schools, shown at Naresuan University (2024)."},
+   tags:["Arduino","Electronics","Team project"], more:[C+"join-06-project-control-box-2024.jpg",C+"join-07-project-eco-bot-2024.jpg"]},
+];
+
+const DESIGNS = [
+  {art:"rack",title:{th:"กลไกยกแบบ Rack & Pinion",en:"Rack & pinion lift"},text:{th:"แขนยกขับด้วยเซอร์โวสำหรับหุ่น WRG คำนวณขนาดเฟืองใน Onshape",en:"Servo-driven lift for the WRG robot, gears sized in Onshape."},src:""},
+  {art:"hub",title:{th:"ตัวต่อแขนเซอร์โว",en:"Servo horn adapter"},text:{th:"เชื่อมแขนเซอร์โวกับเฟือง ปรับและพิมพ์ใหม่หลายรอบจนพอดี",en:"Links the servo horn to the pinion, reprinted until it fit tightly."},src:""},
+  {art:"chassis",title:{th:"โครงหุ่นยนต์",en:"Robot chassis"},text:{th:"โครงหลักตามกติกา 25×25 ซม. โครงหุ่น Quick Box Drop ออกแบบใหม่คืนก่อนแข่งระดับประเทศ",en:"Main frame within the 25×25 cm rule; the Quick Box Drop frame was redesigned the night before the national final."},src:""},
+];
+
+/* type: champ | award | join | course */
+const CERTS = [
+  ["champ","champ-01-wrg-hitthebox-2026","ชนะเลิศ WRG Thailand 2026 — IPST Hit the Box (SR)","Champion — WRG Thailand 2026, IPST Hit the Box (SR)","2569"],
+  ["champ","champ-02-tbn1-quickboxdrop-royal-2026","ชนะเลิศ ถ้วยพระราชทาน — TO BE NUMBER ONE Quick Box Drop","Champion, Royal Trophy — TO BE NUMBER ONE Quick Box Drop","2569"],
+  ["champ","champ-04-sesa-robot-2026","ชนะเลิศ หุ่นยนต์ระดับกลาง ม.4–6 — ศิลปหัตถกรรมเขตพื้นที่","Champion — Intermediate robotics, regional arts & crafts","2569"],
+  ["champ","champ-05-sesa-programming-2026","ชนะเลิศ เขียนโปรแกรมภาษาคอมพิวเตอร์ ม.4–6 — ศิลปหัตถกรรมเขตพื้นที่","Champion — Computer programming, regional arts & crafts","2569"],
+  ["champ","champ-03-rtyl-division3-2024","ชนะเลิศ Robotic Thai Youth League 2024–25 Division 3","Champion — Robotic Thai Youth League 2024–25, Division 3","2567"],
+  ["award","award-01-tbn1-mini-athletics-2026","เหรียญทอง รองอันดับ 3 — MINI Robotic Athletics","Gold, 3rd runner-up — MINI Robotic Athletics","2569"],
+  ["award","award-14-ftc-best-booth-2025","Best Booth Presentation Award — FTC Thailand Championship (ทีม)","Best Booth Presentation Award — FTC Thailand Championship (team)","2568"],
+  ["award","award-09-mitrphol-excellent-2025","รางวัลยอดเยี่ยม — Mitr Phol Grand Robotics Championship 2025","Excellent Award — Mitr Phol Grand Robotics Championship 2025","2568"],
+  ["award","award-04-robotrealm-wall-rescue-2025","เหรียญทอง Wall Tracking Rescue — Robot Realm 2025","Gold — Wall Tracking Rescue, Robot Realm 2025","2568"],
+  ["award","award-02-robotrealm-athletic-gold-2025","เหรียญทอง Robot Athletic — Robot Realm 2025 สนาม 1","Gold — Robot Athletic, Robot Realm 2025 round 1","2568"],
+  ["award","award-03-robotrealm-athletic-4th-2025","เหรียญทอง รองอันดับ 4 Robot Athletic — Robot Realm 2025 สนาม 2","Gold, 4th runner-up — Robot Athletic, round 2","2568"],
+  ["award","award-05-robotrealm-survival-bag-2025","เหรียญทอง รองอันดับ 4 Rescue Survival Bag — Robot Realm 2025","Gold, 4th runner-up — Rescue Survival Bag","2568"],
+  ["award","award-06-robotrealm-penalty-kick-2025","เหรียญทอง รองอันดับ 4 หุ่นยนต์ขาเตะจุดโทษ — Robot Realm 2025","Gold, 4th runner-up — Legged penalty-kick robot","2568"],
+  ["award","award-07-tbn1-network-school-2025","เหรียญทอง — TO BE NUMBER ONE Network School Robot","Gold — TO BE NUMBER ONE Network School Robot","2568"],
+  ["award","award-08-tbn1-rescue-bag-2025","เหรียญทอง Rescue Survival Bag — TO BE NUMBER ONE Rescue Robot","Gold — Rescue Survival Bag, TO BE NUMBER ONE Rescue Robot","2568"],
+  ["award","award-10-cpu-wall-line-silver-2024","เหรียญเงิน Wall Line Track — CPU ASEAN Grand Prix 2024","Silver — Wall Line Track, CPU ASEAN Grand Prix 2024","2567"],
+  ["award","award-11-cpu-line-fast-bronze-2024","เหรียญทองแดง LINE Fast — CPU ASEAN Grand Prix 2024","Bronze — LINE Fast, CPU ASEAN Grand Prix 2024","2567"],
+  ["award","award-12-nsru-invention-silver-2024","เหรียญเงิน โครงงานสิ่งประดิษฐ์ — ม.ราชภัฏนครสวรรค์","Silver — Science invention project, NSRU","2567"],
+  ["award","award-13-sesa-national70-silver-2023","เหรียญเงิน หุ่นยนต์ ม.1–3 — ศิลปหัตถกรรมระดับชาติ ครั้งที่ 70","Silver — Robotics (lower secondary), 70th National Arts & Crafts","2566"],
+  ["join","join-01-ftc-2025","FIRST Tech Challenge 2025–26 — ทีม #32899 TW1","FIRST Tech Challenge 2025–26 — Team #32899 TW1","2568"],
+  ["join","join-02-grc-2025","Global Robotics Competition 2025","Global Robotics Competition 2025","2568"],
+  ["join","join-03-roborave-2026","Robo RAVE Thailand 2026","Robo RAVE Thailand 2026","2569"],
+  ["join","join-04-smart-transport-2026","Smart Transportation Robot 2026 (Senior) — วช.","Smart Transportation Robot 2026 (Senior) — NRCT","2569"],
+  ["join","join-05-cpmeiji-2024","1st CP-Meiji Robotics Grand Championship 2024","1st CP-Meiji Robotics Grand Championship 2024","2567"],
+  ["join","join-06-project-control-box-2024","โครงงาน Electronic control box prefect system — ม.นเรศวร","Project: Electronic control box prefect system — Naresuan Univ.","2567"],
+  ["join","join-07-project-eco-bot-2024","โครงงาน Eco Student Bot — ม.นเรศวร","Project: Eco Student Bot — Naresuan Univ.","2567"],
+  ["join","join-08-live-and-learn-2025","นิทรรศการผลงานวิชาการ Live and Learn Uthai Thani","Live and Learn academic exhibition, Uthai Thani","2568"],
+  ["join","join-09-insurefluencer-2025","Insurefluencer the new GEN 2025 — คปภ.","Insurefluencer the new GEN 2025 — OIC","2568"],
+  ["course","course-01-su-c-programming","การเขียนโปรแกรมภาษาซี — วิศวะไฟฟ้า ม.ศิลปากร (12 ชม.)","C programming — EE, Silpakorn Univ. (12 h)","2569"],
+  ["course","course-02-su-python-1","Function และ Class ใน Python รุ่น 1 — ม.ศิลปากร","Python functions & classes (1) — Silpakorn","2569"],
+  ["course","course-03-su-python-2","Function และ Class ใน Python รุ่น 2 — ม.ศิลปากร","Python functions & classes (2) — Silpakorn","2569"],
+  ["course","course-06-su-logic-circuits","การแปลงเลขฐานและวงจรลอจิก — ม.ศิลปากร","Number systems & logic circuits — Silpakorn","2569"],
+  ["course","course-07-su-circuit-analysis","การวิเคราะห์วงจรไฟฟ้าเบื้องต้น — ม.ศิลปากร","Basic circuit analysis — Silpakorn","2569"],
+  ["course","course-04-su-electronics-1","อุปกรณ์อิเล็กทรอนิกส์พื้นฐาน รุ่น 1 — ม.ศิลปากร","Basic electronic devices (1) — Silpakorn","2569"],
+  ["course","course-05-su-electronics-2","อุปกรณ์อิเล็กทรอนิกส์พื้นฐาน รุ่น 2 — ม.ศิลปากร","Basic electronic devices (2) — Silpakorn","2569"],
+  ["course","course-10-tira-pre-engineering","หลักสูตรเตรียมวิศวกรรม อิเล็กทรอนิกส์อัจฉริยะ (30 ชม.) — TIRA","Pre-engineering: smart electronics (30 h) — TIRA","2568"],
+  ["course","course-08-ku-applied-cryptography","การเข้ารหัสประยุกต์ — KU MOOC ม.เกษตรศาสตร์","Applied cryptography — KU MOOC, Kasetsart","2569"],
+  ["course","course-09-ku-industrial-engineering","การพัฒนางานโดยมุมมองของวิศวกรอุตสาหการ — KU MOOC","Work improvement from an industrial engineer's view — KU MOOC","2569"],
+  ["course","course-11-nacc-anti-corruption","หลักสูตรต้านทุจริตศึกษา — ป.ป.ช.","Anti-corruption education — NACC","2567"],
+].map(([type,file,th,en,year])=>({type,src:C+file+".jpg",title:{th,en},year}));
+
+const VIDEOS = [ /* ใส่ YouTube ID ใน yt เช่น "dQw4w9WgXcQ" */
+  {title:{th:"WRG Hit the Box — รอบชนะเลิศ",en:"WRG Hit the Box — winning run"},yt:"B5hZ554a0ow"},
+  {title:{th:"Smart Classroom AI — เดโม",en:"Smart Classroom AI — demo"},yt:""},
+  {title:{th:"Global Robotics Competition 2025",en:"Global Robotics Competition 2025"},yt:""},
+  {title:{th:"TO BE NUMBER ONE — Quick Box Drop",en:"TO BE NUMBER ONE — Quick Box Drop"},yt:""},
+];
+
+const PHOTOS = [
+  "wrg-stage","wrg-team","wrg-field","tbn1-trophy","tbn1-stage-1","tbn1-stage-2","ftc-team","grc-team","sc-team","sc-fall-detect",
+  ...Array.from({length:17},(_,i)=>"gallery-"+String(i+1).padStart(2,"0"))
+].map(n=>P+n+".jpg");
+
+const SKILLS = ["C / C++","Python","Arduino","SketchUp"];
+
+/* ===================================================================== */
+let L="th";
+const T=o=>o&&typeof o==="object"&&!Array.isArray(o)?(o[L]??o.en):o;
+const UI={
+  home:{th:"หน้าหลัก",en:"Home"},robots:{th:"แข่งหุ่นยนต์",en:"Robotics"},projects:{th:"โครงงาน",en:"Projects"},design:{th:"ออกแบบ 3D",en:"3D design"},
+  certs:{th:"เกียรติบัตร",en:"Certificates"},photos:{th:"รูปภาพ",en:"Photos"},videos:{th:"วิดีโอ",en:"Videos"},about:{th:"เกี่ยวกับ",en:"About"},
+  contact:{th:"✉ ติดต่อ",en:"✉ Contact"},intro:{th:"แนะนำตัว",en:"Intro"},seeAll:{th:"ดูทั้งหมด",en:"See all"},
+  all:{th:"ทั้งหมด",en:"All"},champ:{th:"🥇 ชนะเลิศ",en:"🥇 Champion"},award:{th:"🏅 รางวัล/เหรียญ",en:"🏅 Medals & awards"},join:{th:"🤖 เข้าร่วมแข่งขัน",en:"🤖 Participation"},course:{th:"📚 อบรม/คอร์สเรียน",en:"📚 Courses"},
+  sChamp:{th:"รางวัลชนะเลิศ",en:"Champion titles"},sGold:{th:"เหรียญ/รางวัล",en:"Medals & awards"},sCert:{th:"เกียรติบัตรทั้งหมด",en:"Certificates"},sCourse:{th:"คอร์สวิศวะ/โปรแกรม",en:"Engineering courses"},
+  addVid:{th:"ยังไม่มีคลิป — ใส่ YouTube ID ในโค้ด",en:"No video yet — add a YouTube ID"},edu:{th:"การศึกษา",en:"Education"},skills:{th:"ทักษะ",en:"Skills"},
+  latest:{th:"ผลงานล่าสุด",en:"Latest highlights"},noImg:{th:"เพิ่มรูปภายหลัง",en:"Image coming soon"}
+};
+const tabIc={
+  home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>',
+  robots:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="8" width="16" height="11" rx="2"/><path d="M12 4v4M9 13h.01M15 13h.01M2 13v3M22 13v3"/></svg>',
+  projects:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 22h4M12 2a6 6 0 00-4 10.5c.6.6 1 1.4 1 2.5h6c0-1.1.4-1.9 1-2.5A6 6 0 0012 2z"/></svg>',
+  design:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21l9-9M3 21l6-1 12-12-5-5L4 15z"/></svg>',
+  certs:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 21l4-3 4 3-1-6.5M6 3h12v7a6 6 0 01-12 0z"/></svg>',
+  photos:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.5"/><path d="M8 6l1.5-2h5L16 6"/></svg>',
+  videos:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="14" height="14" rx="2"/><path d="M17 9.5l4-2.5v10l-4-2.5"/></svg>',
+  about:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-6 8-6s8 2 8 6"/></svg>'
+};
+const TABS=[["home",tabIc.home],["robots",tabIc.robots],["projects",tabIc.projects],["design",tabIc.design],["certs",tabIc.certs],["photos",tabIc.photos],["videos",tabIc.videos],["about",tabIc.about]];
+
+const ic={
+  school:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c3 2 9 2 12 0v-5"/></svg>',
+  pin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s7-7 7-12a7 7 0 00-14 0c0 5 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+  mail:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>',
+  ig:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/></svg>',
+  fb:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 3h-2a4 4 0 00-4 4v3H7v4h2v7h4v-7h3l1-4h-4V7a1 1 0 011-1h2z"/></svg>',
+  star:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>'
+};
+const ART={
+  rack:'<svg viewBox="0 0 120 90" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="10" y="60" width="100" height="10"/>'+Array.from({length:12},(_,i)=>`<path d="M${14+i*8} 60l2-5h4l2 5"/>`).join("")+'<circle cx="60" cy="38" r="16"/><circle cx="60" cy="38" r="4"/></svg>',
+  hub:'<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="50" cy="50" r="34"/><circle cx="50" cy="50" r="12"/><circle cx="72" cy="50" r="3"/><circle cx="28" cy="50" r="3"/><circle cx="50" cy="72" r="3"/><circle cx="50" cy="28" r="3"/></svg>',
+  chassis:'<svg viewBox="0 0 110 110" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="10" y="10" width="90" height="90" rx="6"/><rect x="2" y="30" width="10" height="26" rx="2"/><rect x="98" y="30" width="10" height="26" rx="2"/><rect x="22" y="86" width="66" height="8"/><path d="M40 55h30v18H40z"/></svg>'
+};
+
+/* lightbox groups */
+const GROUPS={}; let gid=0;
+function grp(list){const k="g"+(gid++);GROUPS[k]=list;return k}
+const img=(src,k,i,alt="")=>`<img src="${src}" loading="lazy" alt="${alt}" data-g="${k}" data-i="${i}">`;
+function pics(list){const k=grp(list.map(s=>({src:s})));const n=Math.min(list.length,4);return `<div class="pics n${n}">${list.slice(0,4).map((s,i)=>img(s,k,i)).join("")}</div>`}
+
+function post(r){
+  return `<article class="card post">
+    <div class="post-head"><div class="av" style="background-image:url(${P}profile.jpg)"></div><div><b>${T(ME.name)}</b><small>${T(r.date)}</small></div></div>
+    <span class="tag-medal ${r.medal==="gold"?"m-gold":"m-cyan"}">${r.medal==="gold"?"🏆":"🌏"} ${T(r.title)}</span>
+    <p>${T(r.text)}</p>
+    ${r.specs?`<div class="specs">${r.specs.map(s=>`<span class="chip">${s}</span>`).join("")}</div>`:""}
+    ${pics(r.pics)}
+  </article>`;
+}
+
+function intro(){
+  return `<div class="card"><h2>${T(UI.intro)}</h2>
+   <ul class="info">
+    <li>${ic.school}<span>${L==="th"?"นักเรียนแผน SMT (วิทย์–คณิต–เทคโนโลยี) <b>โรงเรียนอุทัยธรรมานุวัตรวิทยา</b>":"SMT program student, <b>Uthaidhammanuwat Witthaya School</b>"}</span></li>
+    <li>${ic.star}<span>${L==="th"?"เกรดเฉลี่ย 4 ภาคเรียน <b>3.46</b>":"GPAX (4 semesters) <b>3.46</b>"}</span></li>
+    <li>${ic.pin}<span>${L==="th"?"จ.อุทัยธานี":"Uthai Thani, Thailand"}</span></li>
+    <li>${ic.mail}<a href="mailto:Taweesinkinrat@gmail.com">Taweesinkinrat@gmail.com</a></li>
+    <li>${ic.ig}<a href="https://www.instagram.com/umamiumami_/" target="_blank" rel="noopener">@umamiumami_</a></li>
+    <li>${ic.fb}<span>Taweesin Kinrat</span></li>
+   </ul></div>`;
+}
+
+function render(){
+  document.documentElement.lang=L;
+  document.getElementById("name").textContent=T(ME.name);
+  document.getElementById("tagline").textContent=T(ME.tagline);
+  document.getElementById("badges").innerHTML=ME.badges.map(b=>`<span class="pill ${b.hl?"hl":""}">${T(b)}</span>`).join("");
+  document.getElementById("btnContact").textContent=T(UI.contact);
+  document.getElementById("tabs").innerHTML=TABS.map(([k,e])=>`<button class="tab ${k===cur?"on":""}" data-t="${k}">${e}<span>${T(UI[k])}</span></button>`).join("");
+  gid=0;for(const k in GROUPS)delete GROUPS[k];
+
+  /* home */
+  const pk=grp(PHOTOS.slice(0,9).map(s=>({src:s})));
+  document.getElementById("p-home").innerHTML=`<div class="cols">
+    <div>${intro()}
+      <div class="card"><h2 style="display:flex;justify-content:space-between">${T(UI.photos)} <button class="muted" style="font-size:.9rem" data-go="photos">${T(UI.seeAll)}</button></h2>
+      <div class="mini-grid">${PHOTOS.slice(0,9).map((s,i)=>img(s,pk,i)).join("")}</div></div>
+    </div>
+    <div>${ROBOTS.slice(0,3).map(post).join("")}
+      <div class="card" style="text-align:center"><button class="btn btn-sub" data-go="robots">${T(UI.seeAll)} — ${T(UI.robots)}</button></div></div>
+  </div>`;
+
+  /* robots */
+  document.getElementById("p-robots").innerHTML=`<div style="max-width:680px;margin:0 auto">${ROBOTS.map(post).join("")}</div>`;
+
+  /* projects */
+  document.getElementById("p-projects").innerHTML=`<div class="grid2">${PROJECTS.map(p=>{
+    const k=grp([p.img,...(p.more||[])].filter(Boolean).map(s=>({src:s,t:T(p.title)})));
+    return `<article class="card" style="margin:0">
+      <div class="card-img">${p.img?img(p.img,k,0):`<div class="bp">${ART.chassis}</div>`}</div>
+      ${p.badge?`<span class="tag-medal m-gold">🏆 ${T(p.badge)}</span>`:""}
+      <h3>${T(p.title)}</h3><p class="muted" style="margin:6px 0">${T(p.text)}</p>
+      ${p.list?`<ul class="dots">${T(p.list).map(x=>`<li>${x}</li>`).join("")}</ul>`:""}
+      <div class="specs">${p.tags.map(t=>`<span class="chip">${t}</span>`).join("")}</div>
+      ${p.more?`<div class="pics n${Math.min(p.more.length,3)===3?2:p.more.length}" style="margin-top:10px">${p.more.slice(0,2).map((s,i)=>img(s,k,i+(p.img?1:0))).join("")}</div>`:""}
+    </article>`}).join("")}</div>`;
+
+  /* design */
+  document.getElementById("p-design").innerHTML=`<p class="muted" style="margin-bottom:12px">${L==="th"?"ออกแบบด้วย SketchUp และ Onshape แล้วพิมพ์ 3D ทดสอบจริง":"Designed in SketchUp and Onshape, then 3D-printed and tested."}</p>
+   <div class="grid2">${DESIGNS.map(d=>`<article class="card" style="margin:0"><div class="card-img">${d.src?`<img src="${d.src}">`:`<div class="bp">${ART[d.art]}</div>`}</div><h3>${T(d.title)}</h3><p class="muted">${T(d.text)}</p></article>`).join("")}</div>`;
+
+  renderCerts();
+
+  /* photos */
+  const gk=grp(PHOTOS.map(s=>({src:s})));
+  document.getElementById("p-photos").innerHTML=`<div class="photo-grid">${PHOTOS.map((s,i)=>img(s,gk,i)).join("")}</div>`;
+
+  /* videos */
+  document.getElementById("p-videos").innerHTML=`<div class="grid2">${VIDEOS.map(v=>`<div class="card" style="margin:0"><div class="vid">${v.yt?`<iframe src="https://www.youtube-nocookie.com/embed/${v.yt}" allowfullscreen loading="lazy"></iframe>`:`<span>▶ ${T(UI.addVid)}</span>`}</div><h3>${T(v.title)}</h3></div>`).join("")}</div>`;
+
+  /* about */
+  document.getElementById("p-about").innerHTML=`<div class="cols">
+    <div>${intro()}</div>
+    <div>
+      <div class="card"><h2>${T(UI.about)}</h2><p>${L==="th"
+        ?"ผมชอบคิด ออกแบบ ลงมือทำ และแก้ปัญหา มากกว่าการเรียนแค่ในตำรา สิ่งที่ชอบที่สุดคือได้เห็นหุ่นที่ตัวเองออกแบบและเขียนโปรแกรมทำงานได้จริง ถึงจะต้องแก้หลายรอบก็ตาม หุ่นทุกตัวที่แข่งผมทำเองทั้งหมด ตั้งแต่หาข้อมูลอุปกรณ์ ออกแบบโครงใน CAD พิมพ์ 3D ต่อวงจร จนถึงเขียนซอฟต์แวร์"
+        :"I enjoy thinking, designing, building and solving problems more than learning from textbooks alone. My favourite moment is seeing a robot I designed and programmed actually work, even after many rounds of fixes. I build every competition robot myself — from choosing parts and CAD design to 3D printing, wiring and software."}</p></div>
+      <div class="card"><h2>${T(UI.edu)}</h2><ul class="tl">
+        <li><b>${L==="th"?"โรงเรียนอุทัยธรรมานุวัตรวิทยา":"Uthaidhammanuwat Witthaya School"}</b><br><span class="muted">${L==="th"?"มัธยมศึกษา · แผน SMT (วิทยาศาสตร์–คณิตศาสตร์และเทคโนโลยี) · เกรดเฉลี่ย 4 ภาคเรียน 3.46":"Secondary · SMT program · GPAX 3.46 (4 semesters)"}</span></li>
+        <li><b>${L==="th"?"โรงเรียนไทยรัฐวิทยา ๕๘":"Thairath Wittaya 58 School"}</b><br><span class="muted">${L==="th"?"ประถมศึกษา":"Primary"}</span></li>
+      </ul></div>
+      <div class="card"><h2>${T(UI.skills)}</h2><div class="specs">${SKILLS.map(s=>`<span class="chip">${s}</span>`).join("")}</div></div>
+    </div></div>`;
+}
+
+let certF="all";
+function renderCerts(){
+  const keys=["all","champ","award","join","course"];
+  const list=CERTS.filter(c=>certF==="all"||c.type===certF);
+  const k=grp(list.map(c=>({src:c.src,t:T(c.title),s:(L==="th"?"พ.ศ. ":"")+c.year})));
+  const col={champ:"var(--gold)",award:"var(--silver)",join:"var(--cyan)",course:"#a78bfa"};
+  document.getElementById("p-certs").innerHTML=`<div class="filters">${keys.map(x=>`<button class="filter ${x===certF?"on":""}" data-f="${x}">${T(UI[x])}<span class="n">${x==="all"?CERTS.length:CERTS.filter(c=>c.type===x).length}</span></button>`).join("")}</div>
+   <div class="cert-grid">${list.map((c,i)=>`<div class="cert" data-g="${k}" data-i="${i}"><img src="${c.src}" loading="lazy" alt=""><div class="t"><b><span class="dot" style="background:${col[c.type]}"></span>${T(c.title)}</b><span>${L==="th"?"พ.ศ. ":""}${c.year}</span></div></div>`).join("")}</div>`;
+}
+
+/* tabs */
+let cur=(location.hash||"#home").slice(1); if(!TABS.some(t=>t[0]===cur))cur="home";
+function go(t){cur=t;document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b.dataset.t===t));
+  document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("on",p.id==="p-"+t));
+  history.replaceState(null,"","#"+t);
+  const tabs=document.querySelector(".tabs");if(scrollY>tabs.offsetTop)scrollTo({top:tabs.offsetTop});
+  document.querySelector(`.tab[data-t="${t}"]`)?.scrollIntoView({inline:"center",block:"nearest"});}
+
+document.addEventListener("click",e=>{
+  const t=e.target.closest("[data-t]");if(t)return go(t.dataset.t);
+  const g=e.target.closest("[data-go]");if(g)return go(g.dataset.go);
+  const f=e.target.closest("[data-f]");if(f){certF=f.dataset.f;return renderCerts();}
+  const im=e.target.closest("[data-g]");if(im)openLB(im.dataset.g,+im.dataset.i);
+});
+document.querySelectorAll(".lang button").forEach(b=>b.onclick=()=>{L=b.dataset.l;document.querySelectorAll(".lang button").forEach(x=>x.classList.toggle("on",x===b));render();go(cur);});
+
+/* lightbox */
+let LB=[],LI=0;const lb=document.getElementById("lb");
+function openLB(k,i){LB=GROUPS[k]||[];LI=i;showLB();lb.classList.add("open");document.body.style.overflow="hidden"}
+function showLB(){const it=LB[LI];if(!it)return;document.getElementById("lbImg").src=it.src;document.getElementById("lbT").textContent=it.t||"";document.getElementById("lbS").textContent=(it.s?it.s+" · ":"")+(LI+1)+" / "+LB.length}
+function closeLB(){lb.classList.remove("open");document.body.style.overflow=""}
+const step=d=>{LI=(LI+d+LB.length)%LB.length;showLB()};
+document.getElementById("lbClose").onclick=closeLB;
+document.getElementById("lbPrev").onclick=()=>step(-1);
+document.getElementById("lbNext").onclick=()=>step(1);
+lb.onclick=e=>{if(e.target===lb)closeLB()};
+addEventListener("keydown",e=>{if(!lb.classList.contains("open"))return;if(e.key==="Escape")closeLB();if(e.key==="ArrowLeft")step(-1);if(e.key==="ArrowRight")step(1)});
+let sx=0;lb.addEventListener("touchstart",e=>sx=e.touches[0].clientX,{passive:true});
+lb.addEventListener("touchend",e=>{const d=e.changedTouches[0].clientX-sx;if(Math.abs(d)>50)step(d>0?-1:1)});
+
+render();go(cur);
+</script>
+</body>
+</html>
