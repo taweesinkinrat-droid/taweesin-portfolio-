@@ -87,6 +87,7 @@ main{padding:18px 16px 60px}
 .muted{color:var(--muted)}
 .cols{display:grid;grid-template-columns:340px 1fr;gap:16px;align-items:start}
 @media (max-width:820px){.cols{grid-template-columns:1fr}.head{justify-content:center;text-align:center}.who{text-align:center}.badge-row{justify-content:center}.head-actions{width:100%;justify-content:center}}
+@media (max-width:380px){.avatar{width:110px;height:110px}.head{gap:12px;padding:0 14px}.wrap{width:100%}}
 
 /* intro list */
 .info{list-style:none;display:grid;gap:10px}
@@ -505,7 +506,7 @@ function render(){
       </div>
     </article>`;
     return `<article class="card ${p.featured?"proj-featured":""}" style="margin:0">
-      ${p.video?`<div class="proj-video"><video controls preload="metadata" ${p.video.poster?`poster="${p.video.poster}"`:""}><source src="${p.video.src}" type="video/mp4"></video></div>`
+      ${p.video?`<div class="proj-video"><video controls preload="metadata" playsinline ${p.video.poster?`poster="${p.video.poster}"`:""} onloadedmetadata="if(!this.currentTime)this.currentTime=0.5"><source src="${p.video.src}" type="video/mp4"></video></div>`
         :`<div class="card-img">${p.img?img(p.img,k,0):`<div class="bp">${ART.chassis}</div>`}</div>`}
       ${p.badge?`<span class="tag-medal m-gold">🏆 ${T(p.badge)}</span>`:""}
       <h3>${T(p.title)}</h3><p class="muted" style="margin:6px 0">${T(p.text)}</p>
@@ -564,7 +565,9 @@ let cur=(location.hash||"#home").slice(1); if(!TABS.some(t=>t[0]===cur))cur="hom
 let firstGo=true;
 const scrollMemory={}, visitedTabs=new Set();
 function go(t){
-  if(cur) scrollMemory[cur]=window.scrollY;
+  const prevScroll=window.scrollY; /* capture BEFORE the panel swap — the browser auto-clamps
+    scrollY the instant the old (taller) panel is hidden, so reading it after is unreliable */
+  if(cur) scrollMemory[cur]=prevScroll;
   cur=t;
   document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b.dataset.t===t));
   document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("on",p.id==="p-"+t));
@@ -572,7 +575,7 @@ function go(t){
   const tabs=document.querySelector(".tabs");
   if(visitedTabs.has(t)){
     scrollTo({top:scrollMemory[t]||0});
-  }else if(scrollY>tabs.offsetTop){
+  }else if(prevScroll>tabs.offsetTop){
     scrollTo({top:tabs.offsetTop});
   }
   visitedTabs.add(t);
