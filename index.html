@@ -143,6 +143,15 @@ main{padding:18px 16px 60px}
 /* projects / 3D */
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media (max-width:760px){.grid2{grid-template-columns:1fr}}
+.proj-featured{grid-column:1/-1}
+.proj-video{aspect-ratio:16/9;border-radius:10px;overflow:hidden;margin:-18px -18px 14px;background:#000}
+.proj-video video{width:100%;height:100%;display:block;object-fit:cover}
+.pdf-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;margin-top:10px;background:var(--card-2);border:1px solid var(--line);border-radius:10px;font-weight:600;font-size:.9rem;color:var(--text);transition:border-color .15s,color .15s}
+.pdf-btn:hover{border-color:var(--cyan);color:var(--cyan)}
+.pdf-btn svg{width:18px;height:18px;flex:0 0 18px}
+.proj-team{font-size:.88rem;margin:4px 0;color:#c9d4db}
+.proj-team b{color:var(--cyan);font-weight:700}
+.proj-result{font-size:.94rem;margin:8px 0;color:var(--gold);font-weight:600}
 .card .card-img{margin:-18px -18px 14px;border-radius:var(--r) var(--r) 0 0;overflow:hidden}
 .card .card-img img{width:100%;aspect-ratio:16/9;object-fit:cover;cursor:zoom-in}
 .bp{aspect-ratio:16/9;display:grid;place-items:center;color:var(--cyan);
@@ -156,8 +165,13 @@ ul.dots{padding-left:18px;margin:6px 0 10px}
 ul.dots li{margin-bottom:4px}
 
 /* videos */
-.vid{aspect-ratio:16/9;background:var(--card-2);border-radius:10px;display:grid;place-items:center;color:var(--muted);overflow:hidden;margin:-4px 0 10px}
+.vid{aspect-ratio:16/9;background:var(--card-2);border-radius:10px;display:grid;place-items:center;color:var(--muted);overflow:hidden;margin:-4px 0 10px;position:relative}
 .vid iframe,.vid video{width:100%;height:100%;border:0}
+.vid-poster{position:absolute;inset:0;cursor:pointer;background:#000}
+.vid-poster img{width:100%;height:100%;object-fit:cover;display:block;opacity:.75}
+.vid-play{position:absolute;inset:0;margin:auto;width:60px;height:60px;border-radius:50%;background:rgba(17,20,23,.75);border:2px solid var(--cyan);display:flex;align-items:center;justify-content:center;color:var(--cyan);transition:transform .15s,background .15s}
+.vid-poster:hover .vid-play{transform:scale(1.08);background:var(--cyan);color:#07202a}
+.vid-play svg{width:24px;height:24px;margin-left:3px}
 
 /* timeline */
 .tl{list-style:none;border-left:2px solid var(--line);padding-left:16px;display:grid;gap:14px}
@@ -276,6 +290,19 @@ const PROJECTS = [
    list:{th:["ตรวจจับคนล้มด้วย YOLO11s-pose","ตรวจจับควัน ไฟ และผู้ต้องสงสัย (ถ่ายรูปและเทรนโมเดลเอง)","เซนเซอร์ MQ-2 และ PIR บน ESP32","เว็บแดชบอร์ด Flask อัปเดตเรียลไทม์ผ่าน MQTT over WebSocket"],
          en:["Fall detection with YOLO11s-pose","Smoke, fire and suspicious-person detection (my own photos and training)","MQ-2 and PIR sensors on ESP32","Flask dashboard with real-time MQTT over WebSocket"]},
    tags:["Python","YOLO11","ESP32","MQTT","Flask","Raspberry Pi 5"], more:[P+"sc-team.jpg",P+"sc-poster.jpg",P+"sc-regional-list.jpg"]},
+  {featured:true, img:"", title:{th:"นวัตกรรม Electronic Control Box Perfect System",en:"Electronic Control Box Perfect System"},
+   badge:{th:"โครงงานวิทยาศาสตร์ ประเภทสิ่งประดิษฐ์ ชิงถ้วยพระราชทานฯ ครั้งที่ 3",en:"Science Invention Project — Royal Trophy Competition, 3rd edition"},
+   text:{th:"กล่องควบคุมเครื่องใช้ไฟฟ้าอัจฉริยะ ต่อยอดจากต้นแบบเดิมให้สั่งเปิด-ปิดอุปกรณ์ไฟฟ้าได้หลายทางในกล่องเดียว พร้อมแจ้งสถานะการทำงานแบบเรียลไทม์ผ่านมือถือ",
+         en:"A smart electrical control box built on an earlier prototype, letting you switch appliances on/off multiple ways from one box, with real-time status sent to your phone."},
+   list:{th:["ตั้งเวลาเปิด–ปิดล่วงหน้าได้ตามเวลาที่กำหนด","สั่งเปิด–ปิดผ่านแอป Blynk (IoT) จากมือถือที่ไหนก็ได้","สั่งเปิด–ปิดจากปุ่มบนตัวกล่องโดยตรง","แจ้งสถานะการทำงานแบบเรียลไทม์และบันทึกประวัติการใช้งาน"],
+         en:["Preset on/off scheduling by time","Control via the Blynk IoT app from anywhere","Manual on/off buttons directly on the box","Real-time status updates with a logged usage history"]},
+   team:{th:"ทำร่วมกับเพื่อน 2 คน (ณัฐสรณ์ ใจเย็น, วลภพ น้อยเจริญ) ครูที่ปรึกษา: ครูธีระ เสนมา และครูสรายุทธ วิเขตกิจ โรงเรียนอุทัยธรรมานุวัตรวิทยา",
+        en:"Team project with 2 classmates (Natsaron Jaiyen, Wonlaphop Noicharoen); advisors: Teera Senma and Sarayut Wikhetkit, Uthaidhammanuwat Witthaya School"},
+   result:{th:"🏅 ผลประเมินความพึงพอใจจากผู้เชี่ยวชาญ 5 ท่าน เฉลี่ย 4.82/5.00 อยู่ในเกณฑ์มากที่สุด",en:"🏅 Expert satisfaction rating: 4.82/5.00 (highest level), from 5 evaluators"},
+   tags:["ESP8266 / NodeMCU","Blynk IoT","Relay module","Arduino (C)","Real-time monitoring"],
+   video:{src:"videos/electronic-control-box-demo.mp4", poster:P+"ecb-poster.jpg"},
+   pdf:"docs/electronic-control-box-report.pdf",
+   more:[C+"join-06-project-control-box-2024.jpg"]},
   {img:"", title:"ROBOT LAB",
    text:{th:"เว็บจำลองหุ่นยนต์เดินตามเส้นภาษาไทย ฟิสิกส์ล้อ differential drive เซนเซอร์ IR 5 ตัว เขียนโค้ดได้ทั้งแบบบล็อกและข้อความ มี 10 บทเรียนตั้งแต่คุมมอเตอร์ถึง PID",
          en:"A Thai-language line-following robot simulator: differential-drive physics, 5 IR sensors, block and text coding, 10 lessons from motors to PID."},
@@ -284,11 +311,11 @@ const PROJECTS = [
    text:{th:"ไลบรารีเดินตามเส้นสำหรับบอร์ด ATX-2i อ่าน IR 16 ตัวผ่านมัลติเพล็กเซอร์ พร้อมจูนความเร็วเลี้ยวสำหรับสนามแข่ง ใช้ในหุ่น WRG",
          en:"Line-following library for the ATX-2i board, reading 16 IR sensors through multiplexers with tuned turn speeds — used in my WRG robot."},
    tags:["C++","PID","ATX-2i"]},
-  {img:C+"award-12-nsru-invention-silver-2024.jpg", title:{th:"โครงงานวิทยาศาสตร์ประเภทสิ่งประดิษฐ์",en:"Science invention projects"},
+  {img:C+"award-12-nsru-invention-silver-2024.jpg", title:{th:"Eco Student Bot",en:"Eco Student Bot"},
    badge:{th:"เหรียญเงิน ม.ราชภัฏนครสวรรค์",en:"Silver medal, Nakhon Sawan Rajabhat University"},
-   text:{th:"Electronic control box prefect system และ Eco Student Bot หุ่นยนต์เก็บขยะเพื่อโรงเรียน ประกวดที่ ม.นเรศวร (2567)",
-         en:"Electronic control box prefect system and Eco Student Bot, a trash-collecting robot for schools, shown at Naresuan University (2024)."},
-   tags:["Arduino","Electronics","Team project"], more:[C+"join-06-project-control-box-2024.jpg",C+"join-07-project-eco-bot-2024.jpg"]},
+   text:{th:"หุ่นยนต์เก็บขยะเพื่อโรงเรียน ผลงานทีมที่ประกวดที่ ม.นเรศวร (2567)",
+         en:"A trash-collecting robot for schools, a team project shown at Naresuan University (2024)."},
+   tags:["Arduino","Electronics","Team project"], more:[C+"join-07-project-eco-bot-2024.jpg"]},
 ];
 
 const DESIGNS = [
@@ -459,12 +486,16 @@ function render(){
   /* projects */
   document.getElementById("p-projects").innerHTML=`<div class="grid2">${PROJECTS.map(p=>{
     const k=grp([p.img,...(p.more||[])].filter(Boolean).map(s=>({src:s,t:T(p.title)})));
-    return `<article class="card" style="margin:0">
-      <div class="card-img">${p.img?img(p.img,k,0):`<div class="bp">${ART.chassis}</div>`}</div>
+    return `<article class="card ${p.featured?"proj-featured":""}" style="margin:0">
+      ${p.video?`<div class="proj-video"><video controls preload="metadata" ${p.video.poster?`poster="${p.video.poster}"`:""}><source src="${p.video.src}" type="video/mp4"></video></div>`
+        :`<div class="card-img">${p.img?img(p.img,k,0):`<div class="bp">${ART.chassis}</div>`}</div>`}
       ${p.badge?`<span class="tag-medal m-gold">🏆 ${T(p.badge)}</span>`:""}
       <h3>${T(p.title)}</h3><p class="muted" style="margin:6px 0">${T(p.text)}</p>
       ${p.list?`<ul class="dots">${T(p.list).map(x=>`<li>${x}</li>`).join("")}</ul>`:""}
+      ${p.team?`<p class="proj-team"><b>${L==="th"?"ทีมงาน":"Team"}:</b> ${T(p.team)}</p>`:""}
+      ${p.result?`<p class="proj-result">${T(p.result)}</p>`:""}
       <div class="specs">${p.tags.map(t=>`<span class="chip">${t}</span>`).join("")}</div>
+      ${p.pdf?`<a class="pdf-btn" href="${p.pdf}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>${L==="th"?"อ่านรายงานฉบับเต็ม (PDF)":"Read the full report (PDF)"}</a>`:""}
       ${p.more?`<div class="pics n${Math.min(p.more.length,3)===3?2:p.more.length}" style="margin-top:10px">${p.more.slice(0,2).map((s,i)=>img(s,k,i+(p.img?1:0))).join("")}</div>`:""}
     </article>`}).join("")}</div>`;
 
@@ -482,7 +513,8 @@ function render(){
   document.getElementById("p-photos").innerHTML=`<div class="photo-grid">${PHOTOS.map((s,i)=>img(s,gk,i)).join("")}</div>`;
 
   /* videos */
-  document.getElementById("p-videos").innerHTML=`<div class="grid2">${VIDEOS.map(v=>`<div class="card" style="margin:0"><div class="vid">${v.yt?`<iframe src="https://www.youtube-nocookie.com/embed/${v.yt}" allowfullscreen loading="lazy"></iframe>`:`<span>▶ ${T(UI.addVid)}</span>`}</div><h3>${T(v.title)}</h3></div>`).join("")}</div>`;
+  activeVideoEl=null;
+  document.getElementById("p-videos").innerHTML=`<div class="grid2">${VIDEOS.map(v=>`<div class="card" style="margin:0"><div class="vid" ${v.yt?`data-yt="${v.yt}"`:""}>${v.yt?posterHTML(v.yt):`<span>▶ ${T(UI.addVid)}</span>`}</div><h3>${T(v.title)}</h3></div>`).join("")}</div>`;
 
   /* about */
   document.getElementById("p-about").innerHTML=`<div class="cols">
@@ -519,14 +551,39 @@ function go(t){cur=t;document.querySelectorAll(".tab").forEach(b=>b.classList.to
   document.querySelector(`.tab[data-t="${t}"]`)?.scrollIntoView({inline:"center",block:"nearest"});
   initStlViewers();
   setSwipeHintText();
+  stopActiveVideo();
+  document.querySelectorAll("#p-projects video").forEach(v=>v.pause());
   if(firstGo){firstGo=false;}else{hideSwipeHint();}}
+
+/* ---------- videos: click-to-play, only one plays at a time ---------- */
+let activeVideoEl=null;
+function posterHTML(yt){
+  return `<div class="vid-poster" data-yt="${yt}"><img src="https://img.youtube.com/vi/${yt}/hqdefault.jpg" loading="lazy" alt="">
+    <span class="vid-play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span></div>`;
+}
+function stopActiveVideo(){
+  if(activeVideoEl && activeVideoEl.isConnected){
+    const yt=activeVideoEl.dataset.yt;
+    if(yt) activeVideoEl.innerHTML=posterHTML(yt);
+  }
+  activeVideoEl=null;
+}
+function playVideo(container){
+  stopActiveVideo();
+  document.querySelectorAll("#p-projects video").forEach(v=>v.pause());
+  const yt=container.dataset.yt; if(!yt)return;
+  container.innerHTML=`<iframe src="https://www.youtube-nocookie.com/embed/${yt}?autoplay=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe>`;
+  activeVideoEl=container;
+}
 
 document.addEventListener("click",e=>{
   const t=e.target.closest("[data-t]");if(t)return go(t.dataset.t);
   const g=e.target.closest("[data-go]");if(g)return go(g.dataset.go);
   const f=e.target.closest("[data-f]");if(f){certF=f.dataset.f;return renderCerts();}
+  const vp=e.target.closest(".vid-poster");if(vp)return playVideo(vp.parentElement);
   const im=e.target.closest("[data-g]");if(im)openLB(im.dataset.g,+im.dataset.i);
 });
+document.addEventListener("play",e=>{ if(e.target.tagName==="VIDEO") stopActiveVideo(); },true);
 document.querySelectorAll(".lang button").forEach(b=>b.onclick=()=>{L=b.dataset.l;document.querySelectorAll(".lang button").forEach(x=>x.classList.toggle("on",x===b));render();go(cur);});
 
 /* lightbox */
@@ -552,13 +609,16 @@ if(!matchMedia("(max-width:820px)").matches || sessionStorage.getItem("hideSwipe
 /* swipe between tabs on main content, Reels-style */
 (function(){
   const mainEl=document.querySelector("main");
-  let sx0=0, sy0=0, active=false;
+  let sx0=0, sy0=0, active=false, skip=false;
   mainEl.addEventListener("touchstart",e=>{
-    if(lb.classList.contains("open"))return;
+    if(lb.classList.contains("open")){active=false;return;}
+    skip=!!e.target.closest(".stl-viewer"); /* let 3D models handle their own rotate/zoom gestures */
+    if(skip){active=false;return;}
     sx0=e.touches[0].clientX; sy0=e.touches[0].clientY; active=true;
   },{passive:true});
   mainEl.addEventListener("touchend",e=>{
-    if(!active)return; active=false;
+    if(!active||skip){active=false;skip=false;return;}
+    active=false;
     if(lb.classList.contains("open"))return;
     const dx=e.changedTouches[0].clientX-sx0, dy=e.changedTouches[0].clientY-sy0;
     if(Math.abs(dx)>60 && Math.abs(dx)>Math.abs(dy)*1.6){
