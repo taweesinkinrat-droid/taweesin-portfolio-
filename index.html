@@ -49,7 +49,7 @@ a{color:var(--cyan);text-decoration:none}
 
 /* ---------- tabs ---------- */
 .tabs{
-  position:sticky;top:0;z-index:20;background:rgba(17,20,23,.95);backdrop-filter:blur(10px);
+  position:sticky;top:0;z-index:20;background:rgba(17,20,23,.97);
   border-bottom:1px solid var(--line);margin-top:14px;padding:10px 0;
 }
 .tabs .wrap{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:0 16px}
@@ -562,10 +562,20 @@ function renderCerts(){
 /* tabs */
 let cur=(location.hash||"#home").slice(1); if(!TABS.some(t=>t[0]===cur))cur="home";
 let firstGo=true;
-function go(t){cur=t;document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b.dataset.t===t));
+const scrollMemory={}, visitedTabs=new Set();
+function go(t){
+  if(cur) scrollMemory[cur]=window.scrollY;
+  cur=t;
+  document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b.dataset.t===t));
   document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("on",p.id==="p-"+t));
   history.replaceState(null,"","#"+t);
-  const tabs=document.querySelector(".tabs");if(scrollY>tabs.offsetTop)scrollTo({top:tabs.offsetTop});
+  const tabs=document.querySelector(".tabs");
+  if(visitedTabs.has(t)){
+    scrollTo({top:scrollMemory[t]||0});
+  }else if(scrollY>tabs.offsetTop){
+    scrollTo({top:tabs.offsetTop});
+  }
+  visitedTabs.add(t);
   document.querySelector(`.tab[data-t="${t}"]`)?.scrollIntoView({inline:"center",block:"nearest"});
   initStlViewers();
   setSwipeHintText();
@@ -656,10 +666,11 @@ function initStl(container){
   const w=container.clientWidth, h=container.clientHeight;
   if(!w||!h)return; /* panel still hidden — retry next time this tab is opened */
   container.dataset.inited="1";
+  const coarse=matchMedia("(pointer:coarse)").matches; /* touch device: trade quality for smoothness */
   const scene=new THREE.Scene();
   const camera=new THREE.PerspectiveCamera(45,w/h,0.1,2000);
-  const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
-  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  const renderer=new THREE.WebGLRenderer({antialias:!coarse,alpha:true,powerPreference:"low-power"});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,coarse?1.25:2));
   renderer.setSize(w,h);
   container.appendChild(renderer.domElement);
   scene.add(new THREE.HemisphereLight(0xffffff,0x1b2932,1.15));
@@ -686,7 +697,13 @@ function initStl(container){
     const w2=container.clientWidth,h2=container.clientHeight; if(!w2||!h2)return;
     renderer.setSize(w2,h2); camera.aspect=w2/h2; camera.updateProjectionMatrix();
   }).observe(container);
-  (function animate(){ requestAnimationFrame(animate); controls.update(); renderer.render(scene,camera); })();
+  /* only render frames while this viewer is actually visible on screen and the page/tab is active —
+     with several 3D models on one page this is the single biggest win for smoothness on mobile */
+  const loop=()=>{ controls.update(); renderer.render(scene,camera); };
+  let onScreen=false;
+  const sync=()=>{ renderer.setAnimationLoop((onScreen && !document.hidden) ? loop : null); };
+  new IntersectionObserver(entries=>{ onScreen=entries[0].isIntersecting; sync(); },{threshold:.01}).observe(container);
+  document.addEventListener("visibilitychange",sync);
 }
 function initStlViewers(){document.querySelectorAll(".stl-viewer[data-stl]").forEach(initStl)}
 
