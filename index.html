@@ -396,7 +396,8 @@ const VIDEOS = [ /* ใส่ YouTube ID ใน yt เช่น "dQw4w9WgXcQ" */
 
 const PHOTOS = [
   "wrg-stage","wrg-team","wrg-field","tbn1-trophy","tbn1-stage-1","tbn1-stage-2","ftc-team","grc-team","sc-team","sc-fall-detect",
-  ...Array.from({length:17},(_,i)=>"gallery-"+String(i+1).padStart(2,"0"))
+  ...Array.from({length:17},(_,i)=>"gallery-"+String(i+1).padStart(2,"0")),
+  ...Array.from({length:20},(_,i)=>String(i+1))
 ].map(n=>P+n+".jpg");
 
 const SKILLS = ["C / C++","Python","Arduino","SketchUp"];
