@@ -564,21 +564,30 @@ function renderCerts(){
 let cur=(location.hash||"#home").slice(1); if(!TABS.some(t=>t[0]===cur))cur="home";
 let firstGo=true;
 const scrollMemory={}, visitedTabs=new Set();
+/* .tabs is position:sticky — once the page has scrolled, its offsetTop stops meaning
+   "height of the header" and instead reflects wherever it's currently pinned, which is
+   basically always ≈ the current scroll position. That made every top/bottom check below
+   compare a number against itself. Cache the real header height once, before anything
+   has scrolled, and reuse that fixed number everywhere instead of re-reading offsetTop. */
+const HEADER_H=document.querySelector(".tabs").offsetTop;
 function go(t){
-  const prevScroll=window.scrollY; /* capture BEFORE the panel swap — the browser auto-clamps
-    scrollY the instant the old (taller) panel is hidden, so reading it after is unreliable */
+  const prevScroll=window.scrollY; /* capture BEFORE the panel swap */
   if(cur) scrollMemory[cur]=prevScroll;
+  const firstVisit=!visitedTabs.has(t);
   cur=t;
   document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b.dataset.t===t));
   document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("on",p.id==="p-"+t));
   history.replaceState(null,"","#"+t);
-  const tabs=document.querySelector(".tabs");
-  if(visitedTabs.has(t)){
-    scrollTo({top:scrollMemory[t]||0});
-  }else if(prevScroll>tabs.offsetTop){
-    scrollTo({top:tabs.offsetTop});
-  }
   visitedTabs.add(t);
+  /* deferred one frame: mobile browsers often ignore a scrollTo() made synchronously
+     inside a touch handler, right when the panel's display just changed */
+  requestAnimationFrame(()=>{
+    if(!firstVisit){
+      scrollTo({top:scrollMemory[t]||0,behavior:"auto"});
+    }else if(prevScroll>HEADER_H){
+      scrollTo({top:HEADER_H,behavior:"auto"});
+    }
+  });
   document.querySelector(`.tab[data-t="${t}"]`)?.scrollIntoView({inline:"center",block:"nearest"});
   initStlViewers();
   setSwipeHintText();
