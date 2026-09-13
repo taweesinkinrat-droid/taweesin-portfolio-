@@ -164,6 +164,16 @@ main{padding:18px 16px 60px}
 ul.dots{padding-left:18px;margin:6px 0 10px}
 ul.dots li{margin-bottom:4px}
 
+/* Smart Classroom only: wide desktop feature, stacked on smaller screens. */
+#p-projects .proj-smart{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:24px;align-items:start}
+#p-projects .proj-smart-media,#p-projects .proj-smart-content{min-width:0}
+#p-projects .proj-smart .card-img{margin:0;border-radius:10px}
+#p-projects .proj-smart .card-img img{aspect-ratio:16/9;object-fit:contain;background:var(--card-2)}
+#p-projects .proj-smart .tag-medal{max-width:100%;white-space:normal;overflow-wrap:anywhere}
+#p-projects .proj-smart .pics{grid-template-columns:repeat(3,minmax(0,1fr));margin-top:10px}
+#p-projects .proj-smart .pics img{height:auto;aspect-ratio:4/3;object-fit:contain;background:var(--card-2)}
+@media(max-width:820px){#p-projects .proj-smart{grid-template-columns:minmax(0,1fr);gap:16px}}
+
 /* videos */
 .vid{aspect-ratio:16/9;background:var(--card-2);border-radius:10px;display:grid;place-items:center;color:var(--muted);overflow:hidden;margin:-4px 0 10px;position:relative}
 .vid iframe,.vid video{width:100%;height:100%;border:0}
@@ -284,7 +294,7 @@ const ROBOTS = [
 ];
 
 const PROJECTS = [
-  {img:P+"sc-fall-detect.jpg", title:"Smart Classroom AI",
+  {layout:"smart", img:P+"sc-fall-detect.jpg", title:"Smart Classroom AI",
    badge:{th:"ผ่านเข้ารอบ National Coding & AI Competition (depa) ภาคเหนือตอนล่าง",en:"National Coding & AI Competition (depa), lower-north round"},
    text:{th:"กล้อง AI ในห้องเรียน ตรวจจับเหตุฉุกเฉินแล้วแจ้งเตือนครูทันที",en:"An AI camera for classrooms that detects emergencies and alerts teachers instantly."},
    list:{th:["ตรวจจับคนล้มด้วย YOLO11s-pose","ตรวจจับควัน ไฟ และผู้ต้องสงสัย (ถ่ายรูปและเทรนโมเดลเอง)","เซนเซอร์ MQ-2 และ PIR บน ESP32","เว็บแดชบอร์ด Flask อัปเดตเรียลไทม์ผ่าน MQTT over WebSocket"],
@@ -303,19 +313,15 @@ const PROJECTS = [
    video:{src:"videos/electronic-control-box-demo.mp4", poster:P+"ecb-poster.jpg"},
    pdf:"docs/electronic-control-box-report.pdf",
    more:[C+"join-06-project-control-box-2024.jpg"]},
-  {img:"", title:"ROBOT LAB",
-   text:{th:"เว็บจำลองหุ่นยนต์เดินตามเส้นภาษาไทย ฟิสิกส์ล้อ differential drive เซนเซอร์ IR 5 ตัว เขียนโค้ดได้ทั้งแบบบล็อกและข้อความ มี 10 บทเรียนตั้งแต่คุมมอเตอร์ถึง PID",
-         en:"A Thai-language line-following robot simulator: differential-drive physics, 5 IR sensors, block and text coding, 10 lessons from motors to PID."},
-   tags:["JavaScript","Simulation","Education"]},
-  {img:"", title:{th:"ไลบรารี PID เซนเซอร์ 16 ช่อง",en:"16-channel PID line library"},
-   text:{th:"ไลบรารีเดินตามเส้นสำหรับบอร์ด ATX-2i อ่าน IR 16 ตัวผ่านมัลติเพล็กเซอร์ พร้อมจูนความเร็วเลี้ยวสำหรับสนามแข่ง ใช้ในหุ่น WRG",
-         en:"Line-following library for the ATX-2i board, reading 16 IR sensors through multiplexers with tuned turn speeds — used in my WRG robot."},
-   tags:["C++","PID","ATX-2i"]},
-  {img:C+"award-12-nsru-invention-silver-2024.jpg", title:{th:"Eco Student Bot",en:"Eco Student Bot"},
+  {img:C+"join-07-project-eco-bot-2024.jpg", title:{th:"Eco Student Bot",en:"Eco Student Bot"},
+   text:{th:"โครงงานหุ่นยนต์เก็บขยะเพื่อโรงเรียน พัฒนาร่วมกับทีมและนำเสนอในการประกวดโครงงานที่มหาวิทยาลัยนเรศวร พ.ศ. 2567 โดยนำความรู้ด้าน Arduino และอิเล็กทรอนิกส์มาใช้กับงานหุ่นยนต์เพื่อจัดการขยะในโรงเรียน",
+         en:"A team project developing a trash-collecting robot for schools, presented at a project competition at Naresuan University in 2024. The project applies Arduino and electronics to a robot for school waste collection."},
+   tags:["Arduino","Electronics","Team project"]},
+  {img:C+"award-12-nsru-invention-silver-2024.jpg", title:{th:"โครงงานสิ่งประดิษฐ์ — ม.ราชภัฏนครสวรรค์",en:"Science Invention Project — Nakhon Sawan Rajabhat University"},
    badge:{th:"เหรียญเงิน ม.ราชภัฏนครสวรรค์",en:"Silver medal, Nakhon Sawan Rajabhat University"},
-   text:{th:"หุ่นยนต์เก็บขยะเพื่อโรงเรียน ผลงานทีมที่ประกวดที่ ม.นเรศวร (2567)",
-         en:"A trash-collecting robot for schools, a team project shown at Naresuan University (2024)."},
-   tags:["Arduino","Electronics","Team project"], more:[C+"join-07-project-eco-bot-2024.jpg"]},
+   text:{th:"ผลงานประเภทโครงงานสิ่งประดิษฐ์ ได้รับรางวัลเหรียญเงินจากมหาวิทยาลัยราชภัฏนครสวรรค์ พ.ศ. 2567 โดยมีเกียรติบัตรรางวัลประกอบผลงานนี้",
+         en:"A science invention project awarded a silver medal at Nakhon Sawan Rajabhat University in 2024. The award certificate is shown with this project."},
+   tags:[]},
 ];
 
 const DESIGNS = [
@@ -486,6 +492,18 @@ function render(){
   /* projects */
   document.getElementById("p-projects").innerHTML=`<div class="grid2">${PROJECTS.map(p=>{
     const k=grp([p.img,...(p.more||[])].filter(Boolean).map(s=>({src:s,t:T(p.title)})));
+    if(p.layout==="smart")return `<article class="card proj-smart" style="margin:0">
+      <div class="proj-smart-media">
+        <div class="card-img">${img(p.img,k,0,T(p.title))}</div>
+        <div class="pics">${(p.more||[]).map((s,i)=>img(s,k,i+1,T(p.title))).join("")}</div>
+      </div>
+      <div class="proj-smart-content">
+        <span class="tag-medal m-gold">🏆 ${T(p.badge)}</span>
+        <h3>${T(p.title)}</h3><p class="muted" style="margin:6px 0">${T(p.text)}</p>
+        <ul class="dots">${T(p.list).map(x=>`<li>${x}</li>`).join("")}</ul>
+        <div class="specs">${p.tags.map(t=>`<span class="chip">${t}</span>`).join("")}</div>
+      </div>
+    </article>`;
     return `<article class="card ${p.featured?"proj-featured":""}" style="margin:0">
       ${p.video?`<div class="proj-video"><video controls preload="metadata" ${p.video.poster?`poster="${p.video.poster}"`:""}><source src="${p.video.src}" type="video/mp4"></video></div>`
         :`<div class="card-img">${p.img?img(p.img,k,0):`<div class="bp">${ART.chassis}</div>`}</div>`}
