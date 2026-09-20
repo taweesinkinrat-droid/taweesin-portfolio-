@@ -221,6 +221,21 @@ footer{text-align:center;color:var(--muted);font-size:.85rem;padding:20px}
 .to-top svg{width:22px;height:22px}
 .to-top.show{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
 .to-top:active{transform:scale(.9)}
+/* ---------- lightweight motion polish ---------- */
+.scroll-progress{position:fixed;top:0;left:0;width:100%;height:2.5px;background:var(--cyan);
+  transform-origin:0 50%;transform:scaleX(0);z-index:60;pointer-events:none;
+  box-shadow:0 0 6px rgba(34,211,238,.55);transition:transform .1s linear}
+.reveal{opacity:0;transform:translateY(14px);transition:opacity .5s cubic-bezier(.22,.61,.36,1),transform .5s cubic-bezier(.22,.61,.36,1)}
+.reveal.in{opacity:1;transform:translateY(0)}
+/* subtle hover-zoom on photos — desktop pointer only, so nothing gets stuck "hovered" on touch.
+   Only applied where the image sits inside an overflow:hidden frame, so the zoom never
+   visually spills into a neighbouring card/grid cell. */
+@media (hover:hover){
+  .card .card-img img,.cert img,.pics img{transition:transform .35s cubic-bezier(.22,.61,.36,1)}
+  .card:hover .card-img img,.cert:hover img,.pics img:hover{transform:scale(1.045)}
+  .mini-grid img,.photo-grid img{transition:filter .2s ease}
+  .mini-grid img:hover,.photo-grid img:hover{filter:brightness(1.12)}
+}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -257,6 +272,7 @@ footer{text-align:center;color:var(--muted);font-size:.85rem;padding:20px}
 </main>
 <footer>© 2026 ทวีสิน กลิ่นรัตน์ · Taweesin Kinrat</footer>
 
+<div class="scroll-progress" id="scrollProgress"></div>
 <button class="to-top" id="toTop" aria-label="Back to top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V6M6 11l6-6 6 6"/></svg></button>
 <div class="lb" id="lb">
   <button class="lb-btn lb-close" id="lbClose" aria-label="close">✕</button>
@@ -581,6 +597,7 @@ function renderCerts(){
   const col={champ:"var(--gold)",award:"var(--silver)",join:"var(--cyan)",course:"#a78bfa"};
   document.getElementById("p-certs").innerHTML=`<div class="filters">${keys.map(x=>`<button class="filter ${x===certF?"on":""}" data-f="${x}">${T(UI[x])}<span class="n">${x==="all"?CERTS.length:CERTS.filter(c=>c.type===x).length}</span></button>`).join("")}</div>
    <div class="cert-grid">${list.map((c,i)=>`<div class="cert" data-g="${k}" data-i="${i}"><img src="${c.src}" loading="lazy" alt=""><div class="t"><b><span class="dot" style="background:${col[c.type]}"></span>${T(c.title)}</b><span>${L==="th"?"พ.ศ. ":""}${c.year}</span></div></div>`).join("")}</div>`;
+  observeReveals();
 }
 
 /* tabs */
@@ -623,6 +640,8 @@ function go(t){
   setSwipeHintText();
   stopActiveVideo();
   document.querySelectorAll("#p-projects video").forEach(v=>v.pause());
+  observeReveals();
+  requestAnimationFrame(updateProgress);
   if(firstGo){firstGo=false;}else{hideSwipeHint();}}
 
 /* ---------- videos: click-to-play, only one plays at a time ---------- */
@@ -815,7 +834,41 @@ document.addEventListener("scroll",()=>{
   toTopBtn.classList.toggle("show", window.scrollY>HEADER_H*1.5);
 },{passive:true});
 
+/* slim scroll-progress bar */
+const progressBar=document.getElementById("scrollProgress");
+let progressTicking=false;
+function updateProgress(){
+  const doc=document.documentElement;
+  const max=doc.scrollHeight-doc.clientHeight;
+  const pct=max>0?Math.min(1,window.scrollY/max):0;
+  progressBar.style.transform=`scaleX(${pct})`;
+  progressTicking=false;
+}
+document.addEventListener("scroll",()=>{
+  if(!progressTicking){ requestAnimationFrame(updateProgress); progressTicking=true; }
+},{passive:true});
+
+/* scroll-reveal: fade+rise once, the first time a card/photo/cert enters view */
+const revealObserver=new IntersectionObserver(entries=>{
+  entries.forEach(en=>{
+    if(en.isIntersecting){
+      en.target.classList.add("in");
+      revealObserver.unobserve(en.target);
+    }
+  });
+},{threshold:.12});
+function observeReveals(){
+  document.querySelectorAll(
+    "#p-home .card, #p-robots .card, #p-projects .card, #p-design .card, #p-certs .cert, #p-videos .card, #p-about .card"
+  ).forEach(el=>{
+    if(el.classList.contains("reveal"))return;
+    el.classList.add("reveal");
+    revealObserver.observe(el);
+  });
+}
+
 render();go(cur);
+observeReveals();
 </script>
 </body>
 </html>
