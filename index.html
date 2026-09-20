@@ -87,6 +87,9 @@ main{padding:18px 16px 60px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
 @media (hover:hover){.card:hover{transform:translateY(-3px);border-color:var(--line-2);box-shadow:0 12px 28px -10px rgba(0,0,0,.5)}}
 .card:active{transform:scale(.995)}
+/* the 3D viewer cards must never have their transform animated — doing so while a WebGL
+   canvas renders inside them is what caused the flicker on Android and some desktop GPUs */
+#p-design .card,#p-design .card:hover,#p-design .card:active{transform:none!important;transition:none!important}
 .card + .card{margin-top:14px}
 .card h2{font-size:1.2rem;margin-bottom:10px}
 .card h3{font-size:1.05rem;line-height:1.35}
@@ -859,7 +862,9 @@ const revealObserver=new IntersectionObserver(entries=>{
 },{threshold:.12});
 function observeReveals(){
   document.querySelectorAll(
-    "#p-home .card, #p-robots .card, #p-projects .card, #p-design .card, #p-certs .cert, #p-videos .card, #p-about .card"
+    "#p-home .card, #p-robots .card, #p-projects .card, #p-certs .cert, #p-videos .card, #p-about .card"
+    /* #p-design .card is deliberately excluded — animating transform/opacity on the card
+       that wraps a live WebGL canvas is what caused the 3D models to flicker */
   ).forEach(el=>{
     if(el.classList.contains("reveal"))return;
     el.classList.add("reveal");
