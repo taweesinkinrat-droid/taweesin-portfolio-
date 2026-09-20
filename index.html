@@ -731,122 +731,101 @@ if(!matchMedia("(max-width:820px)").matches || sessionStorage.getItem("hideSwipe
   },{passive:true});
 })();
 
-/* ---------- STL 3D viewers: ONE shared WebGL context for the entire page ----------
-   Root cause of the flicker/blank-screen problems: with up to 10 separate 3D models,
-   each getting its own canvas/WebGL context, many phones simply cannot keep that many
-   contexts alive at once — the OS reclaims older ones under memory pressure, and no
-   matter how gracefully that reclaim is handled, it keeps happening and looks like
-   flicker or a model that "won't load again". The fix that removes the problem instead
-   of reacting to it: there is only ever ONE WebGL context on the whole page. As you
-   scroll, that single canvas is simply moved into whichever model card is most in view,
-   and its geometry is swapped. Nothing is ever created or destroyed while scrolling, so
-   there is nothing for any device to lose. Already-downloaded models are kept in memory
-   so revisiting one is instant. */
-let stlShared=null; /* {renderer, scene, camera, controls, mesh, running} */
-let stlActiveEl=null;
-const stlGeoCache=new Map(); /* src -> THREE.BufferGeometry, kept for the whole session */
-const stlRatios=new Map(); /* container -> how much of it is on screen right now */
+/* ---------- STL 3D viewers: classic approach — every model card has its own viewer ----------
+   Each card creates its own renderer, loads its own .stl, and draws itself. Models are
+   downloaded a couple at a time in a queue so nothing gets starved. One shared animation
+   loop only redraws the cards that are currently on screen. If a model fails to load it
+   shows a tap-to-retry message and the others are not affected. */
+const stlViewers=[];
+const stlQueue=[];
+let stlLoading=0;
+const STL_MAX_PARALLEL=2;
+let stlLoopOn=false;
 
-function ensureStlShared(){
-  if(stlShared)return stlShared;
-  const coarse=matchMedia("(pointer:coarse)").matches; /* touch device: trade quality for smoothness */
+function stlMsg(v,text,retry){
+  let l=v.el.querySelector(".stl-loading");
+  if(!l){ l=document.createElement("div"); l.className="stl-loading"; v.el.appendChild(l); }
+  l.textContent=text;
+  l.style.cursor=retry?"pointer":"";
+  l.onclick=retry||null;
+}
+function stlClearMsg(v){ const l=v.el.querySelector(".stl-loading"); if(l)l.remove(); }
+
+function stlBuild(v,geo){
+  const el=v.el, w=el.clientWidth||300, h=el.clientHeight||170;
+  const coarse=matchMedia("(pointer:coarse)").matches;
   const scene=new THREE.Scene();
-  const camera=new THREE.PerspectiveCamera(45,1,0.1,2000);
-  const renderer=new THREE.WebGLRenderer({antialias:!coarse,alpha:true,powerPreference:"low-power"});
+  const camera=new THREE.PerspectiveCamera(45,w/h,0.1,2000);
+  let renderer;
+  try{ renderer=new THREE.WebGLRenderer({antialias:!coarse,alpha:true,powerPreference:"low-power"}); }
+  catch(e){ stlMsg(v, L==="th"?"อุปกรณ์นี้แสดงโมเดล 3D ไม่ได้":"This device can't show 3D models"); return; }
   renderer.setPixelRatio(Math.min(devicePixelRatio,coarse?1.25:2));
+  renderer.setSize(w,h);
   scene.add(new THREE.HemisphereLight(0xffffff,0x1b2932,1.15));
-  const dir=new THREE.DirectionalLight(0xffffff,.85); dir.position.set(4,6,5); scene.add(dir);
-  const dir2=new THREE.DirectionalLight(0x22d3ee,.3); dir2.position.set(-4,-2,-3); scene.add(dir2);
+  const d1=new THREE.DirectionalLight(0xffffff,.85); d1.position.set(4,6,5); scene.add(d1);
+  const d2=new THREE.DirectionalLight(0x22d3ee,.3); d2.position.set(-4,-2,-3); scene.add(d2);
+  geo.computeVertexNormals(); geo.center(); geo.computeBoundingSphere();
+  const r=(geo.boundingSphere&&geo.boundingSphere.radius)||40;
+  scene.add(new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:0x22d3ee,metalness:.2,roughness:.45})));
+  camera.position.set(r*1.7,r*1.3,r*1.7); camera.near=r/100; camera.far=r*50; camera.updateProjectionMatrix();
   const controls=new THREE.OrbitControls(camera,renderer.domElement);
   controls.enableDamping=true; controls.dampingFactor=.08;
   controls.autoRotate=true; controls.autoRotateSpeed=1.6;
   controls.addEventListener("start",()=>controls.autoRotate=false);
-  const loop=()=>{ controls.update(); renderer.render(scene,camera); };
-  stlShared={renderer,scene,camera,controls,mesh:null,running:false};
-  const sync=()=>{
-    const should=!!stlActiveEl && !document.hidden;
-    if(should && !stlShared.running){ stlShared.running=true; renderer.setAnimationLoop(loop); }
-    else if(!should && stlShared.running){ stlShared.running=false; renderer.setAnimationLoop(null); }
+  renderer.domElement.addEventListener("webglcontextlost",e=>e.preventDefault());
+  stlClearMsg(v);
+  el.appendChild(renderer.domElement);
+  Object.assign(v,{renderer,scene,camera,controls,ready:true,visible:true});
+  stlStartLoop();
+}
+function stlLoad(v){
+  v.loading=true; stlLoading++;
+  stlMsg(v, L==="th"?"กำลังโหลดโมเดล 3D…":"Loading 3D model…");
+  const done=()=>{ v.loading=false; stlLoading--; stlPump(); };
+  new THREE.STLLoader().load(v.src, geo=>{ done(); stlBuild(v,geo); },
+    xhr=>{ if(xhr.lengthComputable&&xhr.total) stlMsg(v,(L==="th"?"กำลังโหลดโมเดล 3D… ":"Loading 3D model… ")+Math.round(xhr.loaded/xhr.total*100)+"%"); },
+    ()=>{ done(); stlMsg(v, L==="th"?"โหลดไฟล์ 3D ไม่สำเร็จ แตะเพื่อลองใหม่":"Couldn't load the 3D file — tap to retry", ()=>stlEnqueue(v)); });
+}
+function stlPump(){
+  while(stlLoading<STL_MAX_PARALLEL && stlQueue.length){ stlLoad(stlQueue.shift()); }
+}
+function stlEnqueue(v){
+  if(v.ready||v.loading||stlQueue.includes(v))return;
+  stlMsg(v, L==="th"?"รอโหลดโมเดล 3D…":"Waiting to load 3D model…");
+  stlQueue.push(v); stlPump();
+}
+function stlStartLoop(){
+  if(stlLoopOn)return; stlLoopOn=true;
+  const tick=()=>{
+    if(!document.hidden){
+      stlViewers.forEach(v=>{ if(v.ready&&v.visible){ v.controls.update(); v.renderer.render(v.scene,v.camera); } });
+    }
+    requestAnimationFrame(tick);
   };
-  stlShared.sync=sync;
-  document.addEventListener("visibilitychange",sync);
-  /* with only one context total, an outright forced loss should be extremely rare —
-     but recover cleanly if it ever happens rather than staying blank */
-  renderer.domElement.addEventListener("webglcontextlost",e=>{
-    e.preventDefault();
-    stlShared=null;
-    const el=stlActiveEl; stlActiveEl=null;
-    if(el) requestAnimationFrame(()=>activateStl(el));
-  });
-  return stlShared;
+  requestAnimationFrame(tick);
 }
-function resetStlPlaceholder(el){
-  el.innerHTML=`<span class="stl-tag">3D</span><div class="stl-loading">${L==="th"?"เลื่อนมาดูโมเดลนี้อีกครั้งเพื่อหมุนดู":"Scroll back to this model to view it in 3D"}</div>`;
-}
-function activateStl(container){
-  if(typeof THREE==="undefined")return;
-  const src=container.dataset.stl; if(!src)return;
-  const w=container.clientWidth,h=container.clientHeight; if(!w||!h)return;
-  if(stlActiveEl===container)return;
-  const s=ensureStlShared();
-  if(stlActiveEl) resetStlPlaceholder(stlActiveEl);
-  stlActiveEl=container;
-  let label=container.querySelector(".stl-loading");
-  if(!label){ container.innerHTML=`<span class="stl-tag">3D</span>`; label=document.createElement("div"); label.className="stl-loading"; container.appendChild(label); }
-  container.appendChild(s.renderer.domElement);
-  s.renderer.setSize(w,h);
-  s.camera.aspect=w/h; s.camera.updateProjectionMatrix();
-  if(s.mesh){ s.scene.remove(s.mesh); s.mesh=null; }
-  const place=geo=>{
-    if(label)label.remove();
-    const r=(geo.boundingSphere&&geo.boundingSphere.radius)||40;
-    const mat=new THREE.MeshStandardMaterial({color:0x22d3ee,metalness:.2,roughness:.45});
-    const mesh=new THREE.Mesh(geo,mat);
-    s.scene.add(mesh); s.mesh=mesh;
-    s.camera.position.set(r*1.7,r*1.3,r*1.7); s.camera.near=r/100; s.camera.far=r*50; s.camera.updateProjectionMatrix();
-    s.controls.target.set(0,0,0); s.controls.update();
-  };
-  const cached=stlGeoCache.get(src);
-  if(cached){ place(cached); }
-  else{
-    label.textContent=L==="th"?"กำลังโหลดโมเดล 3D…":"Loading 3D model…";
-    new THREE.STLLoader().load(src, geo=>{
-      geo.computeVertexNormals(); geo.center(); geo.computeBoundingSphere();
-      stlGeoCache.set(src,geo);
-      if(stlActiveEl===container) place(geo);
-    }, xhr=>{
-      if(xhr.lengthComputable) label.textContent=(L==="th"?`กำลังโหลดโมเดล 3D… ${Math.round(xhr.loaded/xhr.total*100)}%`:`Loading 3D model… ${Math.round(xhr.loaded/xhr.total*100)}%`);
-    }, ()=>{
-      label.textContent = L==="th" ? "โหลดไฟล์ 3D ไม่สำเร็จ ตรวจสอบพาธไฟล์ .stl" : "Couldn't load the 3D file — check the .stl path";
-    });
-  }
-  s.sync();
-}
-function deactivateStl(container){
-  if(stlActiveEl!==container)return;
-  stlActiveEl=null;
-  if(stlShared) stlShared.sync();
-}
-const stlObserver=new IntersectionObserver(entries=>{
-  entries.forEach(en=>stlRatios.set(en.target, en.isIntersecting?en.intersectionRatio:0));
-  let best=null,bestR=0.3;
-  stlRatios.forEach((r,el)=>{ if(r>bestR){ bestR=r; best=el; } });
-  if(best) activateStl(best);
-  else if(stlActiveEl) deactivateStl(stlActiveEl);
-},{threshold:[0,.15,.3,.45,.6,.75,.9,1]});
+const stlVisObserver=new IntersectionObserver(entries=>{
+  entries.forEach(en=>{ const v=stlViewers.find(x=>x.el===en.target); if(v) v.visible=en.isIntersecting; });
+},{rootMargin:"100px"});
+
 function initStlViewers(){
+  if(typeof THREE==="undefined"||typeof THREE.STLLoader==="undefined"||typeof THREE.OrbitControls==="undefined")return;
   document.querySelectorAll(".stl-viewer[data-stl]").forEach(el=>{
     if(el.dataset.observed)return;
     if(!el.clientWidth||!el.clientHeight)return; /* panel still hidden — retry next time this tab opens */
     el.dataset.observed="1";
-    stlObserver.observe(el);
+    const v={el,src:el.dataset.stl,ready:false,loading:false,visible:true};
+    stlViewers.push(v);
+    stlVisObserver.observe(el);
+    stlEnqueue(v);
   });
 }
 addEventListener("resize",()=>{
-  if(!stlActiveEl||!stlShared)return;
-  const w=stlActiveEl.clientWidth,h=stlActiveEl.clientHeight; if(!w||!h)return;
-  stlShared.renderer.setSize(w,h);
-  stlShared.camera.aspect=w/h; stlShared.camera.updateProjectionMatrix();
+  stlViewers.forEach(v=>{
+    if(!v.ready)return;
+    const w=v.el.clientWidth,h=v.el.clientHeight; if(!w||!h)return;
+    v.renderer.setSize(w,h); v.camera.aspect=w/h; v.camera.updateProjectionMatrix();
+  });
 },{passive:true});
 
 /* floating back-to-top button */
