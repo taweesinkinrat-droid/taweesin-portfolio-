@@ -106,6 +106,8 @@ a{color:var(--cyan);text-decoration:none}
 .sheet-title{font-weight:700;font-size:.95rem;margin:0 4px 10px;color:var(--muted)}
 .sheet-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 .sheet-grid .tab:not(.on){background:var(--card-2)}
+.anchor-flash{animation:anchorFlash 1.8s ease-out}
+@keyframes anchorFlash{0%,35%{box-shadow:0 0 0 2px var(--cyan),0 0 26px -4px rgba(34,211,238,.7)}100%{box-shadow:0 0 0 0 rgba(34,211,238,0)}}
 .hl-list{list-style:none;display:grid;gap:8px}
 .hl-item{width:100%;display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;text-align:left;
   background:var(--card-2);border:1px solid var(--line);transition:border-color .15s,transform .15s}
@@ -583,14 +585,14 @@ function render(){
   const pk=grp(PHOTOS.slice(0,9).map(s=>({src:s})));
   const nType=t=>CERTS.filter(c=>c.type===t).length;
   const HL=[
-    ["gold","🏆","robots",{th:"ชนะเลิศ WRG Thailand 2026",en:"Champion — WRG Thailand 2026"},{th:"ตัวแทนประเทศไทย → WRG ญี่ปุ่น พ.ย. 2569",en:"Team Thailand → WRG Japan, Nov 2026"}],
-    ["gold","👑","robots",{th:"ชนะเลิศระดับประเทศ ถ้วยพระราชทาน",en:"National Champion — Royal Trophy"},{th:"TO BE NUMBER ONE Robot Championship",en:"TO BE NUMBER ONE Robot Championship"}],
-    ["","🧠","projects",{th:"Smart Classroom AI",en:"Smart Classroom AI"},{th:"AI ตรวจจับเหตุฉุกเฉินในห้องเรียน · ผ่านเข้ารอบ depa",en:"AI emergency detection for classrooms · depa round"}],
-    ["","📐","design",{th:"ออกแบบชิ้นส่วนหุ่นยนต์เอง",en:"Robot parts I designed"},{th:`${DESIGNS.length} โมเดล · หมุนดูแบบ 3D ได้`,en:`${DESIGNS.length} models · rotate them in 3D`}],
-    ["","📜","certs",{th:`เกียรติบัตร ${CERTS.length} ใบ`,en:`${CERTS.length} certificates`},{th:`ชนะเลิศ ${nType("champ")} · รางวัล/เหรียญ ${nType("award")} · คอร์ส ${nType("course")}`,en:`${nType("champ")} titles · ${nType("award")} medals · ${nType("course")} courses`}]
+    ["gold","🏆","robots:robot-0",{th:"ชนะเลิศ WRG Thailand 2026",en:"Champion — WRG Thailand 2026"},{th:"ตัวแทนประเทศไทย → WRG ญี่ปุ่น พ.ย. 2569",en:"Team Thailand → WRG Japan, Nov 2026"}],
+    ["gold","👑","robots:robot-1",{th:"ชนะเลิศระดับประเทศ ถ้วยพระราชทาน",en:"National Champion — Royal Trophy"},{th:"TO BE NUMBER ONE Robot Championship",en:"TO BE NUMBER ONE Robot Championship"}],
+    ["","🧠","projects:smart",{th:"Smart Classroom AI",en:"Smart Classroom AI"},{th:"AI ตรวจจับเหตุฉุกเฉินในห้องเรียน · ผ่านเข้ารอบ depa",en:"AI emergency detection for classrooms · depa round"}],
+    ["","📐","design:design-top",{th:"ออกแบบชิ้นส่วนหุ่นยนต์เอง",en:"Robot parts I designed"},{th:`${DESIGNS.length} โมเดล · หมุนดูแบบ 3D ได้`,en:`${DESIGNS.length} models · rotate them in 3D`}],
+    ["","📜","certs:certs-top",{th:`เกียรติบัตร ${CERTS.length} ใบ`,en:`${CERTS.length} certificates`},{th:`ชนะเลิศ ${nType("champ")} · รางวัล/เหรียญ ${nType("award")} · คอร์ส ${nType("course")}`,en:`${nType("champ")} titles · ${nType("award")} medals · ${nType("course")} courses`}]
   ];
   const highlights=`<div class="card"><h2>${L==="th"?"ผลงานเด่น":"Highlights"}</h2><ul class="hl-list">${HL.map(([c,ico,tab,t,sub])=>
-    `<li><button class="hl-item" data-go="${tab}"><span class="hl-ico ${c}">${ico}</span><span class="hl-txt"><b>${T(t)}</b><span>${T(sub)}</span></span><svg class="hl-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></li>`).join("")}</ul></div>`;
+    `<li><button class="hl-item" data-go="${tab.split(":")[0]}" data-anchor="${tab.split(":")[1]}"><span class="hl-ico ${c}">${ico}</span><span class="hl-txt"><b>${T(t)}</b><span>${T(sub)}</span></span><svg class="hl-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></li>`).join("")}</ul></div>`;
   document.getElementById("p-home").innerHTML=`<div class="cols">
     <div>${highlights}${intro()}
       <div class="card"><h2 style="display:flex;justify-content:space-between">${T(UI.photos)} <button class="muted" style="font-size:.9rem" data-go="photos">${T(UI.seeAll)}</button></h2>
@@ -601,12 +603,12 @@ function render(){
   </div>`;
 
   /* robots */
-  document.getElementById("p-robots").innerHTML=`<div style="max-width:680px;margin:0 auto">${ROBOTS.map(post).join("")}</div>`;
+  document.getElementById("p-robots").innerHTML=`<div style="max-width:680px;margin:0 auto">${ROBOTS.map((r,i)=>post(r).replace("<article",`<article data-anchor="robot-${i}"`)).join("")}</div>`;
 
   /* projects */
   document.getElementById("p-projects").innerHTML=`<div class="grid2">${PROJECTS.map(p=>{
     const k=grp([p.img,...(p.more||[])].filter(Boolean).map(s=>({src:s,t:T(p.title)})));
-    if(p.layout==="smart")return `<article class="card proj-smart" style="margin:0">
+    if(p.layout==="smart")return `<article class="card proj-smart" data-anchor="smart" style="margin:0">
       <div class="proj-smart-media">
         <div class="card-img">${img(p.img,k,0,T(p.title))}</div>
         <div class="pics">${(p.more||[]).map((s,i)=>img(s,k,i+1,T(p.title))).join("")}</div>
@@ -632,7 +634,7 @@ function render(){
     </article>`}).join("")}</div>`;
 
   /* design */
-  document.getElementById("p-design").innerHTML=`<p class="muted" style="margin-bottom:12px">${L==="th"?"ออกแบบด้วย SketchUp และ Onshape แล้วพิมพ์ 3D ทดสอบจริง — โมเดลที่มีไฟล์ .stl ลากหมุนดูได้เลย":"Designed in SketchUp and Onshape, then 3D-printed and tested. Models with an .stl file can be rotated below."}</p>
+  document.getElementById("p-design").innerHTML=`<p class="muted" data-anchor="design-top" style="margin-bottom:12px">${L==="th"?"ออกแบบด้วย SketchUp และ Onshape แล้วพิมพ์ 3D ทดสอบจริง — โมเดลที่มีไฟล์ .stl ลากหมุนดูได้เลย":"Designed in SketchUp and Onshape, then 3D-printed and tested. Models with an .stl file can be rotated below."}</p>
    <div class="grid2">${DESIGNS.map(d=>`<article class="card" style="margin:0"><div class="card-img">${
      d.stl?`<div class="stl-viewer" data-stl="${d.stl}"><span class="stl-tag">3D</span><div class="stl-loading">${L==="th"?"กำลังโหลดโมเดล 3D…":"Loading 3D model…"}</div></div>`
      :d.src?`<img src="${d.src}">`:`<div class="bp">${ART[d.art]}</div>`
@@ -669,7 +671,7 @@ function renderCerts(){
   const list=CERTS.filter(c=>certF==="all"||c.type===certF);
   const k=grp(list.map(c=>({src:c.src,t:T(c.title),s:(L==="th"?"พ.ศ. ":"")+c.year})));
   const col={champ:"var(--gold)",award:"var(--silver)",join:"var(--cyan)",course:"#a78bfa"};
-  document.getElementById("p-certs").innerHTML=`<div class="filters">${keys.map(x=>`<button class="filter ${x===certF?"on":""}" data-f="${x}">${T(UI[x])}<span class="n">${x==="all"?CERTS.length:CERTS.filter(c=>c.type===x).length}</span></button>`).join("")}</div>
+  document.getElementById("p-certs").innerHTML=`<div class="filters" data-anchor="certs-top">${keys.map(x=>`<button class="filter ${x===certF?"on":""}" data-f="${x}">${T(UI[x])}<span class="n">${x==="all"?CERTS.length:CERTS.filter(c=>c.type===x).length}</span></button>`).join("")}</div>
    <div class="cert-grid">${list.map((c,i)=>`<div class="cert" data-g="${k}" data-i="${i}"><img src="${c.src}" loading="lazy" alt=""><div class="t"><b><span class="dot" style="background:${col[c.type]}"></span>${T(c.title)}</b><span>${L==="th"?"พ.ศ. ":""}${c.year}</span></div></div>`).join("")}</div>`;
   observeReveals();
 }
@@ -684,7 +686,9 @@ const scrollMemory={}, visitedTabs=new Set();
    compare a number against itself. Cache the real header height once, before anything
    has scrolled, and reuse that fixed number everywhere instead of re-reading offsetTop. */
 const HEADER_H=document.querySelector(".tabs").offsetTop;
-function go(t){
+/* go(tab)          — from the menu / swipe: top of a new page, or where you left off
+   go(tab, anchor)  — from a "Highlights" link: open that page and jump straight to that item */
+function go(t,anchor){
   const prevScroll=window.scrollY; /* capture BEFORE the panel swap */
   if(cur) scrollMemory[cur]=prevScroll;
   const firstVisit=!visitedTabs.has(t);
@@ -700,8 +704,11 @@ function go(t){
   visitedTabs.add(t);
   /* deferred one frame: mobile browsers often ignore a scrollTo() made synchronously
      inside a touch handler, right when the panel's display just changed */
+  if(anchor&&t==="certs"&&certF!=="all"){ certF="all"; renderCerts(); }
   requestAnimationFrame(()=>{
-    if(!firstVisit){
+    if(anchor&&scrollToAnchor(t,anchor)){
+      /* jumped straight to the item */
+    }else if(!firstVisit){
       scrollTo({top:scrollMemory[t]||0,behavior:"auto"});
     }else if(prevScroll>HEADER_H){
       scrollTo({top:HEADER_H,behavior:"auto"}); /* new page starts at the top, menu in view */
@@ -720,6 +727,22 @@ function go(t){
   document.querySelectorAll("#p-projects video").forEach(v=>v.pause());
   observeReveals();
   if(firstGo){firstGo=false;}else{hideSwipeHint();}}
+
+function anchorTop(el){
+  const phone=matchMedia("(max-width:700px)").matches;
+  const offset=phone?70:document.querySelector(".tabs").offsetHeight+14; /* clear the sticky bar */
+  return Math.max(0,el.getBoundingClientRect().top+scrollY-offset);
+}
+function scrollToAnchor(t,anchor){
+  const el=document.querySelector(`#p-${t} [data-anchor="${anchor}"]`);
+  if(!el)return false;
+  let y=anchorTop(el); scrollTo({top:y,behavior:"auto"});
+  /* the page fades in and images above may still be loading; re-aim once things settle,
+     unless the visitor has already started scrolling on their own */
+  setTimeout(()=>{ if(Math.abs(scrollY-y)<4){ y=anchorTop(el); scrollTo({top:y,behavior:"smooth"}); } },450);
+  el.classList.remove("anchor-flash"); void el.offsetWidth; el.classList.add("anchor-flash");
+  return true;
+}
 
 /* ---------- videos: click-to-play, only one plays at a time ---------- */
 let activeVideoEl=null;
@@ -744,7 +767,7 @@ function playVideo(container){
 
 document.addEventListener("click",e=>{
   const t=e.target.closest("[data-t]");if(t)return go(t.dataset.t);
-  const g=e.target.closest("[data-go]");if(g)return go(g.dataset.go);
+  const g=e.target.closest("[data-go]");if(g)return go(g.dataset.go,g.dataset.anchor);
   const f=e.target.closest("[data-f]");if(f){certF=f.dataset.f;return renderCerts();}
   const vp=e.target.closest(".vid-poster");if(vp)return playVideo(vp.parentElement);
   const im=e.target.closest("[data-g]");if(im)openLB(im.dataset.g,+im.dataset.i);
