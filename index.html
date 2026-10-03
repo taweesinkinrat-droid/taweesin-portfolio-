@@ -391,9 +391,9 @@ const ROBOTS = [
      ["what",{th:"แข่งหุ่นยนต์ Hit the Box รุ่น Senior ระดับประเทศ",en:"National robot competition — Hit the Box (Senior)"}],
      ["role",{th:"ออกแบบและสร้างหุ่นเองทั้งหมด ตั้งแต่ตัวหุ่น ฮาร์ดแวร์ จนถึงโปรแกรมควบคุม",en:"Designed and built the entire robot myself — frame, hardware and control software"}],
      ["how",{th:"ทดสอบและแก้ไขหลายรอบ จนหุ่นทำภารกิจได้ทั้งเร็วและแม่นยำ",en:"Tested and refined it over many iterations until it completed the missions quickly and accurately"}],
-     ["result",{th:"🏆 ชนะเลิศ — ได้สิทธิ์และยืนยันเป็นตัวแทนประเทศไทย แข่ง WRG รอบนานาชาติ ที่เมืองชิบะ ประเทศญี่ปุ่น 15–20 พ.ย. 2569",en:"🏆 Champion — qualified for and confirmed on Team Thailand for the WRG international round in Chiba, Japan (Nov 15–20, 2026)"}]
+     ["result",{th:"🏆 ชนะเลิศ — ได้สิทธิ์และยืนยันเป็นตัวแทนประเทศไทย แข่ง WRG รอบนานาชาติ ที่เมืองชิบะ ประเทศญี่ปุ่น 15–20 พ.ย. 2569",en:"🏆 Champion — qualified for and confirmed on Team Thailand for the WRG international round in Chiba, Japan (Nov 15–20, 2026)"}],
+     ["learned",{th:"เข้าใจการจูนค่า PID ให้หุ่นวิ่งตามเส้นได้นิ่งแม้ใช้ความเร็วสูง และได้รู้ว่าค่าที่ใช้ได้ดีตอนซ้อม มักต้องปรับใหม่เมื่อเจอสนามและแสงไฟจริง การทดสอบในสภาพแวดล้อมจริงจึงสำคัญมาก",en:"How to tune PID so the robot stays stable on the line even at high speed — and that settings that work in practice almost always need re-tuning under the real field and lighting, so testing in real conditions matters"}]
    ],
-   specs:["ESP32 / ATX-2i","TB6612FNG","16× IR + 2× CD74HC4067","2× HM-500MG servo","25×25 cm"],
    pics:[P+"wrg-stage.jpg",P+"wrg-team.jpg",P+"wrg-field.jpg",C+"champ-01-wrg-hitthebox-2026.jpg"]},
   {date:{th:"พ.ค. 2569",en:"May 2026"}, medal:"gold",
    title:{th:"ชนะเลิศระดับประเทศ ถ้วยรางวัลพระราชทาน — TO BE NUMBER ONE Robot Championship",en:"National Champion with Royal Trophy — TO BE NUMBER ONE Robot Championship"},
@@ -403,7 +403,7 @@ const ROBOTS = [
      ["what",{th:"Quick Box Drop Challenge ระดับ ม.ปลาย ชิงถ้วยรางวัลพระราชทาน ทูลกระหม่อมหญิงอุบลรัตนราชกัญญา สิริวัฒนาพรรณวดี",en:"Quick Box Drop Challenge (upper secondary), competing for the Royal Trophy of HRH Princess Ubolratana Rajakanya"}],
      ["role",{th:"คืนก่อนแข่ง ผมแก้โครงหุ่นใหม่และพิมพ์ชิ้นส่วน 3D ใหม่หลายรอบ แล้วลงแข่งทั้งที่ยังไม่ได้นอน",en:"The night before the final I redesigned the frame and reprinted the 3D parts several times, then competed without sleep"}],
      ["result",{th:"🏆 ชนะเลิศระดับประเทศ พร้อมถ้วยรางวัลพระราชทาน · เหรียญทอง รองชนะเลิศอันดับ 3 รายการ MINI Robotic Athletics",en:"🏆 National Champion with the Royal Trophy · Gold medal, 3rd runner-up in MINI Robotic Athletics"}],
-     ["learned",{th:"การแก้ปัญหาเฉพาะหน้าภายใต้เวลาที่จำกัด",en:"Solving problems on the spot under tight time pressure"}]
+     ["learned",{th:"การตัดสินใจให้เร็วเมื่อแผนไม่เป็นไปตามคาด และได้เห็นว่าการวางแผนเวลาพิมพ์ 3D ให้เผื่อไว้ กับการเตรียมชิ้นส่วนสำรอง สำคัญไม่น้อยกว่าตัวหุ่นเอง",en:"Making fast decisions when the plan falls apart — and that planning 3D-printing time with a buffer and keeping spare parts ready matters as much as the robot itself"}]
    ],
    pics:[P+"tbn1-trophy.jpg",P+"tbn1-stage-1.jpg",P+"tbn1-stage-2.jpg",C+"champ-02-tbn1-quickboxdrop-royal-2026.jpg"]},
   {date:{th:"ม.ค. 2569",en:"Jan 2026"}, medal:"gold",
@@ -423,7 +423,7 @@ const ROBOTS = [
    story:[
      ["what",{th:"Robot Realm Robotic Olympiad 2025 — 5 รายการ ทั้งหุ่นกู้ภัย หุ่นกรีฑา และหุ่นยนต์ขาเตะจุดโทษ",en:"Robot Realm Robotic Olympiad 2025 — five events covering rescue, athletics and a legged penalty-kick robot"}],
      ["result",{th:"🥇 เหรียญทอง Wall Tracking Rescue และ Robot Athletic · เหรียญทอง รองชนะเลิศอันดับ 4 ใน Robot Athletic (สนาม 2), Rescue Survival Bag และหุ่นยนต์ขาเตะจุดโทษ",en:"🥇 Gold in Wall Tracking Rescue and Robot Athletic · Gold, 4th runner-up in Robot Athletic (round 2), Rescue Survival Bag and the legged penalty-kick robot"}],
-     ["learned",{th:"การใช้ไจโรสโคปและเซนเซอร์อัลตราโซนิก และการเลี้ยวด้วยไจโรซึ่งแม่นยำกว่าการกะเวลา",en:"Using gyroscope and ultrasonic sensors, and gyro-based turning, which is far more accurate than timed turns"}]
+     ["learned",{th:"การใช้ไจโรสโคปและเซนเซอร์อัลตราโซนิก รวมถึงการเลี้ยวด้วยไจโรซึ่งแม่นยำกว่าการกะเวลา และเพราะจุดภารกิจถูกสุ่มทุกรอบ จึงได้ฝึกเขียนโปรแกรมให้หุ่นตัดสินใจจากค่าเซนเซอร์ แทนการกำหนดเส้นทางตายตัว",en:"Using gyroscope and ultrasonic sensors, and gyro-based turning, which is far more accurate than timed turns. Because mission points were randomised every round, I learned to program the robot to decide from sensor readings instead of following a fixed route"}]
    ],
    pics:[C+"award-04-robotrealm-wall-rescue-2025.jpg",C+"award-02-robotrealm-athletic-gold-2025.jpg",C+"award-05-robotrealm-survival-bag-2025.jpg",C+"award-06-robotrealm-penalty-kick-2025.jpg"]},
   {date:{th:"2568–2569",en:"2025–2026"}, medal:"cyan",
@@ -433,7 +433,7 @@ const ROBOTS = [
    story:[
      ["role",{th:"สมาชิกทีม FIRST Tech Challenge #32899 TW1 ฤดูกาล 2025–2026 และร่วมแข่ง Global Robotics Competition 2025 ที่ Robot Realm Arena",en:"Member of FIRST Tech Challenge team #32899 TW1 (2025–2026 season); competed at the Global Robotics Competition 2025, Robot Realm Arena"}],
      ["result",{th:"🏅 ทีมได้รับ Best Booth Presentation Award — FTC Thailand Championship",en:"🏅 Team won the Best Booth Presentation Award — FTC Thailand Championship"}],
-     ["learned",{th:"กระบวนการพัฒนาหุ่นยนต์อย่างเป็นระบบ ตั้งแต่วางแผน ออกแบบ ทดลอง จนถึงปรับปรุง",en:"A systematic engineering cycle — planning, designing, testing and improving"}]
+     ["learned",{th:"กระบวนการพัฒนาหุ่นยนต์อย่างเป็นระบบ ตั้งแต่วางแผน ออกแบบ ทดลอง จนถึงปรับปรุง ได้ทำงานกับเพื่อนร่วมทีมที่ถนัดต่างกัน แบ่งหน้าที่กันชัดเจน และได้ฝึกอธิบายแนวคิดของผลงานให้กรรมการเข้าใจ",en:"A systematic engineering cycle — planning, designing, testing and improving. I worked with teammates who had different strengths, split responsibilities clearly, and practised explaining our design decisions to the judges"}]
    ],
    pics:[P+"ftc-team.jpg",C+"award-14-ftc-best-booth-2025.jpg",P+"grc-team.jpg",C+"join-02-grc-2025.jpg"]},
   {date:{th:"2567–2568",en:"2024–2025"}, medal:"gold",
@@ -441,7 +441,8 @@ const ROBOTS = [
    text:{th:"ชนะเลิศ Robotic Thai Youth League Division 3 (ม.4–6), เหรียญทอง Network School Robot, เหรียญทอง Rescue Survival Bag, รางวัลยอดเยี่ยม Mitr Phol Grand Robotics, เหรียญเงิน Wall Line Track และเหรียญทองแดง LINE Fast (CPU ASEAN Grand Prix)",
          en:"Champion, Robotic Thai Youth League Division 3; gold in Network School Robot and Rescue Survival Bag; Excellent Award at Mitr Phol Grand Robotics; silver in Wall Line Track and bronze in LINE Fast at the CPU ASEAN Grand Prix."},
    story:[
-     ["result",{th:"🏆 ชนะเลิศ Robotic Thai Youth League Division 3 (ม.4–6) · เหรียญทอง Network School Robot · เหรียญทอง Rescue Survival Bag · รางวัลยอดเยี่ยม Mitr Phol Grand Robotics · เหรียญเงิน Wall Line Track และเหรียญทองแดง LINE Fast (CPU ASEAN Grand Prix)",en:"🏆 Champion, Robotic Thai Youth League Division 3 · Gold, Network School Robot · Gold, Rescue Survival Bag · Excellent Award, Mitr Phol Grand Robotics · Silver, Wall Line Track and bronze, LINE Fast (CPU ASEAN Grand Prix)"}]
+     ["result",{th:"🏆 ชนะเลิศ Robotic Thai Youth League Division 3 (ม.4–6) · เหรียญทอง Network School Robot · เหรียญทอง Rescue Survival Bag · รางวัลยอดเยี่ยม Mitr Phol Grand Robotics · เหรียญเงิน Wall Line Track และเหรียญทองแดง LINE Fast (CPU ASEAN Grand Prix)",en:"🏆 Champion, Robotic Thai Youth League Division 3 · Gold, Network School Robot · Gold, Rescue Survival Bag · Excellent Award, Mitr Phol Grand Robotics · Silver, Wall Line Track and bronze, LINE Fast (CPU ASEAN Grand Prix)"}],
+     ["learned",{th:"ได้เจอโจทย์หลายแบบในปีเดียว ทั้งหุ่นเดินตามเส้นความเร็วสูง หุ่นเดินตามกำแพง และหุ่นกู้ภัย ทำให้เข้าใจว่าแต่ละโจทย์ต้องเลือกเซนเซอร์และกลยุทธ์ต่างกัน และกลายเป็นพื้นฐานที่ต่อยอดมาถึงรายการใหญ่ในปีถัดไป",en:"Facing many different challenges in one year — high-speed line following, wall following and rescue — taught me that each task needs its own choice of sensors and strategy. That year became the foundation for the bigger wins that followed"}]
    ],
    pics:[P+"gallery-17.jpg",C+"champ-03-rtyl-division3-2024.jpg",C+"award-09-mitrphol-excellent-2025.jpg",P+"gallery-06.jpg"]},
 ];
