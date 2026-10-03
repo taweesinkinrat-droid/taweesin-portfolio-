@@ -72,11 +72,51 @@ a{color:var(--cyan);text-decoration:none}
 .tab:active{transform:scale(.95)}
 .tab.on{color:#07202a;background:var(--cyan);border-color:var(--cyan);box-shadow:0 4px 16px -4px rgba(34,211,238,.7)}
 /* on narrow screens, wrap into rows instead of hiding tabs off-screen */
+/* phones: every section visible at once as a tidy 4×2 grid (no hidden tabs, no sideways
+   scrolling). The grid is not sticky — instead a slim bar appears once it scrolls away. */
 @media (max-width:700px){
-  .tabs .wrap{flex-wrap:wrap;overflow-x:visible;justify-content:center;padding:0 10px}
-  .tab{padding:8px 12px;font-size:.86rem;gap:6px}
-  .tab svg{width:16px;height:16px;flex:0 0 16px}
+  .tabs{position:static;padding:10px 0 12px}
+  .tabs .wrap{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;overflow:visible;padding:0 10px}
+  .tab{flex-direction:column;justify-content:center;gap:4px;padding:9px 2px;min-height:60px;border-radius:12px;
+    font-size:.74rem;line-height:1.2;white-space:normal;text-align:center}
+  .tab svg{width:20px;height:20px;flex:0 0 20px}
+  .tab:hover{transform:none}
 }
+.minibar{position:fixed;top:0;left:0;right:0;z-index:30;display:none;align-items:center;gap:6px;padding:8px 10px;
+  background:rgba(17,20,23,.97);border-bottom:1px solid var(--line);box-shadow:0 6px 18px -10px rgba(0,0,0,.8);
+  transform:translateY(-110%);transition:transform .25s cubic-bezier(.22,.61,.36,1)}
+@media (max-width:700px){.minibar{display:flex}}
+.minibar.show{transform:none}
+.mb-arrow{width:44px;height:42px;flex:0 0 44px;border-radius:11px;background:var(--card);border:1px solid var(--line);
+  display:grid;place-items:center;color:var(--text)}
+.mb-arrow svg{width:20px;height:20px}
+.mb-arrow:disabled{opacity:.3}
+.mb-cur{flex:1;min-width:0;height:42px;border-radius:11px;background:var(--cyan);color:#07202a;font-weight:700;
+  display:flex;align-items:center;justify-content:center;gap:8px;padding:0 10px}
+.mb-cur svg{width:18px;height:18px;flex:0 0 18px}
+.mb-cur .mb-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mb-cur .mb-count{font-weight:600;font-size:.78rem;opacity:.65}
+.sheet{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:opacity .22s}
+.sheet.open{opacity:1;pointer-events:auto}
+.sheet-panel{position:absolute;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);
+  border-radius:18px 18px 0 0;padding:10px 12px calc(16px + env(safe-area-inset-bottom));
+  transform:translateY(100%);transition:transform .28s cubic-bezier(.22,.61,.36,1)}
+.sheet.open .sheet-panel{transform:none}
+.sheet-handle{width:40px;height:4px;border-radius:4px;background:var(--line-2,#3a4651);margin:0 auto 12px}
+.sheet-title{font-weight:700;font-size:.95rem;margin:0 4px 10px;color:var(--muted)}
+.sheet-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.sheet-grid .tab:not(.on){background:var(--card-2)}
+.hl-list{list-style:none;display:grid;gap:8px}
+.hl-item{width:100%;display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;text-align:left;
+  background:var(--card-2);border:1px solid var(--line);transition:border-color .15s,transform .15s}
+.hl-item:active{transform:scale(.985)}
+@media (hover:hover){.hl-item:hover{border-color:rgba(34,211,238,.5)}.hl-item:hover .hl-go{transform:translateX(3px);color:var(--cyan)}}
+.hl-ico{width:38px;height:38px;flex:0 0 38px;border-radius:10px;display:grid;place-items:center;font-size:1.15rem;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.25)}
+.hl-ico.gold{background:rgba(245,196,81,.1);border-color:rgba(245,196,81,.35)}
+.hl-txt{flex:1;min-width:0}
+.hl-txt b{display:block;font-size:.95rem;line-height:1.35}
+.hl-txt span{display:block;color:var(--muted);font-size:.82rem;line-height:1.4}
+.hl-go{flex:0 0 18px;width:18px;height:18px;color:var(--muted);transition:transform .15s,color .15s}
 .swipe-hint{
   text-align:center;font-size:.78rem;color:var(--muted);padding:8px 16px 0;opacity:1;
   transition:opacity .4s ease;display:flex;align-items:center;justify-content:center;gap:6px;
@@ -180,8 +220,15 @@ main{padding:18px 16px 60px}
 .bp{aspect-ratio:16/9;display:grid;place-items:center;color:var(--cyan);
   background:linear-gradient(rgba(34,211,238,.07) 1px,transparent 1px) 0 0/16px 16px,linear-gradient(90deg,rgba(34,211,238,.07) 1px,transparent 1px) 0 0/16px 16px,#13212a}
 .bp svg{width:46%;height:70%}
-.stl-viewer{position:relative;aspect-ratio:16/9;background:#0d1519;overflow:hidden;touch-action:none}
-.stl-viewer canvas{display:block;width:100%!important;height:100%!important}
+.stl-viewer{position:relative;aspect-ratio:16/9;overflow:hidden;touch-action:pan-y;
+  background:radial-gradient(ellipse at 50% 60%,#14262e 0%,#0d1519 70%);transition:box-shadow .2s}
+.stl-viewer canvas{display:block;width:100%;height:100%}
+.stl-viewer.active{touch-action:none;box-shadow:inset 0 0 0 2px var(--cyan)}
+.stl-hint{position:absolute;left:10px;bottom:10px;z-index:2;max-width:calc(100% - 20px);font-size:.74rem;line-height:1.3;
+  padding:5px 10px;border-radius:999px;background:rgba(10,16,20,.8);border:1px solid var(--line);color:#cfe3ea;
+  pointer-events:none;transition:opacity .35s,border-color .2s,color .2s}
+.stl-viewer.active .stl-hint{border-color:rgba(34,211,238,.55);color:var(--cyan)}
+@media (hover:hover){.stl-viewer.used .stl-hint{opacity:0}}
 .stl-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.85rem;text-align:center;padding:10px;gap:6px}
 .stl-tag{position:absolute;top:8px;right:8px;font-size:.7rem;padding:3px 9px;border-radius:999px;background:rgba(34,211,238,.15);border:1px solid rgba(34,211,238,.4);color:var(--cyan);font-weight:600;letter-spacing:.03em;pointer-events:none;z-index:2}
 ul.dots{padding-left:18px;margin:6px 0 10px}
@@ -264,7 +311,15 @@ footer{text-align:center;color:var(--muted);font-size:.85rem;padding:20px}
   </div>
 </div>
 
-<nav class="tabs"><div class="wrap" id="tabs"></div></nav>
+<nav class="tabs" aria-label="Sections"><div class="wrap" id="tabs"></div></nav>
+<div class="minibar" id="minibar" aria-hidden="true">
+  <button class="mb-arrow" id="mbPrev" aria-label="Previous section"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <button class="mb-cur" id="mbCur" aria-label="All sections"></button>
+  <button class="mb-arrow" id="mbNext" aria-label="Next section"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
+</div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Sections">
+  <div class="sheet-panel"><div class="sheet-handle"></div><div class="sheet-title" id="sheetTitle"></div><div class="sheet-grid" id="sheetGrid"></div></div>
+</div>
 <div class="swipe-hint" id="swipeHint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 6l6 6-6 6M3 12h18"/></svg><span id="swipeHintTxt"></span></div>
 
 <main class="wrap">
@@ -518,13 +573,26 @@ function render(){
   document.getElementById("tagline").textContent=T(ME.tagline);
   document.getElementById("badges").innerHTML=ME.badges.map(b=>`<span class="pill ${b.hl?"hl":""}">${T(b)}</span>`).join("");
   document.getElementById("btnContact").textContent=T(UI.contact);
-  document.getElementById("tabs").innerHTML=TABS.map(([k,e])=>`<button class="tab ${k===cur?"on":""}" data-t="${k}">${e}<span>${T(UI[k])}</span></button>`).join("");
+  const tabHTML=TABS.map(([k,e])=>`<button class="tab ${k===cur?"on":""}" data-t="${k}">${e}<span>${T(UI[k])}</span></button>`).join("");
+  document.getElementById("tabs").innerHTML=tabHTML;
+  document.getElementById("sheetGrid").innerHTML=tabHTML;
+  document.getElementById("sheetTitle").textContent=L==="th"?"ไปที่หมวด":"Go to section";
   gid=0;for(const k in GROUPS)delete GROUPS[k];
 
   /* home */
   const pk=grp(PHOTOS.slice(0,9).map(s=>({src:s})));
+  const nType=t=>CERTS.filter(c=>c.type===t).length;
+  const HL=[
+    ["gold","🏆","robots",{th:"ชนะเลิศ WRG Thailand 2026",en:"Champion — WRG Thailand 2026"},{th:"ตัวแทนประเทศไทย → WRG ญี่ปุ่น พ.ย. 2569",en:"Team Thailand → WRG Japan, Nov 2026"}],
+    ["gold","👑","robots",{th:"ชนะเลิศระดับประเทศ ถ้วยพระราชทาน",en:"National Champion — Royal Trophy"},{th:"TO BE NUMBER ONE Robot Championship",en:"TO BE NUMBER ONE Robot Championship"}],
+    ["","🧠","projects",{th:"Smart Classroom AI",en:"Smart Classroom AI"},{th:"AI ตรวจจับเหตุฉุกเฉินในห้องเรียน · ผ่านเข้ารอบ depa",en:"AI emergency detection for classrooms · depa round"}],
+    ["","📐","design",{th:"ออกแบบชิ้นส่วนหุ่นยนต์เอง",en:"Robot parts I designed"},{th:`${DESIGNS.length} โมเดล · หมุนดูแบบ 3D ได้`,en:`${DESIGNS.length} models · rotate them in 3D`}],
+    ["","📜","certs",{th:`เกียรติบัตร ${CERTS.length} ใบ`,en:`${CERTS.length} certificates`},{th:`ชนะเลิศ ${nType("champ")} · รางวัล/เหรียญ ${nType("award")} · คอร์ส ${nType("course")}`,en:`${nType("champ")} titles · ${nType("award")} medals · ${nType("course")} courses`}]
+  ];
+  const highlights=`<div class="card"><h2>${L==="th"?"ผลงานเด่น":"Highlights"}</h2><ul class="hl-list">${HL.map(([c,ico,tab,t,sub])=>
+    `<li><button class="hl-item" data-go="${tab}"><span class="hl-ico ${c}">${ico}</span><span class="hl-txt"><b>${T(t)}</b><span>${T(sub)}</span></span><svg class="hl-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></li>`).join("")}</ul></div>`;
   document.getElementById("p-home").innerHTML=`<div class="cols">
-    <div>${intro()}
+    <div>${highlights}${intro()}
       <div class="card"><h2 style="display:flex;justify-content:space-between">${T(UI.photos)} <button class="muted" style="font-size:.9rem" data-go="photos">${T(UI.seeAll)}</button></h2>
       <div class="mini-grid">${PHOTOS.slice(0,9).map((s,i)=>img(s,pk,i)).join("")}</div></div>
     </div>
@@ -636,12 +704,16 @@ function go(t){
     if(!firstVisit){
       scrollTo({top:scrollMemory[t]||0,behavior:"auto"});
     }else if(prevScroll>HEADER_H){
-      scrollTo({top:HEADER_H,behavior:"auto"});
+      scrollTo({top:HEADER_H,behavior:"auto"}); /* new page starts at the top, menu in view */
     }
     const fEl=document.querySelector("#p-"+t+" .filters");
     if(fEl) fEl.classList.toggle("at-end",fEl.scrollWidth<=fEl.clientWidth+2);
   });
-  document.querySelector(`.tab[data-t="${t}"]`)?.scrollIntoView({inline:"center",block:"nearest"});
+  { /* keep the active tab in view inside the bar itself, without ever scrolling the page */
+    const bar=document.querySelector(".tabs .wrap"), btn=bar&&bar.querySelector(`.tab[data-t="${t}"]`);
+    if(bar&&btn&&bar.scrollWidth>bar.clientWidth+2) bar.scrollTo({left:btn.offsetLeft-bar.clientWidth/2+btn.offsetWidth/2,behavior:"smooth"});
+  }
+  updateMinibar(); closeSheet();
   initStlViewers();
   setSwipeHintText();
   stopActiveVideo();
@@ -731,102 +803,233 @@ if(!matchMedia("(max-width:820px)").matches || sessionStorage.getItem("hideSwipe
   },{passive:true});
 })();
 
-/* ---------- STL 3D viewers: classic approach — every model card has its own viewer ----------
-   Each card creates its own renderer, loads its own .stl, and draws itself. Models are
-   downloaded a couple at a time in a queue so nothing gets starved. One shared animation
-   loop only redraws the cards that are currently on screen. If a model fails to load it
-   shows a tap-to-retry message and the others are not affected. */
-const stlViewers=[];
-const stlQueue=[];
-let stlLoading=0;
-const STL_MAX_PARALLEL=2;
-let stlLoopOn=false;
+/* ---------- STL 3D viewers: ONE shared WebGL renderer, many 2D "screens" ----------
+   Why some models turned white on Android: every card used to create its own WebGL
+   context (10 of them). Android Chrome keeps only a handful of GPU contexts alive and
+   silently kills the oldest when memory gets tight; a killed context shows as a white or
+   gray box that never comes back.
+   The fix is the standard technique for many 3D views on one page: the whole site has
+   exactly ONE WebGL context, kept off-screen. Every card shows an ordinary 2D <canvas>.
+   Each frame the shared renderer draws a card's scene and the picture is copied onto that
+   card's 2D canvas. 2D canvases are not affected by the WebGL context limit and keep their
+   last picture even if the GPU context ever resets, so a card can no longer go white.
+   Extra safety: models far off-screen release their GPU memory (re-uploaded automatically
+   when they come back), downloads are lazy and queued, a reset context is recovered or
+   rebuilt, and nothing renders while a model is off-screen or the tab is hidden. */
+const STL={renderer:null,lost:false,w:0,h:0,views:[],geo:new Map(),queue:[],loading:0,raf:0,lostT:0};
+const STL_PAR=2;
+const STL_TOUCH=matchMedia("(pointer:coarse)").matches;
+const STL_DPR=Math.min(window.devicePixelRatio||1, STL_TOUCH?1.5:2);
 
+function stlRenderer(){
+  if(STL.renderer) return STL.renderer;
+  let r;
+  try{ r=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:"low-power"}); }
+  catch(e){ return null; }
+  r.setPixelRatio(1); r.setClearColor(0x000000,0);
+  r.domElement.addEventListener("webglcontextlost",e=>{
+    e.preventDefault(); STL.lost=true;
+    clearTimeout(STL.lostT); STL.lostT=setTimeout(stlRebuildRenderer,2500); /* not restored in time → start fresh */
+  });
+  r.domElement.addEventListener("webglcontextrestored",()=>{
+    clearTimeout(STL.lostT); STL.lost=false; STL.w=STL.h=0;
+    STL.views.forEach(v=>v.dirty=true); stlKick();
+  });
+  STL.renderer=r; STL.w=STL.h=0;
+  return r;
+}
+function stlRebuildRenderer(){
+  try{ STL.renderer&&STL.renderer.dispose(); }catch(e){}
+  STL.renderer=null; STL.lost=false;
+  stlRenderer(); STL.views.forEach(v=>v.dirty=true); stlKick();
+}
+function stlText(key){
+  const t={
+    wait:["รอโหลดโมเดล 3D…","Waiting to load 3D model…"],
+    load:["กำลังโหลดโมเดล 3D…","Loading 3D model…"],
+    fail:["โหลดไฟล์ 3D ไม่สำเร็จ แตะเพื่อลองใหม่","Couldn't load the 3D file — tap to retry"],
+    nogl:["อุปกรณ์นี้แสดงโมเดล 3D ไม่ได้","This device can't show 3D models"],
+    tapIdle:["แตะเพื่อหมุนดูโมเดล","Tap to rotate the model"],
+    tapOn:["หมุน / ซูมได้ · แตะนอกกรอบเพื่อเลื่อนหน้า","Rotate / pinch to zoom · tap outside to scroll"],
+    mouse:["ลากเพื่อหมุน · คลิกแล้วเลื่อนลูกกลิ้งเพื่อซูม","Drag to rotate · click, then scroll to zoom"]
+  }[key];
+  return L==="th"?t[0]:t[1];
+}
 function stlMsg(v,text,retry){
   let l=v.el.querySelector(".stl-loading");
   if(!l){ l=document.createElement("div"); l.className="stl-loading"; v.el.appendChild(l); }
-  l.textContent=text;
-  l.style.cursor=retry?"pointer":"";
-  l.onclick=retry||null;
+  l.textContent=text; l.style.cursor=retry?"pointer":""; l.onclick=retry||null;
 }
 function stlClearMsg(v){ const l=v.el.querySelector(".stl-loading"); if(l)l.remove(); }
-
+function stlHint(v){
+  let h=v.el.querySelector(".stl-hint");
+  if(!h){ h=document.createElement("div"); h.className="stl-hint"; v.el.appendChild(h); }
+  h.textContent=STL_TOUCH?(v.active?stlText("tapOn"):stlText("tapIdle")):stlText("mouse");
+}
+function stlSize(v){
+  if(!v.cv)return;
+  const w=Math.max(1,Math.round(v.el.clientWidth*STL_DPR)), h=Math.max(1,Math.round(v.el.clientHeight*STL_DPR));
+  if(v.cv.width!==w||v.cv.height!==h){
+    v.cv.width=w; v.cv.height=h;
+    v.camera.aspect=w/h; v.camera.updateProjectionMatrix();
+    v.dirty=true; stlKick();
+  }
+}
+function stlActivate(v){
+  if(!STL_TOUCH||v.active||!v.ready)return;
+  v.active=true; v.controls.enabled=true; v.controls.enableZoom=true; v.controls.autoRotate=false;
+  v.cv.style.touchAction="none"; v.el.classList.add("active"); stlHint(v);
+}
+function stlDeactivate(v){
+  if(!v.ready)return;
+  if(STL_TOUCH){
+    if(!v.active)return;
+    v.active=false; v.controls.enabled=false; v.controls.enableZoom=false;
+    v.cv.style.touchAction="pan-y"; v.el.classList.remove("active"); stlHint(v);
+  }else{ v.controls.enableZoom=false; }
+}
 function stlBuild(v,geo){
-  const el=v.el, w=el.clientWidth||300, h=el.clientHeight||170;
-  const coarse=matchMedia("(pointer:coarse)").matches;
+  if(!v.el.isConnected)return;
+  if(!stlRenderer()){ stlMsg(v,stlText("nogl")); return; }
   const scene=new THREE.Scene();
-  const camera=new THREE.PerspectiveCamera(45,w/h,0.1,2000);
-  let renderer;
-  try{ renderer=new THREE.WebGLRenderer({antialias:!coarse,alpha:true,powerPreference:"low-power"}); }
-  catch(e){ stlMsg(v, L==="th"?"อุปกรณ์นี้แสดงโมเดล 3D ไม่ได้":"This device can't show 3D models"); return; }
-  renderer.setPixelRatio(Math.min(devicePixelRatio,coarse?1.25:2));
-  renderer.setSize(w,h);
   scene.add(new THREE.HemisphereLight(0xffffff,0x1b2932,1.15));
   const d1=new THREE.DirectionalLight(0xffffff,.85); d1.position.set(4,6,5); scene.add(d1);
   const d2=new THREE.DirectionalLight(0x22d3ee,.3); d2.position.set(-4,-2,-3); scene.add(d2);
-  geo.computeVertexNormals(); geo.center(); geo.computeBoundingSphere();
   const r=(geo.boundingSphere&&geo.boundingSphere.radius)||40;
-  scene.add(new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:0x22d3ee,metalness:.2,roughness:.45})));
-  camera.position.set(r*1.7,r*1.3,r*1.7); camera.near=r/100; camera.far=r*50; camera.updateProjectionMatrix();
-  const controls=new THREE.OrbitControls(camera,renderer.domElement);
+  const mesh=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:0x22d3ee,metalness:.2,roughness:.45}));
+  scene.add(mesh);
+  const camera=new THREE.PerspectiveCamera(45,16/9,r/100,r*50);
+  camera.position.set(r*1.7,r*1.3,r*1.7);
+  const cv=document.createElement("canvas"); cv.className="stl-canvas";
+  v.el.insertBefore(cv,v.el.firstChild);
+  const ctx=cv.getContext("2d");
+  const controls=new THREE.OrbitControls(camera,cv);
   controls.enableDamping=true; controls.dampingFactor=.08;
   controls.autoRotate=true; controls.autoRotateSpeed=1.6;
-  controls.addEventListener("start",()=>controls.autoRotate=false);
-  renderer.domElement.addEventListener("webglcontextlost",e=>e.preventDefault());
-  stlClearMsg(v);
-  el.appendChild(renderer.domElement);
-  Object.assign(v,{renderer,scene,camera,controls,ready:true,visible:true});
-  stlStartLoop();
+  controls.enablePan=false; controls.enableZoom=false;
+  controls.enabled=!STL_TOUCH;            /* touch: first tap activates, so the page still scrolls */
+  cv.style.touchAction=STL_TOUCH?"pan-y":"none"; /* OrbitControls forces 'none'; restore scrolling */
+  controls.addEventListener("start",()=>{ controls.autoRotate=false; v.el.classList.add("used"); });
+  controls.addEventListener("change",()=>{ v.dirty=true; stlKick(); });
+  controls.target.set(0,0,0); controls.update();
+  cv.addEventListener("contextrestored",()=>{ v.dirty=true; stlKick(); }); /* 2D canvas reset → just redraw */
+  Object.assign(v,{scene,camera,controls,cv,ctx,mesh,ready:true,dirty:true,active:false});
+  if(STL_TOUCH) v.el.addEventListener("click",()=>stlActivate(v));
+  else{
+    v.el.addEventListener("click",()=>{ controls.enableZoom=true; });
+    v.el.addEventListener("mouseleave",()=>{ controls.enableZoom=false; });
+  }
+  v.ro=new ResizeObserver(()=>stlSize(v)); v.ro.observe(v.el);
+  stlClearMsg(v); stlSize(v); stlHint(v); stlKick();
+}
+function stlGeometry(src,onProgress){
+  if(STL.geo.has(src))return STL.geo.get(src);
+  const p=new Promise((res,rej)=>{
+    new THREE.STLLoader().load(src,geo=>{
+      geo.computeVertexNormals(); geo.center(); geo.computeBoundingSphere(); res(geo);
+    },onProgress,rej);
+  });
+  STL.geo.set(src,p);
+  p.catch(()=>STL.geo.delete(src)); /* allow retry */
+  return p;
 }
 function stlLoad(v){
-  v.loading=true; stlLoading++;
-  stlMsg(v, L==="th"?"กำลังโหลดโมเดล 3D…":"Loading 3D model…");
-  const done=()=>{ v.loading=false; stlLoading--; stlPump(); };
-  new THREE.STLLoader().load(v.src, geo=>{ done(); stlBuild(v,geo); },
-    xhr=>{ if(xhr.lengthComputable&&xhr.total) stlMsg(v,(L==="th"?"กำลังโหลดโมเดล 3D… ":"Loading 3D model… ")+Math.round(xhr.loaded/xhr.total*100)+"%"); },
-    ()=>{ done(); stlMsg(v, L==="th"?"โหลดไฟล์ 3D ไม่สำเร็จ แตะเพื่อลองใหม่":"Couldn't load the 3D file — tap to retry", ()=>stlEnqueue(v)); });
+  v.loading=true; STL.loading++;
+  stlMsg(v,stlText("load"));
+  const done=()=>{ v.loading=false; STL.loading--; stlPump(); };
+  stlGeometry(v.src,xhr=>{
+    if(xhr.lengthComputable&&xhr.total) stlMsg(v,stlText("load")+" "+Math.round(xhr.loaded/xhr.total*100)+"%");
+  }).then(geo=>{ done(); stlBuild(v,geo); },
+          ()=>{ done(); stlMsg(v,stlText("fail"),()=>stlEnqueue(v)); });
 }
-function stlPump(){
-  while(stlLoading<STL_MAX_PARALLEL && stlQueue.length){ stlLoad(stlQueue.shift()); }
-}
+function stlPump(){ while(STL.loading<STL_PAR&&STL.queue.length) stlLoad(STL.queue.shift()); }
 function stlEnqueue(v){
-  if(v.ready||v.loading||stlQueue.includes(v))return;
-  stlMsg(v, L==="th"?"รอโหลดโมเดล 3D…":"Waiting to load 3D model…");
-  stlQueue.push(v); stlPump();
+  if(v.ready||v.loading||STL.queue.includes(v))return;
+  stlMsg(v,stlText("wait")); STL.queue.push(v); stlPump();
 }
-function stlStartLoop(){
-  if(stlLoopOn)return; stlLoopOn=true;
-  const tick=()=>{
-    if(!document.hidden){
-      stlViewers.forEach(v=>{ if(v.ready&&v.visible){ v.controls.update(); v.renderer.render(v.scene,v.camera); } });
-    }
-    requestAnimationFrame(tick);
-  };
-  requestAnimationFrame(tick);
+function stlKick(){ if(!STL.raf) STL.raf=requestAnimationFrame(stlTick); }
+function stlTick(){
+  STL.raf=0;
+  if(document.hidden)return;
+  let keep=false;
+  for(const v of STL.views){
+    if(!v.ready||!v.visible)continue;
+    v.controls.update();                       /* fires 'change' while rotating/damping → dirty */
+    if(v.controls.autoRotate) keep=true;
+    if(!v.dirty||STL.lost)continue;
+    const r=stlRenderer(); if(!r)break;
+    /* the loss event arrives a moment after the GPU actually drops the context; never copy a
+       frame rendered on a dead context, or the card would be wiped to blank */
+    if(r.getContext().isContextLost()){ STL.lost=true; break; }
+    const w=v.cv.width,h=v.cv.height;
+    if(STL.w!==w||STL.h!==h){ r.setSize(w,h,false); STL.w=w; STL.h=h; }
+    r.render(v.scene,v.camera);
+    v.ctx.clearRect(0,0,w,h);
+    v.ctx.drawImage(r.domElement,0,0);
+    v.dirty=false;
+    keep=true;                                  /* keep ticking so damping can settle */
+  }
+  if(keep) stlKick();
 }
-const stlVisObserver=new IntersectionObserver(entries=>{
-  entries.forEach(en=>{ const v=stlViewers.find(x=>x.el===en.target); if(v) v.visible=en.isIntersecting; });
-},{rootMargin:"100px"});
+document.addEventListener("visibilitychange",()=>{
+  if(!document.hidden){ STL.views.forEach(v=>v.dirty=true); stlKick(); }
+});
+/* tap anywhere outside an active model → give scrolling back to the page */
+document.addEventListener("pointerdown",e=>{
+  STL.views.forEach(v=>{ if(v.active&&!v.el.contains(e.target)) stlDeactivate(v); });
+},{passive:true});
+/* on screen (with a small margin) → render;  off screen → stop rendering + release touch */
+const stlVisIO=new IntersectionObserver(es=>es.forEach(en=>{
+  const v=en.target._stl; if(!v)return;
+  v.visible=en.isIntersecting;
+  if(v.visible){ v.dirty=true; stlKick(); } else stlDeactivate(v);
+}),{rootMargin:"150px"});
+/* near the screen → download; far away → free GPU memory (CPU copy kept, re-uploaded on return) */
+const stlNearIO=new IntersectionObserver(es=>es.forEach(en=>{
+  const v=en.target._stl; if(!v)return;
+  v.near=en.isIntersecting;
+  if(v.near){ if(!v.ready) stlEnqueue(v); }
+  else if(v.ready&&v.mesh) v.mesh.geometry.dispose();
+}),{rootMargin:"900px"});
 
 function initStlViewers(){
-  if(typeof THREE==="undefined"||typeof THREE.STLLoader==="undefined"||typeof THREE.OrbitControls==="undefined")return;
+  if(typeof THREE==="undefined"||!THREE.STLLoader||!THREE.OrbitControls)return;
+  /* drop views whose card was re-rendered (e.g. after switching language) */
+  STL.views=STL.views.filter(v=>{
+    if(v.el.isConnected)return true;
+    stlVisIO.unobserve(v.el); stlNearIO.unobserve(v.el);
+    if(v.ro)v.ro.disconnect();
+    const qi=STL.queue.indexOf(v); if(qi>=0)STL.queue.splice(qi,1);
+    return false;
+  });
   document.querySelectorAll(".stl-viewer[data-stl]").forEach(el=>{
-    if(el.dataset.observed)return;
-    if(!el.clientWidth||!el.clientHeight)return; /* panel still hidden — retry next time this tab opens */
-    el.dataset.observed="1";
-    const v={el,src:el.dataset.stl,ready:false,loading:false,visible:true};
-    stlViewers.push(v);
-    stlVisObserver.observe(el);
-    stlEnqueue(v);
+    if(el._stl)return;
+    if(!el.clientWidth||!el.clientHeight)return; /* panel hidden — retried next time the tab opens */
+    const v={el,src:el.dataset.stl,ready:false,loading:false,visible:false,near:false};
+    el._stl=v; STL.views.push(v);
+    stlVisIO.observe(el); stlNearIO.observe(el);
   });
 }
-addEventListener("resize",()=>{
-  stlViewers.forEach(v=>{
-    if(!v.ready)return;
-    const w=v.el.clientWidth,h=v.el.clientHeight; if(!w||!h)return;
-    v.renderer.setSize(w,h); v.camera.aspect=w/h; v.camera.updateProjectionMatrix();
-  });
-},{passive:true});
+
+/* ---------- phone navigation: slim sticky bar + bottom sheet ---------- */
+const minibar=document.getElementById("minibar"), sheet=document.getElementById("sheet");
+function updateMinibar(){
+  const i=TABS.findIndex(x=>x[0]===cur);
+  document.getElementById("mbCur").innerHTML=`${TABS[i][1]}<span class="mb-name">${T(UI[cur])}</span><span class="mb-count">${i+1}/${TABS.length}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>`;
+  document.getElementById("mbPrev").disabled=i<=0;
+  document.getElementById("mbNext").disabled=i>=TABS.length-1;
+}
+function openSheet(){ sheet.classList.add("open"); document.body.style.overflow="hidden"; }
+function closeSheet(){ if(!sheet.classList.contains("open"))return; sheet.classList.remove("open"); document.body.style.overflow=""; }
+document.getElementById("mbCur").addEventListener("click",openSheet);
+document.getElementById("mbPrev").addEventListener("click",()=>{ const i=TABS.findIndex(x=>x[0]===cur); if(i>0) go(TABS[i-1][0]); });
+document.getElementById("mbNext").addEventListener("click",()=>{ const i=TABS.findIndex(x=>x[0]===cur); if(i<TABS.length-1) go(TABS[i+1][0]); });
+sheet.addEventListener("click",e=>{ if(e.target===sheet) closeSheet(); });
+addEventListener("keydown",e=>{ if(e.key==="Escape") closeSheet(); });
+new IntersectionObserver(([en])=>{
+  const away=!en.isIntersecting && en.boundingClientRect.top<0;
+  minibar.classList.toggle("show",away); minibar.setAttribute("aria-hidden",away?"false":"true");
+}).observe(document.querySelector(".tabs"));
 
 /* floating back-to-top button */
 const toTopBtn=document.getElementById("toTop");
