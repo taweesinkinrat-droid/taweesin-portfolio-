@@ -74,12 +74,10 @@ a:hover{color:var(--cyan-2)}
    HERO / PROFILE HEADER
    ===================================================================== */
 .hero{position:relative}
-.cover{position:relative;overflow:hidden;height:clamp(150px,30vw,340px);border-radius:0 0 var(--r) var(--r);background:#0f2a33}
+.cover{position:relative;overflow:hidden;height:clamp(150px,30vw,300px);border-radius:0 0 var(--r) var(--r);background:#0f2a33}
 .cover-img{position:absolute;inset:-46px 0 0 0;background:url("images/photos/wrg-team.jpg") center 30%/cover;will-change:transform}
 .cover::after{content:"";position:absolute;inset:0;
-  background:linear-gradient(180deg,rgba(17,20,23,0) 0%,rgba(17,20,23,.12) 40%,rgba(17,20,23,.7) 76%,var(--bg) 100%)}
-/* wide screens: the photo's left/right edges dissolve into the page instead of ending in hard lines */
-@media (min-width:1200px){.cover{border-radius:0;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 7%,#000 93%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 7%,#000 93%,transparent 100%)}}
+  background:linear-gradient(180deg,rgba(17,20,23,0) 0%,rgba(17,20,23,.25) 50%,rgba(17,20,23,.96) 100%)}
 @media (max-width:575.98px){.hero .container-xl{padding-left:0;padding-right:0}.cover{border-radius:0}}
 
 /* phones: avatar left + actions right on one line, text below (compact, like a pro profile page)
@@ -99,19 +97,21 @@ a:hover{color:var(--cyan-2)}
    that overlaps the bottom of the cover photo */
 @media (min-width:768px){
   .hero .container-xl{padding-left:calc(var(--bs-gutter-x)*.5);padding-right:calc(var(--bs-gutter-x)*.5)}
-  .head{grid-template-columns:auto minmax(0,1fr);grid-template-areas:"av who" "av act";align-items:center;column-gap:26px;row-gap:14px;
-    margin:-78px 24px 0;padding:0}
-  .who h1,.who .sub{text-shadow:0 2px 16px rgba(0,0,0,.75)}
-  .avatar{width:124px;height:124px;border:4px solid var(--bg)}
+  .head{grid-template-columns:auto minmax(0,1fr);grid-template-areas:"av who" "av act";align-items:center;column-gap:24px;row-gap:14px;
+    margin:-58px 22px 0;padding:22px 24px;border-radius:22px;
+    background:linear-gradient(180deg,rgba(32,38,46,.86),rgba(24,29,35,.92));
+    -webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3);
+    border:1px solid rgba(255,255,255,.07);box-shadow:0 30px 60px -30px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.05)}
+  .avatar{width:124px;height:124px;border:4px solid #1c2229}
   .who{margin-top:0;align-self:end}
   .head-actions{justify-self:start;align-self:start;padding:0}
 }
 @media (min-width:992px){
-  .head{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"av who act";column-gap:30px;margin-top:-92px}
+  .head{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"av who act";column-gap:28px;padding:24px 30px;margin-top:-64px}
   .who{align-self:center}
   .head-actions{justify-self:end;align-self:center}
 }
-@media (min-width:1200px){.head{margin:-104px 40px 0}.avatar{width:144px;height:144px}}
+@media (min-width:1200px){.head{margin:-72px 28px 0;padding:26px 34px}.avatar{width:140px;height:140px}}
 
 .badge-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
 .pill{display:inline-flex;align-items:center;gap:6px;font-size:.8rem;line-height:1.3;padding:4px 11px;border-radius:999px;
@@ -384,7 +384,7 @@ footer .container-xl{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center
 .to-top:active{transform:scale(.9)}
 
 /* motion polish — GSAP drives it when available; plain CSS transitions are the fallback */
-.intro .cover-img,.intro .head,.intro .tabs .tab,.intro .tab-ink{opacity:0}
+.intro .cover-img,.intro .head,.intro .tabs .tab{opacity:0}
 .reveal{transition:opacity .5s cubic-bezier(.22,.61,.36,1),transform .5s cubic-bezier(.22,.61,.36,1)}
 .reveal:not(.in){opacity:0;transform:translateY(16px)}
 .gs .reveal{transition:none}
@@ -395,46 +395,10 @@ footer .container-xl{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center
   .mini-grid img,.photo-grid img{transition:filter .2s ease}
   .mini-grid img:hover,.photo-grid img:hover{filter:brightness(1.12)}
 }
-/* ---------- extras ---------- */
-/* reading-progress line along the very top */
-.progress-top{position:fixed;top:0;left:0;right:0;height:3px;z-index:60;pointer-events:none;transform-origin:0 50%;transform:scaleX(0);
-  background:linear-gradient(90deg,var(--cyan),var(--cyan-2),#a5f3fc);box-shadow:0 0 10px rgba(34,211,238,.7)}
-/* back-to-top button doubles as a progress ring */
-.to-top{background:conic-gradient(#e9fdff var(--p,0deg),rgba(6,34,43,.35) 0)}
-.to-top::before{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--cyan)}
-.to-top svg{position:relative}
-/* sliding highlight behind the active section tab (desktop) */
-.tab-ink{display:none}
-@media (min-width:992px){
-  .has-ink{position:relative}
-  .has-ink .tab{position:relative;z-index:1}
-  .has-ink .tab.on{background:transparent;border-color:transparent;box-shadow:none}
-  .has-ink .tab-ink{display:block;position:absolute;left:0;top:0;width:0;height:0;border-radius:999px;z-index:0;pointer-events:none;
-    background:var(--cyan);box-shadow:0 4px 18px -4px rgba(34,211,238,.75)}
-}
-/* soft cyan spotlight that follows the mouse across cards (desktop) */
-@media (hover:hover) and (pointer:fine){
-  .card::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s;
-    background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),rgba(34,211,238,.075),transparent 45%)}
-  .card:hover::after{opacity:1}
-  #p-design .card::after{display:none}
-  .hl-item{position:relative;overflow:hidden}
-  .hl-item::before{content:"";position:absolute;top:0;bottom:0;width:60%;left:-70%;pointer-events:none;
-    background:linear-gradient(100deg,transparent,rgba(255,255,255,.06),transparent);transform:skewX(-18deg);transition:left .6s ease}
-  .hl-item:hover::before{left:120%}
-  .gs .cert:hover{transform:none}
-}
-/* shimmer placeholder while photos load */
-@keyframes shimmer{to{background-position:-200% 0}}
-.pics img:not(.ok),.cert img:not(.ok),.photo-grid img:not(.ok),.mini-grid img:not(.ok),.media-top img:not(.ok){
-  background:linear-gradient(100deg,var(--card-2) 30%,#2c353f 50%,var(--card-2) 70%) 0 0/200% 100%;animation:shimmer 1.3s linear infinite}
-/* the photo glows a little on hover */
-@media (hover:hover){.avatar{transition:transform .35s cubic-bezier(.22,.61,.36,1)}.avatar:hover{transform:scale(1.04) rotate(-2deg)}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<div class="progress-top" id="progTop" aria-hidden="true"></div>
 
 <header class="hero">
   <div class="container-xl">
@@ -879,7 +843,7 @@ function renderCerts(){
   const col={champ:"var(--gold)",award:"var(--silver)",join:"var(--cyan)",course:"#a78bfa"};
   document.getElementById("p-certs").innerHTML=`<div class="filters" data-anchor="certs-top">${keys.map(x=>`<button class="filter ${x===certF?"on":""}" data-f="${x}">${T(UI[x])}<span class="n">${x==="all"?CERTS.length:CERTS.filter(c=>c.type===x).length}</span></button>`).join("")}</div>
    <div class="row row-cols-2 row-cols-md-3 row-cols-xl-4 g-2 g-md-3">${list.map((c,i)=>`<div class="col"><div class="cert" data-g="${k}" data-i="${i}"><img src="${c.src}" loading="lazy" alt=""><div class="t"><b><span class="dot" style="background:${col[c.type]}"></span>${T(c.title)}</b><span>${L==="th"?"พ.ศ. ":""}${c.year}</span></div></div></div>`).join("")}</div>`;
-  observeReveals(); markLoaded();
+  observeReveals();
 }
 
 /* tabs */
@@ -926,7 +890,7 @@ function go(t,anchor){
     const bar=document.querySelector(".tabs .wrap"), btn=bar&&bar.querySelector(`.tab[data-t="${t}"]`);
     if(bar&&btn&&bar.scrollWidth>bar.clientWidth+2) bar.scrollTo({left:btn.offsetLeft-bar.clientWidth/2+btn.offsetWidth/2,behavior:"smooth"});
   }
-  updateMinibar(); closeSheet(); moveInk(); markLoaded();
+  updateMinibar(); closeSheet();
   initStlViewers();
   setSwipeHintText();
   stopActiveVideo();
@@ -1141,3 +1105,192 @@ function stlBuild(v,geo){
   controls.autoRotate=true; controls.autoRotateSpeed=1.6;
   controls.enablePan=false; controls.enableZoom=false;
   controls.enabled=!STL_TOUCH;            /* touch: first tap activates, so the page still scrolls */
+  cv.style.touchAction=STL_TOUCH?"pan-y":"none"; /* OrbitControls forces 'none'; restore scrolling */
+  controls.addEventListener("start",()=>{ controls.autoRotate=false; v.el.classList.add("used"); });
+  controls.addEventListener("change",()=>{ v.dirty=true; stlKick(); });
+  controls.target.set(0,0,0); controls.update();
+  cv.addEventListener("contextrestored",()=>{ v.dirty=true; stlKick(); }); /* 2D canvas reset → just redraw */
+  Object.assign(v,{scene,camera,controls,cv,ctx,mesh,ready:true,dirty:true,active:false});
+  if(STL_TOUCH) v.el.addEventListener("click",()=>stlActivate(v));
+  else{
+    v.el.addEventListener("click",()=>{ controls.enableZoom=true; });
+    v.el.addEventListener("mouseleave",()=>{ controls.enableZoom=false; });
+  }
+  v.ro=new ResizeObserver(()=>stlSize(v)); v.ro.observe(v.el);
+  stlClearMsg(v); stlSize(v); stlHint(v); stlKick();
+}
+function stlGeometry(src,onProgress){
+  if(STL.geo.has(src))return STL.geo.get(src);
+  const p=new Promise((res,rej)=>{
+    new THREE.STLLoader().load(src,geo=>{
+      geo.computeVertexNormals(); geo.center(); geo.computeBoundingSphere(); res(geo);
+    },onProgress,rej);
+  });
+  STL.geo.set(src,p);
+  p.catch(()=>STL.geo.delete(src)); /* allow retry */
+  return p;
+}
+function stlLoad(v){
+  v.loading=true; STL.loading++;
+  stlMsg(v,stlText("load"));
+  const done=()=>{ v.loading=false; STL.loading--; stlPump(); };
+  stlGeometry(v.src,xhr=>{
+    if(xhr.lengthComputable&&xhr.total) stlMsg(v,stlText("load")+" "+Math.round(xhr.loaded/xhr.total*100)+"%");
+  }).then(geo=>{ done(); stlBuild(v,geo); },
+          ()=>{ done(); stlMsg(v,stlText("fail"),()=>stlEnqueue(v)); });
+}
+function stlPump(){ while(STL.loading<STL_PAR&&STL.queue.length) stlLoad(STL.queue.shift()); }
+function stlEnqueue(v){
+  if(v.ready||v.loading||STL.queue.includes(v))return;
+  stlMsg(v,stlText("wait")); STL.queue.push(v); stlPump();
+}
+function stlKick(){ if(!STL.raf) STL.raf=requestAnimationFrame(stlTick); }
+function stlTick(){
+  STL.raf=0;
+  if(document.hidden)return;
+  let keep=false;
+  for(const v of STL.views){
+    if(!v.ready||!v.visible)continue;
+    v.controls.update();                       /* fires 'change' while rotating/damping → dirty */
+    if(v.controls.autoRotate) keep=true;
+    if(!v.dirty||STL.lost)continue;
+    const r=stlRenderer(); if(!r)break;
+    /* the loss event arrives a moment after the GPU actually drops the context; never copy a
+       frame rendered on a dead context, or the card would be wiped to blank */
+    if(r.getContext().isContextLost()){ STL.lost=true; break; }
+    const w=v.cv.width,h=v.cv.height;
+    if(STL.w!==w||STL.h!==h){ r.setSize(w,h,false); STL.w=w; STL.h=h; }
+    r.render(v.scene,v.camera);
+    v.ctx.clearRect(0,0,w,h);
+    v.ctx.drawImage(r.domElement,0,0);
+    v.dirty=false;
+    keep=true;                                  /* keep ticking so damping can settle */
+  }
+  if(keep) stlKick();
+}
+document.addEventListener("visibilitychange",()=>{
+  if(!document.hidden){ STL.views.forEach(v=>v.dirty=true); stlKick(); }
+});
+/* tap anywhere outside an active model → give scrolling back to the page */
+document.addEventListener("pointerdown",e=>{
+  STL.views.forEach(v=>{ if(v.active&&!v.el.contains(e.target)) stlDeactivate(v); });
+},{passive:true});
+/* on screen (with a small margin) → render;  off screen → stop rendering + release touch */
+const stlVisIO=new IntersectionObserver(es=>es.forEach(en=>{
+  const v=en.target._stl; if(!v)return;
+  v.visible=en.isIntersecting;
+  if(v.visible){ v.dirty=true; stlKick(); } else stlDeactivate(v);
+}),{rootMargin:"150px"});
+/* near the screen → download; far away → free GPU memory (CPU copy kept, re-uploaded on return) */
+const stlNearIO=new IntersectionObserver(es=>es.forEach(en=>{
+  const v=en.target._stl; if(!v)return;
+  v.near=en.isIntersecting;
+  if(v.near){ if(!v.ready) stlEnqueue(v); }
+  else if(v.ready&&v.mesh) v.mesh.geometry.dispose();
+}),{rootMargin:"900px"});
+
+function initStlViewers(){
+  if(typeof THREE==="undefined"||!THREE.STLLoader||!THREE.OrbitControls)return;
+  /* drop views whose card was re-rendered (e.g. after switching language) */
+  STL.views=STL.views.filter(v=>{
+    if(v.el.isConnected)return true;
+    stlVisIO.unobserve(v.el); stlNearIO.unobserve(v.el);
+    if(v.ro)v.ro.disconnect();
+    const qi=STL.queue.indexOf(v); if(qi>=0)STL.queue.splice(qi,1);
+    return false;
+  });
+  document.querySelectorAll(".stl-viewer[data-stl]").forEach(el=>{
+    if(el._stl)return;
+    if(!el.clientWidth||!el.clientHeight)return; /* panel hidden — retried next time the tab opens */
+    const v={el,src:el.dataset.stl,ready:false,loading:false,visible:false,near:false};
+    el._stl=v; STL.views.push(v);
+    stlVisIO.observe(el); stlNearIO.observe(el);
+  });
+}
+
+/* ---------- motion (GSAP) ---------- */
+const GS=!!window.gsap && !matchMedia("(prefers-reduced-motion: reduce)").matches;
+if(GS) document.documentElement.classList.add("gs");
+function heroIntro(){
+  const root=document.documentElement;
+  if(!GS){ root.classList.remove("intro"); return; }
+  const parts=".cover-img,.head,.avatar,.who>*,.head-actions,.tabs .wrap .tab";
+  const tl=gsap.timeline({defaults:{ease:"power3.out"},onComplete(){ gsap.set(parts,{clearProps:"opacity,transform"}); }});
+  tl.fromTo(".cover-img",{opacity:0,scale:1.07},{opacity:1,scale:1,duration:1})
+    .fromTo(".head",{opacity:0,y:24},{opacity:1,y:0,duration:.6},"-=.8")
+    .fromTo(".avatar",{opacity:0,scale:.82},{opacity:1,scale:1,duration:.6,ease:"back.out(1.7)"},"-=.45")
+    .fromTo(".who>*",{opacity:0,y:12},{opacity:1,y:0,duration:.45,stagger:.06},"-=.45")
+    .fromTo(".head-actions",{opacity:0,y:10},{opacity:1,y:0,duration:.4},"-=.35")
+    .fromTo(".tabs .wrap .tab",{opacity:0,y:8},{opacity:1,y:0,duration:.35,stagger:.025},"-=.3");
+  root.classList.remove("intro");
+}
+/* gentle cover parallax — desktop mouse/trackpad only, uses the separate `translate`
+   property so it never fights the intro animation's transform */
+if(GS && matchMedia("(hover:hover) and (pointer:fine)").matches){
+  const ci=document.querySelector(".cover-img"); let ticking=false;
+  addEventListener("scroll",()=>{ if(ticking)return; ticking=true;
+    requestAnimationFrame(()=>{ ticking=false; ci.style.translate=`0 ${Math.min(scrollY,400)*.11}px`; }); },{passive:true});
+}
+
+/* ---------- phone navigation: slim sticky bar + bottom sheet ---------- */
+const minibar=document.getElementById("minibar"), sheet=document.getElementById("sheet");
+function updateMinibar(){
+  const i=TABS.findIndex(x=>x[0]===cur);
+  document.getElementById("mbCur").innerHTML=`${TABS[i][1]}<span class="mb-name">${T(UI[cur])}</span><span class="mb-count">${i+1}/${TABS.length}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>`;
+  document.getElementById("mbPrev").disabled=i<=0;
+  document.getElementById("mbNext").disabled=i>=TABS.length-1;
+}
+const sheetBS=()=>window.bootstrap&&bootstrap.Offcanvas?bootstrap.Offcanvas.getOrCreateInstance(sheet):null;
+function openSheet(){ const o=sheetBS(); if(o) o.show(); else sheet.classList.add("show"); }
+function closeSheet(){ if(window.bootstrap&&bootstrap.Offcanvas){ const o=bootstrap.Offcanvas.getInstance(sheet); if(o) o.hide(); } else sheet.classList.remove("show"); }
+document.getElementById("mbCur").addEventListener("click",openSheet);
+document.getElementById("mbPrev").addEventListener("click",()=>{ const i=TABS.findIndex(x=>x[0]===cur); if(i>0) go(TABS[i-1][0]); });
+document.getElementById("mbNext").addEventListener("click",()=>{ const i=TABS.findIndex(x=>x[0]===cur); if(i<TABS.length-1) go(TABS[i+1][0]); });
+if(!window.bootstrap) addEventListener("keydown",e=>{ if(e.key==="Escape") closeSheet(); });
+new IntersectionObserver(([en])=>{
+  const away=!en.isIntersecting && en.boundingClientRect.top<0;
+  minibar.classList.toggle("show",away); minibar.setAttribute("aria-hidden",away?"false":"true");
+  document.body.classList.toggle("mb-on",away && matchMedia("(max-width:700px)").matches);
+}).observe(document.querySelector(".tabs"));
+
+new IntersectionObserver(([en])=>document.body.classList.toggle("scrolled",!en.isIntersecting&&en.boundingClientRect.top<0))
+  .observe(document.querySelector(".head"));
+document.getElementById("brand").addEventListener("click",e=>{e.preventDefault();scrollTo({top:0,behavior:"smooth"});});
+
+/* floating back-to-top button */
+const toTopBtn=document.getElementById("toTop");
+toTopBtn.addEventListener("click",()=>scrollTo({top:0,behavior:"smooth"}));
+document.addEventListener("scroll",()=>{
+  toTopBtn.classList.toggle("show", window.scrollY>HEADER_H*1.5);
+},{passive:true});
+
+/* scroll-reveal: fade+rise once, the first time a card/photo/cert enters view */
+const revealObserver=new IntersectionObserver(entries=>{
+  const els=entries.filter(en=>en.isIntersecting).map(en=>en.target);
+  if(!els.length)return;
+  els.forEach(el=>revealObserver.unobserve(el));
+  if(!GS){ els.forEach(el=>el.classList.add("in")); return; }
+  /* everything that enters together cascades in reading order */
+  const pos=el=>{const r=el.getBoundingClientRect();return r.top*10000+r.left};
+  els.sort((a,b)=>pos(a)-pos(b));
+  gsap.fromTo(els,{opacity:0,y:18},{opacity:1,y:0,duration:.7,ease:"power3.out",stagger:.07,overwrite:true,
+    onComplete(){ els.forEach(el=>{ el.classList.add("in"); gsap.set(el,{clearProps:"opacity,transform"}); }); }});
+},{threshold:.12});
+function observeReveals(){
+  document.querySelectorAll(
+    "#p-home .card, #p-robots .card, #p-projects .card, #p-certs .cert, #p-videos .card, #p-about .card"
+    /* #p-design .card is deliberately excluded — animating transform/opacity on the card
+       that wraps a live WebGL canvas is what caused the 3D models to flicker */
+  ).forEach(el=>{
+    if(el.classList.contains("reveal"))return;
+    el.classList.add("reveal");
+    revealObserver.observe(el);
+  });
+}
+
+render();go(cur);
+observeReveals();
+heroIntro();
+</script>
+</body>
+</html>
