@@ -606,6 +606,32 @@ footer .priv{flex-basis:100%;font-size:.72rem;color:#6f7d88;opacity:.85}
 .card.reveal.in li:nth-child(4) .hl-ico{animation-delay:.24s}.card.reveal.in li:nth-child(5) .hl-ico{animation-delay:.32s}
 @keyframes icoIn{from{transform:scale(.3) rotate(-25deg);opacity:0}to{transform:none;opacity:1}}
 
+/* ---------- private statistics page (5 taps on the profile photo) ---------- */
+#stats{position:fixed;inset:0;z-index:5000;background:#0b0e11;color:#dfe7ec;overflow:auto;font-size:14px;line-height:1.5;-webkit-overflow-scrolling:touch}
+#stats .st-in{max-width:1100px;margin:0 auto;padding:16px 14px 60px}
+#stats .st-top{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-bottom:14px;position:sticky;top:0;background:#0b0e11;padding:8px 0;z-index:2}
+#stats h2{font-size:1.15rem;margin:0}#stats h3{font-size:.95rem;margin:0 0 8px;color:#22d3ee}
+#stats button,#stats select,#stats input{font:inherit;color:#e8edf1;background:#1a1f25;border:1px solid #2c353e;border-radius:8px;padding:6px 10px}
+#stats button:hover{border-color:#22d3ee}
+#stats .st-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:14px}
+#stats .st-card{background:#14191e;border:1px solid #232b33;border-radius:10px;padding:10px 12px}
+#stats .st-card b{display:block;font-size:1.5rem;color:#fff}#stats .st-card span{color:#8796a1;font-size:.8rem}
+#stats .st-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px;margin-bottom:14px}
+#stats .st-box{background:#14191e;border:1px solid #232b33;border-radius:10px;padding:12px;min-width:0}
+#stats table{width:100%;border-collapse:collapse;font-size:.85rem}#stats td,#stats th{padding:4px 6px;border-bottom:1px solid #1f262d;text-align:left;vertical-align:top}
+#stats th{color:#8796a1;font-weight:600}#stats td.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+#stats .st-bar{height:6px;border-radius:3px;background:#22d3ee;opacity:.75}
+#stats .st-days{display:flex;align-items:flex-end;gap:4px;height:110px;padding-top:6px}
+#stats .st-days div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:3px;font-size:.66rem;color:#8796a1;min-width:0}
+#stats .st-days i{display:block;width:100%;background:#22d3ee;border-radius:3px 3px 0 0;min-height:2px}
+#stats .st-visit{background:#14191e;border:1px solid #232b33;border-radius:10px;padding:10px 12px;margin-bottom:8px}
+#stats .st-visit summary{cursor:pointer;list-style:none}#stats .st-visit summary::-webkit-details-marker{display:none}
+#stats .st-meta{color:#8796a1;font-size:.8rem}#stats .st-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+#stats .st-tags span{font-size:.75rem;padding:1px 7px;border-radius:999px;background:#1e2a31;border:1px solid #29404a;color:#a5f3fc}
+#stats .st-tags span.g{background:#2b2513;border-color:#5a4a1c;color:#f5c451}
+#stats .st-login{max-width:340px;margin:18vh auto 0;display:grid;gap:10px;text-align:center}
+#stats .st-err{color:#fca5a5;font-size:.85rem;min-height:1.2em}
+
 /* ---------- opening splash (first visit per session) ---------- */
 #splash{display:none}
 .splash #splash{display:block;position:fixed;inset:0;z-index:3000;cursor:pointer}
@@ -1859,25 +1885,52 @@ if(TRACK){
   const later=()=>(window.requestIdleCallback||(f=>setTimeout(f,1500)))(loadStats,{timeout:4000});
   if(document.readyState==="complete") later(); else addEventListener("load",later);
 }
+/* ---------- your own statistics store (Google Sheet via Apps Script) ---------- */
+const STATS_URL="https://script.google.com/macros/s/AKfycbyESqBx_1RyG7m2Vdh7DsG4RW7CAorqgzL9Bx_jlFOOQbBiet9GkZRd04Ejp7pcIknb/exec"; /* ← Apps Script "Web app" URL (https://script.google.com/macros/s/…/exec) */
+let OWNER=false;
+const DEV=(/iPad|Tablet|PlayBook|Silk/i.test(UA)||(/Android/i.test(UA)&&!/Mobile/i.test(UA))||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1))?"tablet":/Mobi|iPhone|iPod|Android/i.test(UA)?"mobile":"desktop";
+const OS=(/iPhone|iPad|iPod/.test(UA)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1))?"iOS":/Android/.test(UA)?"Android":/Windows/.test(UA)?"Windows":/Mac OS X|Macintosh/.test(UA)?"macOS":/CrOS/.test(UA)?"ChromeOS":/Linux/.test(UA)?"Linux":"other";
+const BR=OPEN_IN!=="browser"?OPEN_IN+" (in-app)":/Edg\//.test(UA)?"Edge":/SamsungBrowser/.test(UA)?"Samsung Internet":/OPR\/|Opera/.test(UA)?"Opera":/Firefox|FxiOS/.test(UA)?"Firefox":/CriOS|Chrome\//.test(UA)?"Chrome":/Safari/.test(UA)?"Safari":"other";
+const VID=(()=>{ try{ let v=localStorage.getItem("tk_vid"); if(!v){ v=Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4); localStorage.setItem("tk_vid",v); } return v; }catch(e){ return "anon"; } })();
+const SID=Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-3);
+let stQ=[], stTimer=0;
+function stPush(name,p){
+  if(!TRACK||OWNER||!STATS_URL)return;
+  const item=p.item_name||p.page_title||p.target||p.network||p.filter||p.to||"";
+  const val=p.seconds!=null?p.seconds:p.percent_scrolled!=null?p.percent_scrolled:(p.nav_via||p.link_location||p.image||p.direction||"");
+  stQ.push({t:Date.now(),n:name,tab:p.tab||cur,item:String(item),val:String(val)});
+  if(stQ.length>=25) stFlush(); else if(!stTimer) stTimer=setTimeout(stFlush,4000);
+}
+function stFlush(beacon){
+  clearTimeout(stTimer); stTimer=0; if(!stQ.length||!STATS_URL)return;
+  const body=JSON.stringify({v:VID,s:SID,src:ENTRY,app:OPEN_IN,dev:DEV,os:OS,br:BR,scr:screen.width+"x"+screen.height,lang:navigator.language||"",
+    ref:REF_HOST,med:QS.get("utm_medium")||"",tz:(Intl.DateTimeFormat().resolvedOptions().timeZone||""),ev:stQ.splice(0,60)});
+  try{ if(beacon&&navigator.sendBeacon) navigator.sendBeacon(STATS_URL,new Blob([body],{type:"text/plain;charset=utf-8"}));
+       else fetch(STATS_URL,{method:"POST",mode:"no-cors",keepalive:true,headers:{"Content-Type":"text/plain;charset=utf-8"},body}); }catch(e){}
+  if(stQ.length) stFlush(beacon);
+}
 function track(name,params){
-  if(!TRACK)return;
+  if(!TRACK||OWNER)return;
   const p=Object.assign({open_in:OPEN_IN,entry_source:ENTRY,lang:L,tab:cur},params||{});
   for(const k in p) if(typeof p[k]==="string"&&p[k].length>100) p[k]=p[k].slice(0,99)+"…";
+  stPush(name,p);
   try{ gtag("event",name,p);
        clarity("event",name); }catch(e){}
 }
 /* one "page view" per section, plus how long it was looked at and how far it was scrolled */
 let NAV_VIA="first_load", tabCur=null, tabT0=0, tabActive=0, depthSent=new Set();
-function tabSeconds(){ return Math.round((tabActive+(document.hidden?0:performance.now()-tabT0))/1000); }
-function sendTabTime(){ if(!tabCur)return; const sec=tabSeconds(); if(sec>0) track("section_time",{tab:tabCur,seconds:sec}); }
+let tabPaused=false;
+function tabSeconds(){ return Math.round((tabActive+(tabPaused?0:performance.now()-tabT0))/1000); }
+function sendTabTime(){ if(!tabCur)return; const sec=tabSeconds(); tabActive=0; tabT0=performance.now(); if(sec>0) track("section_time",{tab:tabCur,seconds:sec}); }
 function trackTab(t){
-  if(!TRACK||t===tabCur)return;
+  if(!TRACK||OWNER||t===tabCur)return;
   sendTabTime(); tabCur=t; tabT0=performance.now(); tabActive=0; depthSent=new Set();
   const title="Portfolio · "+UI[t].en;
   gtag("event","page_view",{page_title:title,page_location:location.href,page_path:location.pathname+"#"+t,nav_via:NAV_VIA,open_in:OPEN_IN,entry_source:ENTRY,lang:L});
+  stPush("page_view",{page_title:UI[t].en,nav_via:NAV_VIA,tab:t});
   clarity("set","section",t); NAV_VIA="menu";
 }
-document.addEventListener("visibilitychange",()=>{ if(document.hidden){ tabActive+=performance.now()-tabT0; sendTabTime(); tabActive=0; } tabT0=performance.now(); });
+document.addEventListener("visibilitychange",()=>{ if(document.hidden){ sendTabTime(); tabPaused=true; } else { tabPaused=false; tabT0=performance.now(); } });
 let depthTick=false;
 document.addEventListener("scroll",()=>{ if(!TRACK||depthTick)return; depthTick=true; requestAnimationFrame(()=>{ depthTick=false;
   const panel=document.getElementById("p-"+cur); if(!panel)return; const r=panel.getBoundingClientRect(); if(r.height<10)return;
@@ -1922,7 +1975,117 @@ document.addEventListener("click",e=>{
 document.addEventListener("play",e=>{ if(e.target.tagName==="VIDEO") track("video_play",{item_name:itemOf(e.target)}); },true);
 const modelTouched=new WeakSet();
 document.addEventListener("pointerdown",e=>{ const v=e.target.closest(".stl-viewer"); if(v&&!modelTouched.has(v)){ modelTouched.add(v); track("model_interact",{item_name:itemOf(v)}); } },{passive:true});
-addEventListener("pagehide",sendTabTime);
+addEventListener("pagehide",()=>{ sendTabTime(); stFlush(true); });
+document.addEventListener("visibilitychange",()=>{ if(document.hidden) stFlush(true); });
+
+/* ---------- private statistics page: tap the profile photo 5 times ---------- */
+let stTaps=[];
+document.addEventListener("click",e=>{ if(!e.target.closest(".avatar"))return; const now=Date.now();
+  stTaps=stTaps.filter(x=>now-x<3000); stTaps.push(now); if(stTaps.length>=5){ stTaps=[]; openStats(); } });
+const esc=x=>String(x==null?"":x).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c]);
+const EV_TH={page_view:"เปิดหมวด",section_time:"อยู่ในหมวด",scroll_depth:"เลื่อนถึง",item_view:"ดู",timeline_click:"กดไทม์ไลน์",highlight_click:"กดผลงานเด่น",
+  contents_click:"กดสารบัญ",image_open:"เปิดรูป",video_play:"เล่นวิดีโอ",model_interact:"หมุนโมเดล 3D",resume_download:"ดาวน์โหลด Resume",contact_email:"กดติดต่อ/อีเมล",
+  social_click:"กดโซเชียล",report_open:"เปิดรายงาน PDF",cert_filter:"กรองเกียรติบัตร",language_switch:"เปลี่ยนภาษา",splash_complete:"ดูหน้าเปิดตัวจนจบ",splash_skip:"ข้ามหน้าเปิดตัว",
+  timeline_arrow:"กดลูกศรไทม์ไลน์",section_picker_open:"เปิดเมนูหมวด",brand_click:"กดชื่อแถบบน"};
+const SRC_TH={resume_pdf:"Resume PDF",qr_resume:"QR ใน Resume",qr_print:"QR แฟ้มกระดาษ",line:"ลิงก์ LINE",facebook:"ลิงก์ Facebook",instagram:"ลิงก์ IG",email:"อีเมล",application:"ใบสมัคร",direct:"ลิงก์ตรง/พิมพ์เอง",
+  line_app:"แอป LINE",facebook_app:"แอป Facebook",instagram_app:"แอป IG",messenger_app:"แอป Messenger"};
+const fmtDur=s=>{ s=Math.round(s); return s<60?s+" วิ":Math.floor(s/60)+" นาที "+(s%60)+" วิ"; };
+const fmtTime=t=>new Date(t).toLocaleString("th-TH",{day:"numeric",month:"short",year:"2-digit",hour:"2-digit",minute:"2-digit"});
+let stData=null;
+function openStats(){
+  let box=document.getElementById("stats");
+  if(!box){ box=document.createElement("div"); box.id="stats"; document.body.appendChild(box); }
+  document.body.style.overflow="hidden";
+  if(!STATS_URL){ box.innerHTML=`<div class="st-in"><div class="st-login"><h2>สถิติ</h2><p>ยังไม่ได้ตั้งค่าระบบเก็บสถิติ (STATS_URL)</p><button id="stClose">ปิด</button></div></div>`;
+    box.querySelector("#stClose").onclick=closeStats; return; }
+  let key=""; try{ key=localStorage.getItem("tk_dash_key")||""; }catch(e){}
+  key?loadStats(key):loginForm("");
+}
+function closeStats(){ const b=document.getElementById("stats"); if(b) b.remove(); document.body.style.overflow=""; }
+function loginForm(err){
+  const box=document.getElementById("stats");
+  box.innerHTML=`<div class="st-in"><form class="st-login" id="stLogin"><h2>🔒 หน้าสถิติ</h2><input type="password" id="stKey" placeholder="รหัสผ่าน" autocomplete="current-password">
+    <div class="st-err">${esc(err)}</div><button type="submit">เข้าสู่ระบบ</button><button type="button" id="stClose">ปิด</button></form></div>`;
+  box.querySelector("#stClose").onclick=closeStats;
+  box.querySelector("#stLogin").onsubmit=e=>{ e.preventDefault(); loadStats(box.querySelector("#stKey").value.trim()); };
+  setTimeout(()=>{ const k=box.querySelector("#stKey"); if(k) k.focus(); },50);
+}
+async function loadStats(key){
+  const box=document.getElementById("stats"); if(!box)return;
+  box.innerHTML=`<div class="st-in"><div class="st-login"><p>กำลังโหลดสถิติ…</p></div></div>`;
+  try{
+    const r=await fetch(STATS_URL+(STATS_URL.includes("?")?"&":"?")+"key="+encodeURIComponent(key),{cache:"no-store"}); const d=await r.json();
+    if(d.error){ try{ localStorage.removeItem("tk_dash_key"); }catch(e){} return loginForm("รหัสผ่านไม่ถูกต้อง"); }
+    try{ localStorage.setItem("tk_dash_key",key); localStorage.setItem("tk_notrack","1"); }catch(e){}
+    OWNER=true; stQ.length=0; /* this device is yours: stop counting it from now on */
+    const H=d.head; stData=d.rows.map(r=>Object.fromEntries(H.map((h,i)=>[h,r[i]]))).map(o=>(o.time=+o.time,o)).sort((a,b)=>a.time-b.time);
+    renderStats("30");
+  }catch(e){ box.innerHTML=`<div class="st-in"><div class="st-login"><p>โหลดสถิติไม่สำเร็จ — ตรวจอินเทอร์เน็ตแล้วลองใหม่</p><button id="stRetry">ลองใหม่</button><button id="stClose">ปิด</button></div></div>`;
+    box.querySelector("#stRetry").onclick=()=>loadStats(key); box.querySelector("#stClose").onclick=closeStats; }
+}
+function renderStats(range){
+  const box=document.getElementById("stats"); if(!box||!stData)return;
+  const now=Date.now(), day=864e5, since=range==="all"?0:range==="1"?new Date().setHours(0,0,0,0):now-(+range)*day;
+  const rows=stData.filter(r=>r.time>=since);
+  /* group into visits */
+  const visits=new Map();
+  for(const r of rows){ let v=visits.get(r.visit); if(!v){ v={id:r.visit,visitor:r.visitor,first:r.time,last:r.time,src:r.source,app:r.app,dev:r.device,os:r.os,br:r.browser,scr:r.screen,lang:r.language,ref:r.referrer,tz:r.timezone,ev:[],secs:{},items:new Set(),acts:[]}; visits.set(r.visit,v); }
+    v.last=Math.max(v.last,r.time); v.ev.push(r);
+    if(r.event==="section_time") v.secs[r.section]=(v.secs[r.section]||0)+(+r.value||0);
+    if(r.event==="item_view") v.items.add(r.item);
+    if(!["page_view","section_time","scroll_depth","item_view"].includes(r.event)) v.acts.push(r); }
+  const V=[...visits.values()].map(v=>{ v.dur=Math.max((v.last-v.first)/1000,Object.values(v.secs).reduce((a,b)=>a+b,0)); return v; }).sort((a,b)=>b.first-a.first);
+  const visitorVisits={}; for(const v of [...V].reverse()){ visitorVisits[v.visitor]=(visitorVisits[v.visitor]||0)+1; v.nth=visitorVisits[v.visitor]; }
+  const count=(arr,key)=>{ const m={}; for(const x of arr){ const k=key(x); if(k!=null&&k!=="") m[k]=(m[k]||0)+1; } return Object.entries(m).sort((a,b)=>b[1]-a[1]); };
+  const tbl=(title,entries,label=x=>x,unit="")=>{ const max=Math.max(1,...entries.map(e=>e[1]));
+    return `<div class="st-box"><h3>${title}</h3>${entries.length?`<table>${entries.slice(0,15).map(([k,n])=>`<tr><td>${esc(label(k))}<div class="st-bar" style="width:${Math.round(n/max*100)}%"></div></td><td class="n">${n}${unit}</td></tr>`).join("")}</table>`:`<p class="st-meta">ยังไม่มีข้อมูล</p>`}</div>`; };
+  const secTotal={}, secViews={};
+  for(const r of rows){ if(r.event==="section_time") secTotal[r.section]=(secTotal[r.section]||0)+(+r.value||0); if(r.event==="page_view") secViews[r.section]=(secViews[r.section]||0)+1; }
+  const uniq=new Set(V.map(v=>v.visitor)).size, avg=V.length?V.reduce((a,v)=>a+v.dur,0)/V.length:0;
+  const nEv=n=>rows.filter(r=>r.event===n).length;
+  const days=[]; for(let i=13;i>=0;i--){ const d0=new Date(); d0.setHours(0,0,0,0); const a=d0.getTime()-i*day; days.push([a,V.filter(v=>v.first>=a&&v.first<a+day).length]); }
+  const dmax=Math.max(1,...days.map(d=>d[1]));
+  const secName=k=>UI[k]?T(UI[k]):k;
+  box.innerHTML=`<div class="st-in">
+   <div class="st-top"><h2>📊 สถิติผู้เข้าชม</h2><div style="display:flex;gap:6px;flex-wrap:wrap">
+     <select id="stRange"><option value="1">วันนี้</option><option value="7">7 วัน</option><option value="30">30 วัน</option><option value="all">ทั้งหมด</option></select>
+     <button id="stRefresh">รีเฟรช</button><button id="stCsv">CSV</button><button id="stOut">ออกจากระบบ</button><button id="stClose">✕ ปิด</button></div></div>
+   <div class="st-cards">
+     <div class="st-card"><b>${V.length}</b><span>ครั้งที่เข้าชม</span></div>
+     <div class="st-card"><b>${uniq}</b><span>คน (เครื่อง) ไม่ซ้ำ</span></div>
+     <div class="st-card"><b>${fmtDur(avg)}</b><span>เวลาเฉลี่ยต่อครั้ง</span></div>
+     <div class="st-card"><b>${nEv("resume_download")}</b><span>ดาวน์โหลด Resume</span></div>
+     <div class="st-card"><b>${nEv("contact_email")}</b><span>กดติดต่อ</span></div>
+     <div class="st-card"><b>${V.filter(v=>v.nth>1).length}</b><span>ครั้งที่เป็นคนกลับมาดูซ้ำ</span></div>
+   </div>
+   <div class="st-box" style="margin-bottom:14px"><h3>จำนวนการเข้าชม 14 วันล่าสุด</h3><div class="st-days">${days.map(([a,n])=>`<div><span>${n||""}</span><i style="height:${Math.round(n/dmax*80)}px"></i>${new Date(a).getDate()}</div>`).join("")}</div></div>
+   <div class="st-grid">
+     ${tbl("มาจากไหน",count(V,v=>v.src),k=>SRC_TH[k]||k)}
+     ${tbl("เปิดในแอป / เบราว์เซอร์",count(V,v=>v.br))}
+     ${tbl("อุปกรณ์",count(V,v=>v.dev+" · "+v.os))}
+     ${tbl("ขนาดจอ",count(V,v=>v.scr))}
+     <div class="st-box"><h3>หมวดที่ดู</h3><table><tr><th>หมวด</th><th class="n">เปิด</th><th class="n">เวลารวม</th></tr>${Object.keys(Object.assign({},secViews,secTotal)).sort((a,b)=>(secTotal[b]||0)-(secTotal[a]||0)).map(k=>`<tr><td>${esc(secName(k))}</td><td class="n">${secViews[k]||0}</td><td class="n">${fmtDur(secTotal[k]||0)}</td></tr>`).join("")||`<tr><td class="st-meta">ยังไม่มีข้อมูล</td></tr>`}</table></div>
+     ${tbl("โพสต์ / โครงงาน / โมเดลที่ถูกดู",count(rows.filter(r=>r.event==="item_view"),r=>r.item))}
+     ${tbl("การกด",count(rows.filter(r=>EV_TH[r.event]&&!["page_view","section_time","scroll_depth","item_view"].includes(r.event)),r=>r.event),k=>EV_TH[k]||k)}
+     ${tbl("รูป / เกียรติบัตรที่ถูกเปิด",count(rows.filter(r=>r.event==="image_open"),r=>r.item))}
+   </div>
+   <h3>การเข้าชมแต่ละครั้ง (ล่าสุดก่อน) — แตะเพื่อดูทุกการกระทำ</h3>
+   ${V.slice(0,200).map(v=>`<details class="st-visit"><summary><b>${fmtTime(v.first)}</b> · ${esc(SRC_TH[v.src]||v.src)} · ${esc(v.dev)} ${esc(v.os)} · ${esc(v.br)} · <b>${fmtDur(v.dur)}</b>${v.nth>1?` · <span style="color:#f5c451">กลับมาครั้งที่ ${v.nth}</span>`:""}
+       <div class="st-tags">${Object.entries(v.secs).sort((a,b)=>b[1]-a[1]).map(([k,n])=>`<span>${esc(secName(k))} ${fmtDur(n)}</span>`).join("")}
+       ${v.acts.filter(a=>["resume_download","contact_email","social_click","report_open"].includes(a.event)).map(a=>`<span class="g">${esc(EV_TH[a.event])}</span>`).join("")}
+       ${v.items.size?`<span>ดู ${v.items.size} รายการ</span>`:""}</div></summary>
+       <p class="st-meta" style="margin:8px 0 4px">จอ ${esc(v.scr)} · ภาษาเครื่อง ${esc(v.lang)} · เขตเวลา ${esc(v.tz)}${v.ref?` · มาจากเว็บ ${esc(v.ref)}`:""} · รหัสผู้ชม ${esc(v.visitor)}</p>
+       <table>${v.ev.map(r=>`<tr><td class="n">+${fmtDur((r.time-v.first)/1000)}</td><td>${esc(EV_TH[r.event]||r.event)}</td><td>${esc(r.event==="page_view"?secName(r.section):r.item)}</td><td class="st-meta">${esc(r.event==="section_time"?fmtDur(+r.value||0):r.event==="scroll_depth"?r.value+"%":r.value)}</td></tr>`).join("")}</table></details>`).join("")||`<p class="st-meta">ยังไม่มีการเข้าชมในช่วงนี้</p>`}
+  </div>`;
+  const q=id=>box.querySelector(id);
+  q("#stRange").value=range; q("#stRange").onchange=e=>renderStats(e.target.value);
+  q("#stRefresh").onclick=()=>{ let k=""; try{ k=localStorage.getItem("tk_dash_key")||""; }catch(e){} loadStats(k); };
+  q("#stOut").onclick=()=>{ try{ localStorage.removeItem("tk_dash_key"); }catch(e){} loginForm(""); };
+  q("#stClose").onclick=closeStats;
+  q("#stCsv").onclick=()=>{ const H=Object.keys(stData[0]||{}); const csv="\ufeff"+[H.join(",")].concat(stData.map(r=>H.map(h=>`"${String(h==="time"?new Date(r[h]).toISOString():r[h]).replace(/"/g,'""')}"`).join(","))).join("\n");
+    const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"})); a.download="portfolio-stats.csv"; a.click(); };
+}
+addEventListener("keydown",e=>{ if(e.key==="Escape"&&document.getElementById("stats")) closeStats(); });
 
 render();go(cur);
 observeReveals();
