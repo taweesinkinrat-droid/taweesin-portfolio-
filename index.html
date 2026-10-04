@@ -141,12 +141,12 @@ a:hover{color:var(--cyan-2)}
 .tabs .wrap{flex:1;min-width:0;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
 .tabs .wrap::-webkit-scrollbar{display:none}
 @media (min-width:1200px){
-  .brand{display:flex;align-items:center;gap:10px;flex:0 0 auto;max-width:0;opacity:0;overflow:hidden;white-space:nowrap;padding:4px;margin-left:-4px;
-    font-weight:700;font-size:.95rem;color:var(--text);transition:max-width .35s ease,opacity .25s ease}
+  /* the name in the bar always keeps its space and only fades in, so the tabs never shift position */
+  .brand{display:flex;align-items:center;gap:10px;flex:0 0 auto;opacity:0;visibility:hidden;white-space:nowrap;padding:4px;margin-left:-4px;
+    font-weight:700;font-size:.95rem;color:var(--text);transition:opacity .3s ease,visibility .3s ease,transform .3s ease;transform:translateX(-6px)}
   .brand i{width:34px;height:34px;flex:0 0 34px;border-radius:50%;background:#223 center/cover;border:2px solid var(--cyan);box-shadow:0 0 12px -3px rgba(34,211,238,.7)}
-  body.scrolled .brand{max-width:260px;opacity:1}
-  .tabs .wrap{justify-content:flex-end}
-  body:not(.scrolled) .tabs .wrap{justify-content:center}
+  body.scrolled .brand{opacity:1;visibility:visible;transform:none}
+  .tabs .wrap{justify-content:center}
 }
 .tab{white-space:nowrap;padding:9px 15px;font-weight:600;font-size:.92rem;color:var(--muted);
   display:flex;align-items:center;gap:8px;border-radius:999px;border:1px solid transparent;
@@ -415,7 +415,8 @@ footer .container-xl{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center
   .has-ink .tab{position:relative;z-index:1}
   .has-ink .tab.on{background:transparent;border-color:transparent;box-shadow:none}
   .has-ink .tab-ink{display:block;position:absolute;left:0;top:0;width:0;height:0;border-radius:999px;z-index:0;pointer-events:none;
-    background:var(--cyan);box-shadow:0 4px 18px -4px rgba(34,211,238,.75)}
+    background:var(--cyan);box-shadow:0 4px 18px -4px rgba(34,211,238,.75);
+    transition:transform .45s cubic-bezier(.22,.61,.36,1),width .45s cubic-bezier(.22,.61,.36,1),height .3s ease,opacity .3s}
 }
 /* soft cyan spotlight that follows the mouse across cards (desktop) */
 @media (hover:hover) and (pointer:fine){
@@ -442,8 +443,17 @@ footer .container-xl{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center
 .j-track{overflow-x:auto;scrollbar-width:none;margin:0 calc(var(--pad)*-1);padding:10px var(--pad) 4px;scroll-snap-type:x mandatory;scroll-padding:0 var(--pad);
   -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 var(--pad),#000 calc(100% - 34px),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 var(--pad),#000 calc(100% - 34px),transparent 100%)}
 .j-track::-webkit-scrollbar{display:none}
+.j-wrap{position:relative}
+.j-arrow{position:absolute;top:2px;z-index:3;width:38px;height:38px;border-radius:50%;display:none;place-items:center;
+  background:rgba(26,31,37,.92);border:1px solid var(--line-2);color:var(--text);box-shadow:0 6px 16px -6px #000;transition:opacity .2s,border-color .2s,color .2s}
+.j-arrow svg{width:18px;height:18px}
+.j-arrow:hover{border-color:var(--cyan);color:var(--cyan)}
+.j-arrow.l{left:-6px}.j-arrow.r{right:-6px}
+@media (hover:hover) and (pointer:fine){.j-wrap.can-l .j-arrow.l,.j-wrap.can-r .j-arrow.r{display:grid}
+  .j-wrap.scrollable .j-track{cursor:grab}.j-wrap.dragging .j-track{cursor:grabbing;scroll-snap-type:none}
+  .j-wrap.dragging .j-item button{pointer-events:none}}
 .j-track.at-end{-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 var(--pad));mask-image:linear-gradient(90deg,transparent 0,#000 var(--pad))}
-.j-list{list-style:none;position:relative;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(150px,1fr);gap:8px;width:max-content;min-width:100%}
+.j-list{--n:7;--col:150px;list-style:none;position:relative;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:8px;width:100%;min-width:calc(var(--n) * var(--col) + (var(--n) - 1) * 8px)}
 .j-line{position:absolute;left:calc(100% / 14);right:calc(100% / 14);top:22px;height:3px;border-radius:3px;background:var(--line)}
 .j-line i{position:absolute;inset:0;border-radius:inherit;transform-origin:0 50%;transform:scaleX(0);transition:transform 1.4s cubic-bezier(.22,.61,.36,1) .15s;
   background:linear-gradient(90deg,var(--cyan) 0%,var(--cyan-2) 55%,var(--gold) 100%);box-shadow:0 0 12px rgba(34,211,238,.45)}
@@ -470,7 +480,28 @@ footer .container-xl{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center
   .k-gold button:hover .j-dot,.k-royal button:hover .j-dot{box-shadow:0 8px 22px -6px rgba(245,196,81,.55)}
   .j-item button:hover b{color:#fff}
 }
-@media (max-width:575.98px){.j-list{grid-auto-columns:146px}}
+@media (max-width:575.98px){.j-list{--col:146px}}
+
+/* ---------- Robotics page contents (wide screens) ---------- */
+.toc{position:sticky;top:92px;padding:6px 0 6px 2px;border-left:2px solid var(--line)}
+.toc-h{font-size:.74rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 8px 14px}
+.toc button{position:relative;display:block;width:100%;text-align:left;padding:8px 10px 8px 14px;border-radius:0 10px 10px 0;transition:background .2s,color .2s}
+.toc button::before{content:"";position:absolute;left:-2px;top:8px;bottom:8px;width:2px;border-radius:2px;background:transparent;transition:background .2s,box-shadow .2s}
+.toc button:hover{background:rgba(255,255,255,.03)}
+.toc button.on{background:var(--cyan-soft)}
+.toc button.on::before{background:var(--cyan);box-shadow:0 0 10px rgba(34,211,238,.8)}
+.toc-d{display:block;font-size:.72rem;font-weight:700;color:var(--muted)}
+.toc-t{display:block;font-size:.88rem;font-weight:600;line-height:1.35;color:#c9d4db}
+.toc button.on .toc-d{color:var(--cyan)}.toc button.on .toc-t{color:#fff}
+
+/* ---------- Photos: masonry — every photo keeps its own shape, nothing cropped ---------- */
+.masonry{columns:2;column-gap:8px}
+@media (min-width:768px){.masonry{columns:3;column-gap:12px}}
+@media (min-width:1200px){.masonry{columns:4}}
+.masonry img{width:100%;margin:0 0 8px;border-radius:12px;break-inside:avoid;cursor:zoom-in;display:block}
+@media (min-width:768px){.masonry img{margin-bottom:12px}}
+.masonry img:not(.ok){min-height:160px;background:linear-gradient(100deg,var(--card-2) 30%,#2c353f 50%,var(--card-2) 70%) 0 0/200% 100%;animation:shimmer 1.3s linear infinite}
+@media (hover:hover){.masonry img{transition:filter .2s,transform .3s cubic-bezier(.22,.61,.36,1)}.masonry img:hover{filter:brightness(1.1);transform:translateY(-2px)}}
 
 /* ---------- résumé (print / PDF only) ---------- */
 .btn-resume svg{width:17px;height:17px}
@@ -516,6 +547,8 @@ footer .container-xl{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center
 .rs-about{font-size:8.4pt;color:#2b3846}
 .rs-foot{margin-top:3mm;padding-top:2.5mm;border-top:1px solid #d6e3e8;font-size:7.6pt;color:#55636f;display:flex;justify-content:space-between;gap:4mm}
 .rs-foot b{color:#0a8aa1}
+.rs a{color:inherit;text-decoration:none}
+.rs-foot a b{text-decoration:underline;text-underline-offset:2px}
 
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -874,9 +907,11 @@ function journey(){
   const ico={gold:"🏆",royal:"👑",medal:"🥇",intl:"🌏",next:FLAG["🇯🇵"]};
   return `<div class="card journey" data-anchor="journey"><div class="card-head"><h2>${L==="th"?"เส้นทางการแข่งขัน":"Competition journey"}</h2>
     <span class="j-range">${L==="th"?"2567 → <b>2569</b>":"2024 → <b>2026</b>"}</span></div>
-    <div class="j-track"><ol class="j-list"><li class="j-line" aria-hidden="true"><i></i></li>${JOURNEY.map((j,i)=>`<li class="j-item k-${j.kind}" style="--i:${i}">
+    <div class="j-wrap"><button class="j-arrow l" aria-label="Previous"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <button class="j-arrow r" aria-label="Next"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
+    <div class="j-track"><ol class="j-list" style="--n:${JOURNEY.length}"><li class="j-line" aria-hidden="true"><i></i></li>${JOURNEY.map((j,i)=>`<li class="j-item k-${j.kind}" style="--i:${i}">
       <button data-go="robots" data-anchor="${j.go}"><span class="j-dot">${ico[j.kind]}</span><span class="j-date">${T(j.date)}</span><b>${T(j.t)}</b><small>${T(j.s)}</small>
-      ${j.kind==="next"?`<span class="j-next-tag">${L==="th"?"ถัดไป":"Next"}</span>`:""}</button></li>`).join("")}</ol></div></div>`;
+      ${j.kind==="next"?`<span class="j-next-tag">${L==="th"?"ถัดไป":"Next"}</span>`:""}</button></li>`).join("")}</ol></div></div></div>`;
 }
 
 /* one-page résumé: built from the same data, shown only when printing / saved as PDF */
@@ -889,7 +924,7 @@ function renderResume(){
   document.getElementById("resume").innerHTML=`<div class="rs">
    <header class="rs-head"><div class="rs-photo" style="background-image:url(${P}profile.jpg)"></div>
     <div class="rs-id"><h1>${T(ME.name)}</h1><p class="rs-tag">${T(ME.tagline)}</p>
-     <div class="rs-contact"><span>Taweesinkinrat@gmail.com</span><span>${th?"จ.อุทัยธานี":"Uthai Thani, Thailand"}</span><span>taweesinkinrat-droid.github.io/taweesin-portfolio-</span></div>
+     <div class="rs-contact"><span><a href="mailto:Taweesinkinrat@gmail.com">Taweesinkinrat@gmail.com</a></span><span>${th?"จ.อุทัยธานี":"Uthai Thani, Thailand"}</span><span><a href="https://taweesinkinrat-droid.github.io/taweesin-portfolio-/#home">taweesinkinrat-droid.github.io/taweesin-portfolio-</a></span></div>
      <div class="rs-badges">${ME.badges.map((b,i)=>`<span class="${i===2?"c":""}">${i===2?FLAG["🇯🇵"]:""}${clean(T(b))}</span>`).join("")}</div></div>
     <div class="rs-qr">${QR_SVG}<small>${th?"สแกนดูผลงาน วิดีโอ<br>และโมเดล 3D ทั้งหมด":"Scan for videos, 3D<br>models &amp; full portfolio"}</small></div>
    </header>
@@ -912,7 +947,7 @@ function renderResume(){
      <section class="rs-proj"><h2>${T(UI.projects)}</h2><ul>${proj}</ul></section>
     </main>
    </div>
-   <footer class="rs-foot"><span>${T(ME.name)} · ${th?"พอร์ตโฟลิโอ":"Portfolio"} 2026</span><span>${th?"ดูผลงานฉบับเต็ม":"Full portfolio"}: <b>taweesinkinrat-droid.github.io/taweesin-portfolio-</b></span></footer>
+   <footer class="rs-foot"><span>${T(ME.name)} · ${th?"พอร์ตโฟลิโอ":"Portfolio"} 2026</span><span>${th?"ดูผลงานฉบับเต็ม":"Full portfolio"}: <a href="https://taweesinkinrat-droid.github.io/taweesin-portfolio-/#home"><b>taweesinkinrat-droid.github.io/taweesin-portfolio-/#home</b></a></span></footer>
   </div>`;
 }
 /* Resume button: download the ready-made PDF (docs/resume-th.pdf / resume-en.pdf); if it isn't there,
@@ -968,7 +1003,7 @@ function render(){
   </div>`;
 
   /* robots */
-  document.getElementById("p-robots").innerHTML=`<div class="row justify-content-center"><div class="col-lg-9 col-xl-8 stack">${ROBOTS.map((r,i)=>post(r).replace("<article",`<article data-anchor="robot-${i}"`)).join("")}</div></div>`;
+  document.getElementById("p-robots").innerHTML=`<div class="row justify-content-center g-4"><div class="col-xl-3 d-none d-xl-block"><nav class="toc"><p class="toc-h">${L==="th"?"รายการแข่งขัน":"Competitions"}</p>${ROBOTS.map((r,i)=>{const j=JOURNEY.find(x=>x.go==="robot-"+i&&x.kind!=="next");return `<button data-go="robots" data-anchor="robot-${i}"><span class="toc-d">${T(r.date)}</span><span class="toc-t">${j?T(j.t):T(r.title)}</span></button>`}).join("")}</nav></div><div class="col-lg-9 col-xl-8 stack">${ROBOTS.map((r,i)=>post(r).replace("<article",`<article data-anchor="robot-${i}"`)).join("")}</div></div>`;
 
   /* projects */
   document.getElementById("p-projects").innerHTML=`<div class="row g-3 g-lg-4">${PROJECTS.map(p=>{
@@ -1009,7 +1044,7 @@ function render(){
 
   /* photos */
   const gk=grp(PHOTOS.map(s=>({src:s})));
-  document.getElementById("p-photos").innerHTML=`<div class="photo-grid row row-cols-3 row-cols-md-4 row-cols-xl-5 g-1 g-md-2">${PHOTOS.map((s,i)=>`<div class="col">${img(s,gk,i)}</div>`).join("")}</div>`;
+  document.getElementById("p-photos").innerHTML=`<div class="masonry">${PHOTOS.map((s,i)=>img(s,gk,i)).join("")}</div>`;
 
   /* videos */
   activeVideoEl=null;
@@ -1085,7 +1120,7 @@ function go(t,anchor){
     const bar=document.querySelector(".tabs .wrap"), btn=bar&&bar.querySelector(`.tab[data-t="${t}"]`);
     if(bar&&btn&&bar.scrollWidth>bar.clientWidth+2) bar.scrollTo({left:btn.offsetLeft-bar.clientWidth/2+btn.offsetWidth/2,behavior:"smooth"});
   }
-  updateMinibar(); closeSheet(); moveInk(); markLoaded();
+  updateMinibar(); closeSheet(); moveInk(); markLoaded(); journeyState(); if(t==="robots") initToc();
   initStlViewers();
   setSwipeHintText();
   stopActiveVideo();
@@ -1099,7 +1134,7 @@ function anchorTop(el){
   return Math.max(0,el.getBoundingClientRect().top+scrollY-offset);
 }
 function scrollToAnchor(t,anchor){
-  const el=document.querySelector(`#p-${t} [data-anchor="${anchor}"]`);
+  const el=document.querySelector(`#p-${t} [data-anchor="${anchor}"]:not([data-go])`); /* the target itself, never a link that points to it */
   if(!el)return false;
   if(el.classList.contains("reveal")){ revealObserver.unobserve(el); if(window.gsap) gsap.killTweensOf(el);
     el.style.transition="none"; el.classList.add("in"); if(window.gsap) gsap.set(el,{clearProps:"opacity,transform"});
@@ -1430,17 +1465,25 @@ if(GS && matchMedia("(hover:hover) and (pointer:fine)").matches){
 }
 
 /* sliding highlight behind the active tab (desktop) */
+/* The highlight is positioned with a CSS transition rather than a fixed-target tween: whenever the
+   tabs shift (e.g. the name slides into the bar after a jump), the next call simply retargets the
+   running transition, so the highlight always ends exactly on the active tab. */
 function moveInk(){
   const bar=document.getElementById("tabs"); if(!GS){ bar.classList.remove("has-ink"); return; }
   bar.classList.add("has-ink");
   let ink=bar.querySelector(".tab-ink"), fresh=false;
-  if(!ink){ ink=document.createElement("span"); ink.className="tab-ink"; bar.prepend(ink); fresh=true; }
+  if(!ink){ ink=document.createElement("span"); ink.className="tab-ink"; bar.prepend(ink); fresh=true;
+    if(inkRO) bar.querySelectorAll(".tab").forEach(t=>inkRO.observe(t)); }
   const on=bar.querySelector(".tab.on"); if(!on||on.offsetWidth===0) return;
-  const to={x:on.offsetLeft,y:on.offsetTop,width:on.offsetWidth,height:on.offsetHeight};
-  if(fresh||moveInk.instant) gsap.set(ink,to); else gsap.to(ink,{...to,duration:.45,ease:"power3.out",overwrite:true});
+  if(fresh) ink.style.transition="none";
+  ink.style.transform=`translate(${on.offsetLeft}px,${on.offsetTop}px)`;
+  ink.style.width=on.offsetWidth+"px"; ink.style.height=on.offsetHeight+"px";
+  if(fresh){ void ink.offsetWidth; ink.style.transition=""; }
 }
-if(window.ResizeObserver){ const ro=new ResizeObserver(()=>{ moveInk.instant=true; moveInk(); moveInk.instant=false; });
-  ro.observe(document.getElementById("tabs")); }
+let inkRO=null;
+if(window.ResizeObserver){ inkRO=new ResizeObserver(()=>moveInk()); inkRO.observe(document.getElementById("tabs")); }
+if(document.fonts){ document.fonts.ready.then(()=>moveInk()); document.fonts.addEventListener&&document.fonts.addEventListener("loadingdone",()=>moveInk()); }
+addEventListener("load",()=>moveInk());
 
 /* desktop pointer niceties: card spotlight, certificate tilt, magnetic contact button */
 if(GS && matchMedia("(hover:hover) and (pointer:fine)").matches){
@@ -1464,6 +1507,37 @@ const markImg=e=>{ if(e.target.tagName==="IMG") e.target.classList.add("ok"); };
 document.addEventListener("load",markImg,true); document.addEventListener("error",markImg,true);
 function markLoaded(){ document.querySelectorAll("img:not(.ok)").forEach(i=>{ if(i.complete) i.classList.add("ok"); }); }
 
+/* timeline: arrows + drag-to-scroll with a mouse whenever all stops don't fit on screen */
+function journeyState(){
+  document.querySelectorAll(".j-wrap").forEach(w=>{ const t=w.querySelector(".j-track"); if(!t)return;
+    const max=t.scrollWidth-t.clientWidth;
+    w.classList.toggle("scrollable",max>2); w.classList.toggle("can-l",t.scrollLeft>4); w.classList.toggle("can-r",t.scrollLeft<max-4);
+    t.classList.toggle("at-end",t.scrollLeft>=max-4); });
+}
+addEventListener("resize",journeyState);
+document.addEventListener("scroll",e=>{ if(e.target.classList&&e.target.classList.contains("j-track")) journeyState(); },true);
+document.addEventListener("click",e=>{ const a=e.target.closest(".j-arrow"); if(!a)return;
+  const t=a.parentElement.querySelector(".j-track"); t.scrollBy({left:(a.classList.contains("l")?-1:1)*t.clientWidth*.7,behavior:"smooth"}); });
+(function(){ let drag=null;
+  document.addEventListener("pointerdown",e=>{ if(e.pointerType!=="mouse"||e.button!==0)return; const t=e.target.closest(".j-track");
+    if(!t||t.scrollWidth<=t.clientWidth+2)return; drag={t,x:e.clientX,left:t.scrollLeft,moved:false}; });
+  document.addEventListener("pointermove",e=>{ if(!drag)return; const dx=e.clientX-drag.x;
+    if(!drag.moved&&Math.abs(dx)>5){ drag.moved=true; drag.t.closest(".j-wrap").classList.add("dragging"); }
+    if(drag.moved) drag.t.scrollLeft=drag.left-dx; });
+  document.addEventListener("pointerup",()=>{ if(!drag)return; const w=drag.t.closest(".j-wrap");
+    setTimeout(()=>w.classList.remove("dragging"),0); drag=null; });
+})();
+
+/* Robotics page (wide screens): sticky contents list that follows your reading position */
+let tocIO=null;
+function initToc(){
+  if(tocIO) tocIO.disconnect();
+  const links=[...document.querySelectorAll(".toc [data-anchor]")]; if(!links.length)return;
+  tocIO=new IntersectionObserver(es=>es.forEach(en=>{ if(!en.isIntersecting)return;
+    const a=en.target.dataset.anchor; links.forEach(l=>l.classList.toggle("on",l.dataset.anchor===a)); }),{rootMargin:"-35% 0px -60% 0px"});
+  document.querySelectorAll("#p-robots article[data-anchor]").forEach(el=>tocIO.observe(el));
+}
+
 /* ---------- phone navigation: slim sticky bar + bottom sheet ---------- */
 const minibar=document.getElementById("minibar"), sheet=document.getElementById("sheet");
 function updateMinibar(){
@@ -1486,7 +1560,7 @@ new IntersectionObserver(([en])=>{
 }).observe(document.querySelector(".tabs"));
 
 new IntersectionObserver(([en])=>{ document.body.classList.toggle("scrolled",!en.isIntersecting&&en.boundingClientRect.top<0);
-  moveInk.instant=true; moveInk(); moveInk.instant=false; })
+  moveInk(); requestAnimationFrame(moveInk); })
   .observe(document.querySelector(".head"));
 document.getElementById("brand").addEventListener("click",e=>{e.preventDefault();scrollTo({top:0,behavior:"smooth"});});
 
