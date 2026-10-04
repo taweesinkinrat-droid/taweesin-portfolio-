@@ -219,7 +219,10 @@ a:hover{color:var(--cyan-2)}
 main{padding-top:20px;padding-bottom:56px}
 @media (min-width:768px){main{padding-top:28px}}
 .panel{display:none}
-.panel.on{display:block;animation:fade .3s ease}
+.panel.on{display:block;animation:panelIn .42s cubic-bezier(.22,.61,.36,1)}
+@keyframes panelIn{from{opacity:0;transform:translateX(var(--dx,0px))}to{opacity:1;transform:none}}
+#p-design.on{animation:fade .3s ease} /* 3D page: opacity only (never transform a live 3D canvas) */
+main{overflow-x:clip} /* the sideways slide never makes the page scroll horizontally (clip keeps sticky elements working) */
 @keyframes fade{from{opacity:0}to{opacity:1}}
 .stack>*+*{margin-top:16px}
 @media (min-width:992px){.stack>*+*{margin-top:20px}}
@@ -560,6 +563,38 @@ footer .container-xl{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center
 .rs-foot b{color:#0a8aa1}
 .rs a{color:inherit;text-decoration:none}
 .rs-foot a b{text-decoration:underline;text-underline-offset:2px}
+
+/* ---------- profile photo: slowly orbiting cyan→gold ring ---------- */
+.avatar{position:relative}
+.avatar::before{content:"";position:absolute;inset:-9px;border-radius:50%;pointer-events:none;
+  background:conic-gradient(from 0deg,rgba(34,211,238,0) 0deg,var(--cyan) 70deg,rgba(34,211,238,0) 140deg,rgba(245,196,81,0) 180deg,var(--gold) 250deg,rgba(245,196,81,0) 320deg);
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 2.5px));mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 2.5px));
+  animation:orbit 7s linear infinite;opacity:.95}
+@keyframes orbit{to{transform:rotate(360deg)}}
+
+/* ---------- name: a soft light sweeps across it now and then ---------- */
+.who h1.shine{background:linear-gradient(100deg,#fff 0%,#fff 42%,#a5f3fc 50%,#fff 58%,#fff 100%) 0 0/260% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(0 2px 12px rgba(0,0,0,.65));
+  animation:nameShine 7s ease-in-out 1s infinite}
+@keyframes nameShine{0%,60%{background-position:100% 0}85%,100%{background-position:0 0}}
+
+/* ---------- timeline: a spark keeps travelling along the line ---------- */
+.j-line::after{content:"";position:absolute;top:50%;left:0;width:46px;height:7px;margin:-3.5px 0 0 -23px;border-radius:7px;opacity:0;pointer-events:none;
+  background:radial-gradient(closest-side,#fff,rgba(165,243,252,.8) 40%,rgba(34,211,238,0));filter:blur(.5px)}
+.journey.in .j-line::after{animation:jSpark 3.6s cubic-bezier(.45,0,.55,1) 1.7s infinite}
+@keyframes jSpark{0%{left:0;opacity:0}8%{opacity:1}88%{opacity:1}100%{left:100%;opacity:0}}
+.journey.in .j-item .j-dot{animation:jPop .5s cubic-bezier(.34,1.56,.64,1) backwards;animation-delay:calc(var(--i) * 90ms + .15s)}
+@keyframes jPop{from{transform:scale(.4)}to{transform:scale(1)}}
+
+/* ---------- photos in cards settle in (slight zoom-out) as the card appears ---------- */
+.card.reveal:not(.in) .pics img,.card.reveal:not(.in) .media-top img{transform:scale(1.1)}
+@media (hover:none){.pics img,.media-top img{transition:transform .9s cubic-bezier(.22,.61,.36,1)}}
+
+/* ---------- highlight icons bob in one after another ---------- */
+.card.reveal.in .hl-ico{animation:icoIn .6s cubic-bezier(.34,1.56,.64,1) both}
+.card.reveal.in li:nth-child(2) .hl-ico{animation-delay:.08s}.card.reveal.in li:nth-child(3) .hl-ico{animation-delay:.16s}
+.card.reveal.in li:nth-child(4) .hl-ico{animation-delay:.24s}.card.reveal.in li:nth-child(5) .hl-ico{animation-delay:.32s}
+@keyframes icoIn{from{transform:scale(.3) rotate(-25deg);opacity:0}to{transform:none;opacity:1}}
 
 /* ---------- opening splash (first visit per session) ---------- */
 #splash{display:none}
@@ -1171,7 +1206,9 @@ function go(t,anchor){
   const prevScroll=window.scrollY; /* capture BEFORE the panel swap */
   if(cur) scrollMemory[cur]=prevScroll;
   const firstVisit=!visitedTabs.has(t);
+  const dir=Math.sign(TABS.findIndex(x=>x[0]===t)-TABS.findIndex(x=>x[0]===cur));
   cur=t;
+  { const tp=document.getElementById("p-"+t); if(tp) tp.style.setProperty("--dx",(dir*28)+"px"); }
   document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b.dataset.t===t));
   moveInk(); /* start the highlight's slide before the (heavier) page swap below */
   document.querySelectorAll(".panel").forEach(p=>{
@@ -1538,7 +1575,7 @@ function heroIntro(){
     .fromTo(".avatar",{opacity:0,scale:.82},{opacity:1,scale:1,duration:.6,ease:"back.out(1.7)"},"-=.45")
     .fromTo(".who>*",{opacity:0,y:12},{opacity:1,y:0,duration:.45,stagger:.06},"-=.45")
     .fromTo(chars,{opacity:0,y:"0.6em",rotationX:-70,transformOrigin:"50% 100%"},{opacity:1,y:0,rotationX:0,duration:.55,stagger:.035,ease:"back.out(1.6)",
-      onComplete(){ const h=document.getElementById("name"); h.textContent=h.textContent; }},"<")
+      onComplete(){ const h=document.getElementById("name"); h.textContent=h.textContent; if(!REDUCED_FX) h.classList.add("shine"); }},"<")
     .fromTo(".badge-row .pill",{opacity:0,scale:.85},{opacity:1,scale:1,duration:.4,stagger:.08,ease:"back.out(2)",clearProps:"opacity,transform"},"-=.35")
     .fromTo(".head-actions",{opacity:0,y:10},{opacity:1,y:0,duration:.4},"-=.35")
     .fromTo(".tabs .wrap .tab",{opacity:0,y:8},{opacity:1,y:0,duration:.35,stagger:.02},"-=.55")
@@ -1552,12 +1589,13 @@ function runSplash(){
   try{ sessionStorage.setItem("tkSplash","1"); }catch(e){}
   let done=false; const t0=performance.now();
   const exit=()=>{ if(done)return; done=true;
-    if(!GS){ root.classList.remove("splash"); heroIntro(); return; }
+    if(!GS){ root.classList.remove("splash"); heroIntro(); kickReveals(); return; }
     const tl=gsap.timeline({onComplete(){ root.classList.remove("splash"); gsap.set(sp,{clearProps:"all"}); }});
     tl.to(".sp-core",{opacity:0,scale:1.08,duration:.4,ease:"power2.in"})
       .to(".sp-half.t",{yPercent:-100,duration:.8,ease:"power4.inOut"},"-=.1")
       .to(".sp-half.b",{yPercent:100,duration:.8,ease:"power4.inOut"},"<")
-      .add(()=>heroIntro(),"-=.55");
+      .add(()=>heroIntro(),"-=.55")
+      .add(()=>{ root.classList.remove("splash"); kickReveals(); },"-=.25"); /* cards start while the hero animates in */
   };
   sp.addEventListener("click",exit); addEventListener("keydown",exit,{once:true});
   setTimeout(exit,Math.max(0,1900-(performance.now()-t0)));
@@ -1724,6 +1762,7 @@ addEventListener("resize",()=>requestAnimationFrame(updateProgress));
 
 /* scroll-reveal: fade+rise once, the first time a card/photo/cert enters view */
 const revealObserver=new IntersectionObserver(entries=>{
+  if(document.documentElement.classList.contains("splash")) return; /* hidden behind the splash: wait, replay once it opens */
   const els=entries.filter(en=>en.isIntersecting).map(en=>en.target);
   if(!els.length)return;
   els.forEach(el=>revealObserver.unobserve(el));
@@ -1734,6 +1773,9 @@ const revealObserver=new IntersectionObserver(entries=>{
   gsap.fromTo(els,{opacity:0,y:18},{opacity:1,y:0,duration:.7,ease:"power3.out",stagger:.07,overwrite:true,
     onComplete(){ els.forEach(el=>{ el.classList.add("in"); gsap.set(el,{clearProps:"opacity,transform"}); }); }});
 },{threshold:.12});
+/* re-arm reveals that were held back (e.g. under the splash) so they play in view */
+function kickReveals(){ document.querySelectorAll(".reveal:not(.in)").forEach(el=>{ revealObserver.unobserve(el); revealObserver.observe(el); }); }
+setTimeout(kickReveals,4700); /* matches the splash safety-net timer in <head> */
 function observeReveals(){
   document.querySelectorAll(
     "#p-home .card, #p-robots .card, #p-projects .card, #p-certs .cert, #p-videos .card, #p-about .card"
