@@ -37,6 +37,21 @@ addEventListener("load",function(){ if(!window.__siteReady){ document.documentEl
   setTimeout(function(){h.classList.remove("intro")},seen?2500:5000);
 })();
 </script>
+<script>
+/* Chat apps (Messenger, Facebook, LINE, IG…) open links in their own built-in browser, and those
+   browsers enlarge all text to follow the phone's font-size setting while Chrome/Safari do not —
+   so the same phone showed the page at two different sizes. Measure that text zoom once, before
+   anything is drawn, and cancel it out so the site looks identical in every app. Every size in the
+   stylesheet is rem-based, so resetting the root size is the only knob needed. */
+(function(){ try{
+  var d=document.documentElement, p=document.createElement("span");
+  p.style.cssText="position:absolute;left:-9999px;top:0;font:100px/1 sans-serif;visibility:hidden;white-space:nowrap";
+  p.textContent="M"; d.appendChild(p); var f=p.getBoundingClientRect().height/100; d.removeChild(p);
+  if(f>1.03||(f<0.97&&f>0.4)){ var st=document.createElement("style");
+    st.textContent="html{font-size:"+(15/f).toFixed(3)+"px!important}@media (min-width:768px){html{font-size:"+(16/f).toFixed(3)+"px!important}}#stats{font-size:"+(14/f).toFixed(3)+"px!important}";
+    document.head.appendChild(st); d.setAttribute("data-textzoom",f.toFixed(2)); }
+}catch(e){} })();
+</script>
 <style>
 /* =====================================================================
    THEME — Bootstrap 5 (dark) mapped onto our own palette
@@ -805,8 +820,9 @@ footer .priv{flex-basis:100%;font-size:.72rem;color:#6f7d88;opacity:.85}
   background:var(--card);border:1px solid var(--line);font-size:.85rem;transition:color .15s,border-color .15s}
 .tab-search svg{width:18px;height:18px}
 .tab-search:hover{color:var(--cyan);border-color:var(--cyan)}
-.tab-search kbd,.qs-foot kbd{font:600 .7rem/1 inherit;padding:3px 6px;border-radius:6px;background:var(--card-2);border:1px solid var(--line-2);color:#c7d2da}
-@media (max-width:1439.98px){.tab-search kbd{display:none}.tab-search{width:40px;padding:0;justify-content:center}}
+.qs-foot kbd{font:600 .7rem/1 inherit;padding:3px 6px;border-radius:6px;background:var(--card-2);border:1px solid var(--line-2);color:#c7d2da}
+.tab-search .ts-t{font-weight:600}
+@media (max-width:1439.98px){.tab-search .ts-t{display:none}.tab-search{width:40px;padding:0;justify-content:center}}
 .qs{position:fixed;inset:0;z-index:1090;display:none;background:rgba(6,9,11,.72);padding:10vh 16px 16px}
 .qs.open{display:block;animation:fade .18s ease}
 @media (hover:hover) and (pointer:fine){.qs{-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}}
@@ -846,6 +862,17 @@ footer .priv{flex-basis:100%;font-size:.72rem;color:#6f7d88;opacity:.85}
   .sheet-search{display:flex;align-items:center;gap:10px;width:100%;height:48px;padding:0 14px;margin-bottom:12px;border-radius:14px;
     background:var(--bg);border:1px solid var(--line-2);color:var(--muted);font-size:.92rem}
   .sheet-search svg{width:19px;height:19px;color:var(--cyan)}
+}
+.toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));z-index:1200;transform:translate(-50%,20px);opacity:0;pointer-events:none;
+  padding:10px 18px;border-radius:999px;background:#e8edf1;color:#0b0e11;font-weight:600;font-size:.88rem;box-shadow:0 10px 30px -8px rgba(0,0,0,.7);transition:opacity .25s,transform .25s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.sheet-acts{display:none}
+@media (max-width:700px){
+  .sheet-acts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px}
+  .sa{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;height:68px;border-radius:14px;font-size:.8rem;font-weight:600;
+    color:var(--text);background:var(--card-2);border:1px solid var(--line)}
+  .sa svg{width:21px;height:21px;color:var(--cyan)}
+  .sa-main{background:var(--cyan-soft);border-color:rgba(34,211,238,.45);color:var(--cyan-2)}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -888,7 +915,7 @@ footer .priv{flex-basis:100%;font-size:.72rem;color:#6f7d88;opacity:.85}
   <div class="container-xl tabs-in">
     <a class="brand" href="#" id="brand" aria-hidden="true" tabindex="-1"><i style="background-image:url(images/photos/profile.jpg)"></i><span id="brandName"></span></a>
     <div class="wrap" id="tabs"></div>
-    <button class="tab-search" data-search aria-label="Search" title="ค้นหา / Search  (Ctrl K)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg><kbd class="ts-k">Ctrl K</kbd></button>
+    <button class="tab-search" data-search aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg><span class="ts-t">ค้นหา</span></button>
   </div>
 </nav>
 <div class="minibar" id="minibar" aria-hidden="true">
@@ -909,7 +936,12 @@ footer .priv{flex-basis:100%;font-size:.72rem;color:#6f7d88;opacity:.85}
     <h2 class="offcanvas-title sheet-title" id="sheetTitle"></h2>
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
-  <div class="offcanvas-body"><button class="sheet-search" data-search><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg><span id="sheetSearchTxt">ค้นหา</span></button><div class="sheet-grid" id="sheetGrid"></div></div>
+  <div class="offcanvas-body"><button class="sheet-search" data-search><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg><span id="sheetSearchTxt">ค้นหา</span></button>
+    <div class="sheet-acts">
+      <a class="sa sa-main" href="mailto:Taweesinkinrat@gmail.com"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 7l8.5 6 8.5-6"/></svg><span id="saMail">ติดต่อ</span></a>
+      <button class="sa" data-resume><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/></svg><span>Resume</span></button>
+      <button class="sa" data-share><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="M8.2 10.8l7.6-4.1M8.2 13.2l7.6 4.1"/></svg><span id="saShare">แชร์</span></button>
+    </div><div class="sheet-grid" id="sheetGrid"></div></div>
 </div>
 <div class="swipe-hint" id="swipeHint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 6l6 6-6 6M3 12h18"/></svg><span id="swipeHintTxt"></span></div>
 
@@ -933,12 +965,12 @@ footer .priv{flex-basis:100%;font-size:.72rem;color:#6f7d88;opacity:.85}
 </footer>
 <div id="resume" aria-hidden="true"></div>
 
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="qs" id="qs" aria-hidden="true" role="dialog" aria-label="Search">
   <div class="qs-box">
     <div class="qs-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>
       <input id="qsIn" type="search" autocomplete="off" enterkeyhint="search" aria-controls="qsList"><button class="qs-close" id="qsClose">ปิด</button></div>
     <div class="qs-list" id="qsList" role="listbox"></div>
-    <div class="qs-foot"><span><kbd>↑</kbd><kbd>↓</kbd> เลือก / select</span><span><kbd>Enter</kbd> เปิด / open</span><span><kbd>Esc</kbd> ปิด / close</span></div>
   </div>
 </div>
 <button class="to-top" id="toTop" aria-label="Back to top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V6M6 11l6-6 6 6"/></svg></button>
@@ -1304,8 +1336,10 @@ function render(){
   document.getElementById("sheetGrid").innerHTML=tabHTML;
   document.getElementById("sheetTitle").textContent=L==="th"?"ไปที่หมวด":"Go to section";
   document.getElementById("abName").textContent=T(ME.name);
+  document.getElementById("saMail").textContent=L==="th"?"ติดต่อ":"Contact";
+  document.getElementById("saShare").textContent=L==="th"?"แชร์":"Share";
   document.getElementById("sheetSearchTxt").textContent=L==="th"?"ค้นหาผลงาน รางวัล เกียรติบัตร…":"Search work, awards, certificates…";
-  { const k=document.querySelector(".ts-k"); if(k) k.textContent=/Mac|iPhone|iPad/.test(navigator.platform||navigator.userAgent)?"⌘ K":"Ctrl K"; }
+  { const k=document.querySelector(".ts-t"); if(k) k.textContent=L==="th"?"ค้นหา":"Search"; }
   renderBnav();
   gid=0;for(const k in GROUPS)delete GROUPS[k];
 
@@ -1995,6 +2029,7 @@ function updatePhoneUI(){
 }
 document.addEventListener("click",e=>{
   if(e.target.closest("#bnMore")){ openSheet(); return; }
+  if(e.target.closest(".sa")) setTimeout(closeSheet,150);
   const ph=e.target.closest("[data-ph]");
   if(ph){ const i=TABS.findIndex(x=>x[0]===cur)+ +ph.dataset.ph; if(i>=0&&i<TABS.length) go(TABS[i][0]); }
 });
@@ -2209,7 +2244,7 @@ let stTaps=[];
 document.addEventListener("click",e=>{ if(!e.target.closest(".avatar"))return; const now=Date.now();
   stTaps=stTaps.filter(x=>now-x<3000); stTaps.push(now); if(stTaps.length>=5){ stTaps=[]; openStats(); } });
 const esc=x=>String(x==null?"":x).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c]);
-const EV_TH={search:"ค้นหา",page_view:"เปิดหมวด",section_time:"อยู่ในหมวด",scroll_depth:"เลื่อนถึง",item_view:"ดู",timeline_click:"กดไทม์ไลน์",highlight_click:"กดผลงานเด่น",
+const EV_TH={search:"ค้นหา",share:"แชร์ลิงก์",page_view:"เปิดหมวด",section_time:"อยู่ในหมวด",scroll_depth:"เลื่อนถึง",item_view:"ดู",timeline_click:"กดไทม์ไลน์",highlight_click:"กดผลงานเด่น",
   contents_click:"กดสารบัญ",image_open:"เปิดรูป",video_play:"เล่นวิดีโอ",model_interact:"หมุนโมเดล 3D",resume_download:"ดาวน์โหลด Resume",contact_email:"กดติดต่อ/อีเมล",
   social_click:"กดโซเชียล",report_open:"เปิดรายงาน PDF",cert_filter:"กรองเกียรติบัตร",language_switch:"เปลี่ยนภาษา",splash_complete:"ดูหน้าเปิดตัวจนจบ",splash_skip:"ข้ามหน้าเปิดตัว",
   timeline_arrow:"กดลูกศรไทม์ไลน์",section_picker_open:"เปิดเมนูหมวด",brand_click:"กดชื่อแถบบน"};
@@ -2315,7 +2350,7 @@ addEventListener("keydown",e=>{ if(e.key==="Escape"&&document.getElementById("st
 
 /* =====================================================================
    QUICK SEARCH — every robot, project, 3D model, certificate and video in one box
-   open: Ctrl/⌘ K or "/" (keyboard) · the search button in the bar · the 🔍 in the phone top bar
+   open: the search button in the bar · the 🔍 in the phone top bar or the section sheet
    ===================================================================== */
 const QS_SEL="#p-robots .post,#p-projects article.card,#p-design article.card,#p-videos .card,#p-certs .cert,#p-about .card";
 let qsItems=[], qsSel=0, qsShown=[];
@@ -2384,17 +2419,28 @@ qsList.addEventListener("click",e=>{ const b=e.target.closest("[data-qi]"); if(b
 qsEl.addEventListener("click",e=>{ if(e.target===qsEl||e.target.closest("#qsClose")) closeSearch(); });
 document.addEventListener("click",e=>{ if(e.target.closest("[data-search]")) openSearch(); });
 
-/* keyboard: Ctrl/⌘K or / opens search · ← → switch section (tablet/desktop) */
+/* keyboard: ← → switch section (tablet/desktop) · "/" also opens search */
 addEventListener("keydown",e=>{
   const typing=/^(INPUT|TEXTAREA|SELECT)$/.test((e.target.tagName||""))||e.target.isContentEditable;
   const modal=qsEl.classList.contains("open")||lb.classList.contains("open")||document.getElementById("stats")&&document.getElementById("stats").offsetParent!==null||document.querySelector(".offcanvas.show");
-  if((e.key==="k"||e.key==="K")&&(e.ctrlKey||e.metaKey)){ e.preventDefault(); qsEl.classList.contains("open")?closeSearch():openSearch(); return; }
   if(typing||modal||e.altKey||e.ctrlKey||e.metaKey) return;
   if(e.key==="/"){ e.preventDefault(); openSearch(); return; }
   if((e.key==="ArrowRight"||e.key==="ArrowLeft")&&!e.target.closest(".j-track,.stl-viewer,video")){
     const i=TABS.findIndex(x=>x[0]===cur)+(e.key==="ArrowRight"?1:-1);
     if(i>=0&&i<TABS.length){ NAV_VIA="keyboard"; go(TABS[i][0]); }
   }
+});
+
+/* share this portfolio (phones: the system share sheet — LINE, Messenger…; elsewhere: copy the link) */
+const SHARE_URL="https://taweesinkinrat-droid.github.io/taweesin-portfolio-/?utm_source=share&utm_medium=share&utm_campaign=portfolio#home";
+let toastT=0;
+function toast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),2200); }
+document.addEventListener("click",async e=>{
+  if(!e.target.closest("[data-share]"))return;
+  track("share",{method:navigator.share?"native":"copy"});
+  if(navigator.share){ try{ await navigator.share({title:T(ME.name)+" — Portfolio",url:SHARE_URL}); }catch(err){} return; }
+  try{ await navigator.clipboard.writeText(SHARE_URL); toast(L==="th"?"คัดลอกลิงก์แล้ว":"Link copied"); }
+  catch(err){ window.prompt(L==="th"?"คัดลอกลิงก์นี้":"Copy this link",SHARE_URL); }
 });
 
 render();go(cur);
