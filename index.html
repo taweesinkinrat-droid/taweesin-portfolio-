@@ -165,6 +165,7 @@ a:hover{color:var(--cyan-2)}
   display:flex;align-items:center;gap:8px;border-radius:999px;border:1px solid transparent;
   transition:background .15s,color .15s,border-color .15s}
 .tab svg{width:18px;height:18px;flex:0 0 18px}
+@media (min-width:992px){.tab{padding:9px 12px;gap:7px}.tabs-in{gap:10px}.tabs .wrap{gap:4px}}
 @media (hover:hover){.tab:hover{color:var(--text);background:var(--card)}}
 .tab:active{transform:scale(.95)}
 .tab.on{color:#06222b;background:var(--cyan);border-color:var(--cyan);box-shadow:0 4px 16px -4px rgba(34,211,238,.7)}
@@ -312,7 +313,7 @@ main{overflow-x:clip} /* the sideways slide never makes the page scroll horizont
   -webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 28px),transparent 100%);mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 28px),transparent 100%)}
 .filters.at-end{-webkit-mask-image:none;mask-image:none}
 .filters::-webkit-scrollbar{display:none}
-.filter{white-space:nowrap;padding:7px 14px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-weight:500;font-size:.9rem;transition:transform .15s ease,border-color .15s ease}
+.filter{flex-shrink:0;white-space:nowrap;padding:7px 14px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-weight:500;font-size:.9rem;transition:transform .15s ease,border-color .15s ease}
 .filter:active{transform:scale(.95)}
 .filter.on{background:var(--cyan-soft);border-color:var(--cyan);color:var(--cyan)}
 .filter .n{opacity:.7;margin-left:5px;font-size:.78rem}
@@ -684,11 +685,168 @@ footer .priv{flex-basis:100%;font-size:.72rem;color:#6f7d88;opacity:.85}
 .cursor-glow.on{opacity:1}
 
 /* ---------- touch: ripple on tap ---------- */
-.rpl{position:relative;overflow:hidden}
+/* overflow:clip clips the ripple without turning the button into a scroll container, so a flex
+   row can never squash the tapped button (overflow:hidden did, and the tap landed on the next chip) */
+.rpl{position:relative;overflow:clip}
+@supports not (overflow:clip){.rpl{overflow:hidden}}
 .rpl-dot{position:absolute;border-radius:50%;pointer-events:none;background:rgba(255,255,255,.28);transform:scale(0);animation:rpl .55s ease-out forwards}
 .tab.on .rpl-dot,.btn-cyan .rpl-dot,.mb-cur .rpl-dot{background:rgba(6,34,43,.25)}
 @keyframes rpl{to{transform:scale(1);opacity:0}}
 
+/* =====================================================================
+   PHONE LAYOUT (≤700px) — app-style: centred profile, slim top bar,
+   bottom navigation, big section heading, roomier cards
+   ===================================================================== */
+.appbar,.bnav,.phead{display:none}
+@media (max-width:700px){
+  :root{--pad:18px;--r:18px;--ab-h:56px;--bn-h:64px}
+  html{scroll-padding-top:calc(var(--ab-h) + 12px)}
+  body{padding-bottom:calc(var(--bn-h) + env(safe-area-inset-bottom))}
+  .minibar{display:none!important}
+  /* the old tab grid becomes an invisible zero-height marker: it still tells the scripts where the content starts */
+  .tabs{height:0;margin:0!important;padding:0!important;overflow:hidden;border:0;visibility:hidden}
+
+  /* ---- profile header: everything centred, clear hierarchy, two big action buttons ---- */
+  .cover{height:212px}
+  .cover::after{background:linear-gradient(180deg,rgba(17,20,23,.05) 0%,rgba(17,20,23,.18) 45%,rgba(17,20,23,.78) 80%,var(--bg) 100%)}
+  .head{grid-template-columns:minmax(0,1fr);grid-template-areas:"av" "who" "act";justify-items:center;text-align:center;
+    margin-top:-64px;padding:0 20px;row-gap:0}
+  .avatar{width:116px;height:116px}
+  .who{margin-top:14px;width:100%}
+  .who h1{font-size:1.75rem;letter-spacing:-.01em}
+  .who .sub{font-size:.93rem;max-width:34ch;margin:6px auto 0;color:#aebbc5}
+  .badge-row{justify-content:center;gap:7px;margin-top:14px}
+  .pill{font-size:.78rem;padding:5px 11px}
+  .pill.top{font-size:.92rem;padding:7px 16px}
+  .head-actions{justify-self:stretch;width:100%;max-width:440px;margin:18px auto 0;padding:0;
+    display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:10px}
+  .head-actions .btn{height:46px;border-radius:14px;--bs-btn-font-size:.95rem;--bs-btn-padding-x:.6rem}
+  .head-actions .btn-resume{display:inline-flex!important}
+  .head-actions .lang{height:46px;border-radius:14px;align-items:center}
+  .head-actions .lang button{height:38px;padding:0 11px;border-radius:11px}
+
+  .swipe-hint{margin-top:14px}
+  main{padding-top:14px}
+
+  /* ---- section heading: where am I, and what's next ---- */
+  .phead{display:flex;align-items:center;gap:12px;margin:6px 0 16px}
+  .ph-ic{width:44px;height:44px;flex:0 0 44px;border-radius:14px;display:grid;place-items:center;color:var(--cyan);
+    background:linear-gradient(145deg,rgba(34,211,238,.2),rgba(34,211,238,.05));border:1px solid rgba(34,211,238,.35)}
+  .ph-ic svg{width:22px;height:22px}
+  .ph-t{flex:1;min-width:0}
+  .ph-t h2{font-size:1.32rem;font-weight:700;line-height:1.2;margin:0}
+  .ph-t small{display:block;color:var(--muted);font-size:.78rem;margin-top:2px}
+  .ph-nav{display:flex;gap:6px}
+  .ph-nav button{width:40px;height:40px;border-radius:12px;background:var(--card);border:1px solid var(--line);display:grid;place-items:center;color:var(--text)}
+  .ph-nav button:disabled{opacity:.3}
+  .ph-nav svg{width:19px;height:19px}
+
+  /* ---- cards & content: more air, calmer edges ---- */
+  .stack>*+*{margin-top:14px}
+  .card h2{font-size:1.1rem}
+  .filters{position:sticky;top:var(--ab-h);z-index:6;margin:0 -16px 14px;padding:10px 16px;background:linear-gradient(var(--bg) 78%,rgba(17,20,23,0))}
+  .filter{height:40px;padding:0 15px;display:inline-flex;align-items:center;font-size:.88rem}
+  .to-top{bottom:calc(var(--bn-h) + 14px + env(safe-area-inset-bottom))!important;width:44px;height:44px}
+  footer{padding-bottom:28px!important}
+
+  /* robot posts: one card instead of boxes inside boxes — a thin accent line per step, photos run edge to edge */
+  .story{border:0;background:none;border-radius:0;margin:8px 0 2px}
+  .story .srow{position:relative;padding:11px 0 11px 14px;border-top:0;gap:3px}
+  .story .srow::before{content:"";position:absolute;left:0;top:13px;bottom:11px;width:2px;border-radius:2px;background:rgba(34,211,238,.4)}
+  .story .srow.result{margin:4px 0;padding:12px 14px;border-radius:12px;background:rgba(245,196,81,.08);border:1px solid rgba(245,196,81,.22)}
+  .story .srow.result::before{display:none}
+  .post>.pics:last-child{margin:14px calc(-1*var(--pad)) calc(-1*var(--pad));border-radius:0 0 calc(var(--r) - 1px) calc(var(--r) - 1px);gap:2px}
+  .post-head .av{width:42px;height:42px;flex-basis:42px}
+
+  /* ---- slim top bar ---- */
+  .appbar{display:flex;position:fixed;top:0;left:0;right:0;z-index:45;height:var(--ab-h);align-items:center;gap:8px;
+    padding:0 12px 0 10px;padding-top:env(safe-area-inset-top);background:#13171b;border-bottom:1px solid var(--line);
+    box-shadow:0 8px 22px -14px rgba(0,0,0,.9);transform:translateY(-105%);transition:transform .28s cubic-bezier(.22,.61,.36,1)}
+  body.ab-on .appbar{transform:none}
+  .ab-me{flex:1;min-width:0;display:flex;align-items:center;gap:10px;text-align:left;padding:4px}
+  .ab-me i{width:34px;height:34px;flex:0 0 34px;border-radius:50%;background:#223 center/cover;border:2px solid var(--cyan);box-shadow:0 0 10px -3px rgba(34,211,238,.7)}
+  .ab-txt{min-width:0;display:flex;flex-direction:column;line-height:1.2}
+  .ab-txt b{font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ab-txt small{font-size:.74rem;color:var(--cyan);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ab-btn{width:40px;height:40px;flex:0 0 40px;border-radius:12px;display:grid;place-items:center;color:var(--text);background:var(--card);border:1px solid var(--line)}
+  .ab-btn svg{width:19px;height:19px}
+  .ab-lang{padding:2px;border-radius:12px}
+  .ab-lang button{padding:7px 9px;font-size:.76rem}
+
+  /* ---- bottom navigation ---- */
+  .bnav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));position:fixed;left:0;right:0;bottom:0;z-index:44;
+    height:calc(var(--bn-h) + env(safe-area-inset-bottom));padding:6px 4px env(safe-area-inset-bottom);
+    background:#13171b;border-top:1px solid var(--line);box-shadow:0 -10px 26px -16px rgba(0,0,0,.95)}
+  .bn{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:3px;min-width:0;color:var(--muted);
+    font-size:.68rem;font-weight:600;line-height:1.2;padding-top:2px;-webkit-tap-highlight-color:transparent}
+  .bn-ic{width:56px;height:30px;border-radius:999px;display:grid;place-items:center;transition:background-color .25s ease,color .25s ease}
+  .bn-ic svg{width:21px;height:21px;transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+  .bn span:last-child{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 2px}
+  .bn.on{color:var(--text)}
+  .bn.on .bn-ic{background:var(--cyan);color:#06222b;box-shadow:0 4px 14px -5px rgba(34,211,238,.8)}
+  .bn.on .bn-ic svg{transform:scale(1.06)}
+  .bn:active .bn-ic svg{transform:scale(.88)}
+
+  /* ---- section picker sheet: big two-column tiles ---- */
+  .sheet-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .sheet-grid .tab{flex-direction:row;justify-content:flex-start;gap:12px;padding:0 14px;min-height:58px;border-radius:14px;font-size:.92rem;text-align:left}
+  .sheet-grid .tab svg{width:21px;height:21px;flex:0 0 21px}
+  .sheet .offcanvas-header{padding:12px 18px 8px}
+  .sheet .offcanvas-body{padding:6px 16px 20px}
+}
+@media (max-width:359.98px){
+  .head-actions{grid-template-columns:minmax(0,1fr) minmax(0,1fr);}
+  .head-actions .lang{grid-column:1/-1;justify-self:center}
+  .bn{font-size:.62rem}.bn-ic{width:48px}
+  .ab-lang{display:none}
+}
+/* ---------- quick search ---------- */
+.tab-search{flex:0 0 auto;display:flex;align-items:center;gap:8px;height:40px;padding:0 12px;border-radius:999px;color:var(--muted);
+  background:var(--card);border:1px solid var(--line);font-size:.85rem;transition:color .15s,border-color .15s}
+.tab-search svg{width:18px;height:18px}
+.tab-search:hover{color:var(--cyan);border-color:var(--cyan)}
+.tab-search kbd,.qs-foot kbd{font:600 .7rem/1 inherit;padding:3px 6px;border-radius:6px;background:var(--card-2);border:1px solid var(--line-2);color:#c7d2da}
+@media (max-width:1439.98px){.tab-search kbd{display:none}.tab-search{width:40px;padding:0;justify-content:center}}
+.qs{position:fixed;inset:0;z-index:1090;display:none;background:rgba(6,9,11,.72);padding:10vh 16px 16px}
+.qs.open{display:block;animation:fade .18s ease}
+@media (hover:hover) and (pointer:fine){.qs{-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}}
+.qs-box{max-width:640px;margin:0 auto;background:var(--card);border:1px solid var(--line-2);border-radius:18px;overflow:hidden;
+  box-shadow:0 30px 80px -20px rgba(0,0,0,.9),0 0 0 1px rgba(34,211,238,.08);display:flex;flex-direction:column;max-height:76vh;animation:qsIn .22s cubic-bezier(.22,.61,.36,1)}
+@keyframes qsIn{from{transform:translateY(-10px) scale(.98);opacity:0}}
+.qs-top{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.qs-top>svg{width:20px;height:20px;color:var(--cyan);flex:0 0 20px}
+.qs-top input{flex:1;min-width:0;background:none;border:0;outline:0;color:var(--text);font:inherit;font-size:1.05rem;padding:6px 0}
+.qs-top input::-webkit-search-cancel-button{display:none}
+.qs-close{font-size:.8rem;color:var(--muted);padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--card-2)}
+.qs-list{overflow:auto;padding:6px;overscroll-behavior:contain}
+.qs-h{font-size:.74rem;color:var(--muted);padding:8px 10px 4px;font-weight:600}
+.qs-it{width:100%;display:flex;align-items:center;gap:12px;text-align:left;padding:10px;border-radius:12px;border:1px solid transparent}
+.qs-it.on{background:var(--cyan-soft);border-color:rgba(34,211,238,.35)}
+@media (hover:hover){.qs-it:hover{background:var(--card-2)}}
+.qs-ic{width:36px;height:36px;flex:0 0 36px;border-radius:10px;display:grid;place-items:center;background:var(--card-2);border:1px solid var(--line);color:var(--cyan)}
+.qs-ic svg{width:18px;height:18px}
+.qs-tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.qs-tx b{font-weight:600;font-size:.93rem;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.qs-tx small{color:var(--muted);font-size:.76rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qs-tx mark{background:rgba(34,211,238,.25);color:var(--cyan-2);border-radius:3px;padding:0 1px}
+.qs-go{width:18px;height:18px;color:var(--muted);flex:0 0 18px;opacity:0}
+.qs-it.on .qs-go{opacity:1;color:var(--cyan)}
+.qs-empty{padding:28px 16px;text-align:center;color:var(--muted);font-size:.9rem}
+.qs-foot{display:flex;gap:16px;justify-content:center;padding:9px;border-top:1px solid var(--line);font-size:.72rem;color:var(--muted)}
+.qs-foot kbd{margin-right:3px}
+@media (max-width:700px){
+  .qs{padding:0}
+  .qs-box{max-width:none;height:100%;max-height:none;border-radius:0;border:0;padding-top:env(safe-area-inset-top)}
+  .qs-top{padding:10px 12px}
+  .qs-foot{display:none}
+  .qs-it{padding:12px 10px}
+}
+.sheet-search{display:none}
+@media (max-width:700px){
+  .sheet-search{display:flex;align-items:center;gap:10px;width:100%;height:48px;padding:0 14px;margin-bottom:12px;border-radius:14px;
+    background:var(--bg);border:1px solid var(--line-2);color:var(--muted);font-size:.92rem}
+  .sheet-search svg{width:19px;height:19px;color:var(--cyan)}
+}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -730,6 +888,7 @@ footer .priv{flex-basis:100%;font-size:.72rem;color:#6f7d88;opacity:.85}
   <div class="container-xl tabs-in">
     <a class="brand" href="#" id="brand" aria-hidden="true" tabindex="-1"><i style="background-image:url(images/photos/profile.jpg)"></i><span id="brandName"></span></a>
     <div class="wrap" id="tabs"></div>
+    <button class="tab-search" data-search aria-label="Search" title="ค้นหา / Search  (Ctrl K)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg><kbd class="ts-k">Ctrl K</kbd></button>
   </div>
 </nav>
 <div class="minibar" id="minibar" aria-hidden="true">
@@ -737,17 +896,25 @@ footer .priv{flex-basis:100%;font-size:.72rem;color:#6f7d88;opacity:.85}
   <button class="mb-cur" id="mbCur" aria-label="All sections"></button>
   <button class="mb-arrow" id="mbNext" aria-label="Next section"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
 </div>
+<!-- phones: slim top bar (appears once the profile header has scrolled away) + app-style bottom navigation -->
+<div class="appbar" id="appbar" aria-hidden="true">
+  <button class="ab-me" id="abMe" aria-label="Back to top"><i style="background-image:url(images/photos/profile.jpg)"></i><span class="ab-txt"><b id="abName"></b><small id="abSec"></small></span></button>
+  <button class="ab-btn" id="abSearch" data-search aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg></button>
+  <div class="lang ab-lang" role="group" aria-label="Language"><button data-l="th" class="on">TH</button><button data-l="en">EN</button></div>
+</div>
+<nav class="bnav" id="bnav" aria-label="Sections"></nav>
 <div class="offcanvas offcanvas-bottom sheet" tabindex="-1" id="sheet" aria-labelledby="sheetTitle">
   <div class="sheet-handle"></div>
   <div class="offcanvas-header">
     <h2 class="offcanvas-title sheet-title" id="sheetTitle"></h2>
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
   </div>
-  <div class="offcanvas-body"><div class="sheet-grid" id="sheetGrid"></div></div>
+  <div class="offcanvas-body"><button class="sheet-search" data-search><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg><span id="sheetSearchTxt">ค้นหา</span></button><div class="sheet-grid" id="sheetGrid"></div></div>
 </div>
 <div class="swipe-hint" id="swipeHint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 6l6 6-6 6M3 12h18"/></svg><span id="swipeHintTxt"></span></div>
 
 <main class="container-xl">
+  <div class="phead" id="phead" aria-live="polite"></div>
   <section class="panel" id="p-home"></section>
   <section class="panel" id="p-robots"></section>
   <section class="panel" id="p-projects"></section>
@@ -766,6 +933,14 @@ footer .priv{flex-basis:100%;font-size:.72rem;color:#6f7d88;opacity:.85}
 </footer>
 <div id="resume" aria-hidden="true"></div>
 
+<div class="qs" id="qs" aria-hidden="true" role="dialog" aria-label="Search">
+  <div class="qs-box">
+    <div class="qs-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>
+      <input id="qsIn" type="search" autocomplete="off" enterkeyhint="search" aria-controls="qsList"><button class="qs-close" id="qsClose">ปิด</button></div>
+    <div class="qs-list" id="qsList" role="listbox"></div>
+    <div class="qs-foot"><span><kbd>↑</kbd><kbd>↓</kbd> เลือก / select</span><span><kbd>Enter</kbd> เปิด / open</span><span><kbd>Esc</kbd> ปิด / close</span></div>
+  </div>
+</div>
 <button class="to-top" id="toTop" aria-label="Back to top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V6M6 11l6-6 6 6"/></svg></button>
 <div class="lb" id="lb">
   <button class="lb-btn lb-close" id="lbClose" aria-label="close">✕</button>
@@ -1128,6 +1303,10 @@ function render(){
   document.getElementById("tabs").innerHTML=tabHTML;
   document.getElementById("sheetGrid").innerHTML=tabHTML;
   document.getElementById("sheetTitle").textContent=L==="th"?"ไปที่หมวด":"Go to section";
+  document.getElementById("abName").textContent=T(ME.name);
+  document.getElementById("sheetSearchTxt").textContent=L==="th"?"ค้นหาผลงาน รางวัล เกียรติบัตร…":"Search work, awards, certificates…";
+  { const k=document.querySelector(".ts-k"); if(k) k.textContent=/Mac|iPhone|iPad/.test(navigator.platform||navigator.userAgent)?"⌘ K":"Ctrl K"; }
+  renderBnav();
   gid=0;for(const k in GROUPS)delete GROUPS[k];
 
   /* home */
@@ -1224,8 +1403,15 @@ function renderCerts(){
   const list=CERTS.filter(c=>certF==="all"||c.type===certF);
   const k=grp(list.map(c=>({src:c.src,t:T(c.title),s:(L==="th"?"พ.ศ. ":"")+c.year})));
   const col={champ:"var(--gold)",award:"var(--silver)",join:"var(--cyan)",course:"#a78bfa"};
+  const oldF=document.querySelector("#p-certs .filters"), keepX=oldF?oldF.scrollLeft:0;
   document.getElementById("p-certs").innerHTML=`<div class="filters" data-anchor="certs-top">${keys.map(x=>`<button class="filter ${x===certF?"on":""}" data-f="${x}">${T(UI[x])}<span class="n">${x==="all"?CERTS.length:CERTS.filter(c=>c.type===x).length}</span></button>`).join("")}</div>
    <div class="row row-cols-2 row-cols-md-3 row-cols-xl-4 g-2 g-md-3">${list.map((c,i)=>`<div class="col"><div class="cert" data-g="${k}" data-i="${i}" data-name="Certificate: ${c.title.en.replace(/"/g,"'")} (${c.year})"><img src="${c.src}" loading="lazy" alt=""><div class="t"><b><span class="dot" style="background:${col[c.type]}"></span>${T(c.title)}</b><span>${L==="th"?"พ.ศ. ":""}${c.year}</span></div></div></div>`).join("")}</div>`;
+  { const f=document.querySelector("#p-certs .filters"), on=f&&f.querySelector(".filter.on");
+    if(f){ f.scrollLeft=keepX; /* keep the chip row where it was, then nudge the chosen chip fully into view */
+      if(on){ const l=on.getBoundingClientRect().left-f.getBoundingClientRect().left+f.scrollLeft, r=l+on.offsetWidth;
+        if(l<f.scrollLeft+8) f.scrollTo({left:l-16,behavior:"smooth"});
+        else if(r>f.scrollLeft+f.clientWidth-8) f.scrollTo({left:r-f.clientWidth+16,behavior:"smooth"}); }
+      f.classList.toggle("at-end",f.scrollLeft+f.clientWidth>=f.scrollWidth-4); } }
   observeReveals(); markLoaded();
 }
 
@@ -1239,6 +1425,12 @@ const scrollMemory={}, visitedTabs=new Set();
    compare a number against itself. Cache the real header height once, before anything
    has scrolled, and reuse that fixed number everywhere instead of re-reading offsetTop. */
 const HEADER_H=document.querySelector(".tabs").offsetTop;
+/* top of a page's content: under the sticky tab bar (tablet/desktop), or the section heading just below the top bar (phones) */
+function pageTop(){
+  if(!matchMedia("(max-width:700px)").matches) return HEADER_H;
+  const ph=document.getElementById("phead");
+  return Math.max(HEADER_H+1, Math.round(ph.getBoundingClientRect().top+scrollY-56-8));
+}
 /* go(tab)          — from the menu / swipe: top of a new page, or where you left off
    go(tab, anchor)  — from a "Highlights" link: open that page and jump straight to that item */
 function go(t,anchor){
@@ -1267,8 +1459,8 @@ function go(t,anchor){
       /* jumped straight to the item */
     }else if(!firstVisit){
       scrollTo({top:scrollMemory[t]||0,behavior:"auto"});
-    }else if(prevScroll>HEADER_H){
-      scrollTo({top:HEADER_H,behavior:"auto"}); /* new page starts at the top, menu in view */
+    }else if(prevScroll>pageTop()){
+      scrollTo({top:pageTop(),behavior:"auto"}); /* new page starts at the top, menu in view */
     }
     const fEl=document.querySelector("#p-"+t+" .filters");
     if(fEl) fEl.classList.toggle("at-end",fEl.scrollWidth<=fEl.clientWidth+2);
@@ -1287,7 +1479,7 @@ function go(t,anchor){
 
 function anchorTop(el){
   const phone=matchMedia("(max-width:700px)").matches;
-  const offset=phone?16:document.querySelector(".tabs").offsetHeight+14; /* phones: bar is at the bottom; larger screens: clear the sticky top bar */
+  const offset=phone?70:document.querySelector(".tabs").offsetHeight+14; /* phones: bar is at the bottom; larger screens: clear the sticky top bar */
   return Math.max(0,el.getBoundingClientRect().top+scrollY-offset);
 }
 function scrollToAnchor(t,anchor){
@@ -1341,7 +1533,7 @@ document.addEventListener("scroll",e=>{
     el.classList.toggle("at-end", el.scrollLeft + el.clientWidth >= el.scrollWidth - 4);
   }
 },true);
-document.querySelectorAll(".lang button").forEach(b=>b.onclick=()=>{L=b.dataset.l;document.querySelectorAll(".lang button").forEach(x=>x.classList.toggle("on",x===b));render();go(cur);});
+document.querySelectorAll(".lang button").forEach(b=>b.onclick=()=>{L=b.dataset.l;document.querySelectorAll(".lang button").forEach(x=>x.classList.toggle("on",x.dataset.l===L));render();go(cur);});
 
 /* lightbox */
 let LB=[],LI=0;const lb=document.getElementById("lb");
@@ -1782,7 +1974,33 @@ function initToc(){
 
 /* ---------- phone navigation: slim sticky bar + bottom sheet ---------- */
 const minibar=document.getElementById("minibar"), sheet=document.getElementById("sheet");
+/* ---------- phone UI: bottom navigation, top bar, section heading ---------- */
+const BN_MAIN=["home","robots","projects","certs"];
+const moreIc='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="6.5" height="6.5" rx="1.8"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.8"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.8"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.8"/></svg>';
+const chevL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>';
+const chevR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>';
+function renderBnav(){
+  const nav=document.getElementById("bnav"); if(!nav)return;
+  const inMore=!BN_MAIN.includes(cur);
+  nav.innerHTML=BN_MAIN.map(k=>`<button class="bn ${k===cur?"on":""}" data-t="${k}" aria-label="${T(UI[k])}"><span class="bn-ic">${tabIc[k]}</span><span>${T(UI[k])}</span></button>`).join("")
+    +`<button class="bn bn-more ${inMore?"on":""}" id="bnMore" aria-label="${L==="th"?"หมวดทั้งหมด":"All sections"}"><span class="bn-ic">${inMore?tabIc[cur]:moreIc}</span><span>${inMore?T(UI[cur]):(L==="th"?"เพิ่มเติม":"More")}</span></button>`;
+}
+function updatePhoneUI(){
+  const i=TABS.findIndex(x=>x[0]===cur);
+  renderBnav();
+  const sec=document.getElementById("abSec"); if(sec) sec.textContent=T(UI[cur]);
+  const ph=document.getElementById("phead");
+  if(ph) ph.innerHTML=`<span class="ph-ic">${tabIc[cur]}</span><div class="ph-t"><h2>${T(UI[cur])}</h2><small>${L==="th"?"หมวด":"Section"} ${i+1} / ${TABS.length}</small></div>
+    <div class="ph-nav"><button data-ph="-1" aria-label="${L==="th"?"หมวดก่อนหน้า":"Previous section"}" ${i<=0?"disabled":""}>${chevL}</button><button data-ph="1" aria-label="${L==="th"?"หมวดถัดไป":"Next section"}" ${i>=TABS.length-1?"disabled":""}>${chevR}</button></div>`;
+}
+document.addEventListener("click",e=>{
+  if(e.target.closest("#bnMore")){ openSheet(); return; }
+  const ph=e.target.closest("[data-ph]");
+  if(ph){ const i=TABS.findIndex(x=>x[0]===cur)+ +ph.dataset.ph; if(i>=0&&i<TABS.length) go(TABS[i][0]); }
+});
+document.getElementById("abMe").addEventListener("click",()=>scrollTo({top:0,behavior:"smooth"}));
 function updateMinibar(){
+  updatePhoneUI();
   const i=TABS.findIndex(x=>x[0]===cur);
   document.getElementById("mbCur").innerHTML=`${TABS[i][1]}<span class="mb-name">${T(UI[cur])}</span><span class="mb-count">${i+1}/${TABS.length}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>`;
   document.getElementById("mbPrev").disabled=i<=0;
@@ -1800,6 +2018,12 @@ new IntersectionObserver(([en])=>{
   minibar.classList.toggle("show",away); minibar.setAttribute("aria-hidden",away?"false":"true");
   document.body.classList.toggle("mb-on",away && matchMedia("(max-width:700px)").matches);
 }).observe(document.querySelector(".tabs"));
+
+new IntersectionObserver(([en])=>{
+  const on=!en.isIntersecting && en.boundingClientRect.top<60 && matchMedia("(max-width:700px)").matches;
+  document.body.classList.toggle("ab-on",on); document.getElementById("appbar").setAttribute("aria-hidden",on?"false":"true");
+},{rootMargin:"-60px 0px 0px 0px"}).observe(document.querySelector(".tabs"));
+addEventListener("resize",()=>{ if(!matchMedia("(max-width:700px)").matches) document.body.classList.remove("ab-on"); });
 
 new IntersectionObserver(([en])=>{ document.body.classList.toggle("scrolled",!en.isIntersecting&&en.boundingClientRect.top<0);
   moveInk(); requestAnimationFrame(moveInk); })
@@ -1906,7 +2130,7 @@ function stFlush(beacon){
   const body=JSON.stringify({v:VID,s:SID,src:ENTRY,app:OPEN_IN,dev:DEV,os:OS,br:BR,scr:screen.width+"x"+screen.height,lang:navigator.language||"",
     ref:REF_HOST,med:QS.get("utm_medium")||"",tz:(Intl.DateTimeFormat().resolvedOptions().timeZone||""),ev:stQ.splice(0,60)});
   try{ if(beacon&&navigator.sendBeacon) navigator.sendBeacon(STATS_URL,new Blob([body],{type:"text/plain;charset=utf-8"}));
-       else fetch(STATS_URL,{method:"POST",mode:"no-cors",keepalive:true,headers:{"Content-Type":"text/plain;charset=utf-8"},body}); }catch(e){}
+       else fetch(STATS_URL,{method:"POST",mode:"no-cors",keepalive:true,headers:{"Content-Type":"text/plain;charset=utf-8"},body}).catch(()=>{}); }catch(e){}
   if(stQ.length) stFlush(beacon);
 }
 function track(name,params){
@@ -1950,6 +2174,8 @@ document.addEventListener("click",e=>{
   if(el.closest(".tabs .tab")) NAV_VIA="menu";
   else if(el.closest(".sheet-grid")) NAV_VIA="section_picker";
   else if(el.closest(".mb-arrow")) NAV_VIA="bottom_arrows";
+  else if(el.closest(".bn")) NAV_VIA="bottom_nav";
+  else if(el.closest(".ph-nav")) NAV_VIA="section_arrows";
   else if(el.closest(".hl-item")) NAV_VIA="highlights";
   else if(el.closest(".j-item")) NAV_VIA="timeline";
   else if(el.closest(".toc")) NAV_VIA="contents";
@@ -1983,7 +2209,7 @@ let stTaps=[];
 document.addEventListener("click",e=>{ if(!e.target.closest(".avatar"))return; const now=Date.now();
   stTaps=stTaps.filter(x=>now-x<3000); stTaps.push(now); if(stTaps.length>=5){ stTaps=[]; openStats(); } });
 const esc=x=>String(x==null?"":x).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c]);
-const EV_TH={page_view:"เปิดหมวด",section_time:"อยู่ในหมวด",scroll_depth:"เลื่อนถึง",item_view:"ดู",timeline_click:"กดไทม์ไลน์",highlight_click:"กดผลงานเด่น",
+const EV_TH={search:"ค้นหา",page_view:"เปิดหมวด",section_time:"อยู่ในหมวด",scroll_depth:"เลื่อนถึง",item_view:"ดู",timeline_click:"กดไทม์ไลน์",highlight_click:"กดผลงานเด่น",
   contents_click:"กดสารบัญ",image_open:"เปิดรูป",video_play:"เล่นวิดีโอ",model_interact:"หมุนโมเดล 3D",resume_download:"ดาวน์โหลด Resume",contact_email:"กดติดต่อ/อีเมล",
   social_click:"กดโซเชียล",report_open:"เปิดรายงาน PDF",cert_filter:"กรองเกียรติบัตร",language_switch:"เปลี่ยนภาษา",splash_complete:"ดูหน้าเปิดตัวจนจบ",splash_skip:"ข้ามหน้าเปิดตัว",
   timeline_arrow:"กดลูกศรไทม์ไลน์",section_picker_open:"เปิดเมนูหมวด",brand_click:"กดชื่อแถบบน"};
@@ -2086,6 +2312,90 @@ function renderStats(range){
     const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"})); a.download="portfolio-stats.csv"; a.click(); };
 }
 addEventListener("keydown",e=>{ if(e.key==="Escape"&&document.getElementById("stats")) closeStats(); });
+
+/* =====================================================================
+   QUICK SEARCH — every robot, project, 3D model, certificate and video in one box
+   open: Ctrl/⌘ K or "/" (keyboard) · the search button in the bar · the 🔍 in the phone top bar
+   ===================================================================== */
+const QS_SEL="#p-robots .post,#p-projects article.card,#p-design article.card,#p-videos .card,#p-certs .cert,#p-about .card";
+let qsItems=[], qsSel=0, qsShown=[];
+const qsEl=document.getElementById("qs"), qsIn=document.getElementById("qsIn"), qsList=document.getElementById("qsList");
+const qsNorm=x=>(x||"").toLowerCase().replace(/\s+/g," ").trim();
+const qsEsc=x=>String(x).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function qsIndex(){
+  if(certF!=="all"){ certF="all"; renderCerts(); } /* search always sees every certificate */
+  qsItems=[...document.querySelectorAll(QS_SEL)].map(el=>{
+    const tab=el.closest(".panel").id.slice(2);
+    const pickSel=el.classList.contains("post")?[".tag-medal"]:["h3",".t b","h2",".tag-medal","b"];
+    let tEl=null; for(const q of pickSel){ tEl=el.querySelector(q); if(tEl)break; }
+    const title=(tEl?tEl.textContent:"").replace(/\s+/g," ").trim()||T(UI[tab]);
+    const sub=(el.querySelector(".post-head small,.t span")||{}).textContent||"";
+    return {el,tab,title,sub:sub.trim(),hay:qsNorm(el.textContent+" "+(el.dataset.item||el.dataset.name||""))};
+  }).filter(x=>x.title);
+}
+function qsMark(text,terms){
+  let h=qsEsc(text);
+  terms.forEach(t=>{ if(!t)return; const i=h.toLowerCase().indexOf(qsEsc(t).toLowerCase()); if(i>-1) h=h.slice(0,i)+"<mark>"+h.slice(i,i+qsEsc(t).length)+"</mark>"+h.slice(i+qsEsc(t).length); });
+  return h;
+}
+function qsRender(){
+  const q=qsNorm(qsIn.value), terms=q.split(" ").filter(Boolean);
+  if(!terms.length){ /* nothing typed yet: jump straight to a section */
+    qsShown=TABS.map(([k])=>({tab:k,title:T(UI[k]),sub:"",section:true}));
+  }else{
+    qsShown=qsItems.filter(x=>terms.every(t=>x.hay.includes(t)))
+      .map(x=>({...x,score:terms.reduce((a,t)=>a+(qsNorm(x.title).includes(t)?2:0),0)}))
+      .sort((a,b)=>b.score-a.score).slice(0,40);
+  }
+  qsSel=0;
+  const head=terms.length?`<div class="qs-h">${qsShown.length?(L==="th"?`พบ ${qsShown.length} รายการ`:`${qsShown.length} result${qsShown.length>1?"s":""}`):""}</div>`:`<div class="qs-h">${L==="th"?"ไปที่หมวด":"Go to section"}</div>`;
+  qsList.innerHTML=head+(qsShown.length?qsShown.map((x,i)=>`<button class="qs-it ${i===0?"on":""}" data-qi="${i}" role="option"><span class="qs-ic">${tabIc[x.tab]}</span>
+      <span class="qs-tx"><b>${x.section?qsEsc(x.title):qsMark(x.title,terms)}</b>${x.section?"":`<small>${qsEsc(T(UI[x.tab]))}${x.sub?" · "+qsEsc(x.sub):""}</small>`}</span>
+      <svg class="qs-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>`).join("")
+    :`<div class="qs-empty">${L==="th"?"ไม่พบผลลัพธ์ — ลองคำอื่น เช่น WRG, AI, ESP32, ชนะเลิศ":"No results — try e.g. WRG, AI, ESP32, champion"}</div>`);
+}
+function qsMove(d){ const its=qsList.querySelectorAll(".qs-it"); if(!its.length)return;
+  qsSel=(qsSel+d+its.length)%its.length; its.forEach((b,i)=>b.classList.toggle("on",i===qsSel)); its[qsSel].scrollIntoView({block:"nearest"}); }
+function qsPick(i){
+  const x=qsShown[i]; if(!x)return;
+  const q=qsIn.value.trim(); closeSearch();
+  if(q) track("search",{search_term:q.slice(0,90),item_name:x.section?("Section: "+x.tab):(x.el.dataset.item||x.el.dataset.name||x.title).slice(0,90)});
+  NAV_VIA="search";
+  if(x.section){ go(x.tab); return; }
+  if(x.tab==="certs"){ go("certs"); requestAnimationFrame(()=>{ const el=x.el.isConnected?x.el:null; if(!el)return;
+      scrollTo({top:anchorTop(el),behavior:"auto"}); openLB(el.dataset.g,+el.dataset.i); }); return; }
+  const a="q-"+i+"-"+Date.now(); x.el.setAttribute("data-anchor",a); go(x.tab,a);
+}
+let qsPrevFocus=null;
+function openSearch(){
+  if(!qsEl)return; closeSheet(); qsPrevFocus=document.activeElement;
+  qsIndex(); qsIn.value=""; qsIn.placeholder=L==="th"?"ค้นหาผลงาน รางวัล โครงงาน เกียรติบัตร…":"Search robots, awards, projects, certificates…";
+  document.getElementById("qsClose").textContent=L==="th"?"ปิด":"Close";
+  qsRender(); qsEl.classList.add("open"); qsEl.setAttribute("aria-hidden","false"); document.body.style.overflow="hidden";
+  setTimeout(()=>qsIn.focus(),30);
+}
+function closeSearch(){ if(!qsEl.classList.contains("open"))return; qsEl.classList.remove("open"); qsEl.setAttribute("aria-hidden","true"); document.body.style.overflow="";
+  if(qsPrevFocus&&qsPrevFocus.focus) qsPrevFocus.focus({preventScroll:true}); }
+qsIn.addEventListener("input",qsRender);
+qsIn.addEventListener("keydown",e=>{
+  if(e.key==="ArrowDown"){e.preventDefault();qsMove(1);} else if(e.key==="ArrowUp"){e.preventDefault();qsMove(-1);}
+  else if(e.key==="Enter"){e.preventDefault();qsPick(qsSel);} else if(e.key==="Escape"){closeSearch();} });
+qsList.addEventListener("click",e=>{ const b=e.target.closest("[data-qi]"); if(b) qsPick(+b.dataset.qi); });
+qsEl.addEventListener("click",e=>{ if(e.target===qsEl||e.target.closest("#qsClose")) closeSearch(); });
+document.addEventListener("click",e=>{ if(e.target.closest("[data-search]")) openSearch(); });
+
+/* keyboard: Ctrl/⌘K or / opens search · ← → switch section (tablet/desktop) */
+addEventListener("keydown",e=>{
+  const typing=/^(INPUT|TEXTAREA|SELECT)$/.test((e.target.tagName||""))||e.target.isContentEditable;
+  const modal=qsEl.classList.contains("open")||lb.classList.contains("open")||document.getElementById("stats")&&document.getElementById("stats").offsetParent!==null||document.querySelector(".offcanvas.show");
+  if((e.key==="k"||e.key==="K")&&(e.ctrlKey||e.metaKey)){ e.preventDefault(); qsEl.classList.contains("open")?closeSearch():openSearch(); return; }
+  if(typing||modal||e.altKey||e.ctrlKey||e.metaKey) return;
+  if(e.key==="/"){ e.preventDefault(); openSearch(); return; }
+  if((e.key==="ArrowRight"||e.key==="ArrowLeft")&&!e.target.closest(".j-track,.stl-viewer,video")){
+    const i=TABS.findIndex(x=>x[0]===cur)+(e.key==="ArrowRight"?1:-1);
+    if(i>=0&&i<TABS.length){ NAV_VIA="keyboard"; go(TABS[i][0]); }
+  }
+});
 
 render();go(cur);
 observeReveals();
