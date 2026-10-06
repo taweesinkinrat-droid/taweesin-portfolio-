@@ -457,8 +457,12 @@ footer .priv{flex-basis:100%;font-size:.72rem;color:#6f7d88;opacity:.85}
 @media (min-width:701px) and (max-width:991.98px){.has-ink .tab-ink{border-radius:12px}}
 /* soft cyan spotlight that follows the mouse across cards (desktop) */
 @media (hover:hover) and (pointer:fine){
-  .card::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s;
-    background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),rgba(34,211,238,.075),transparent 45%)}
+  /* the glow is a fixed-size disc slid around with transform — composited, so even a very tall card
+     (the video project) never has to be repainted while the mouse moves */
+  .card{overflow:clip}
+  .card::after{content:"";position:absolute;left:0;top:0;width:840px;height:840px;margin:-420px 0 0 -420px;border-radius:50%;pointer-events:none;
+    opacity:0;transition:opacity .3s;background:radial-gradient(circle closest-side,rgba(34,211,238,.075),transparent 45%);
+    transform:translate3d(var(--mx,50%),var(--my,50%),0);will-change:transform}
   .card:hover::after{opacity:1}
   #p-design .card::after{display:none}
   .hl-item{position:relative;overflow:hidden}
@@ -889,7 +893,7 @@ html{background-color:var(--bg);background-repeat:no-repeat;
   background-image:radial-gradient(900px 640px at 6% 0,var(--amb),transparent 70%),radial-gradient(760px 600px at 100% 120px,rgba(139,92,246,.14),transparent 70%)}
 body{background:transparent}
 .card{--bs-card-bg:transparent;background:var(--glass);border-color:var(--glass-line);box-shadow:var(--glass-hi)}
-@media (hover:hover){.card:hover{border-color:rgba(255,255,255,.16);box-shadow:var(--glass-hi),0 18px 40px -18px rgba(0,0,0,.85),0 0 0 1px rgba(34,211,238,.08)}}
+@media (hover:hover){.card.tall:hover{transform:none}.card:hover{border-color:rgba(255,255,255,.16);box-shadow:var(--glass-hi),0 18px 40px -18px rgba(0,0,0,.85),0 0 0 1px rgba(34,211,238,.08)}}
 .cert,.hl-item,.filter,.tab-search,.lang,.chip,.qs-ic,.ph-nav button,.ab-btn,.sa:not(.sa-main),.sheet-grid .tab:not(.on),.mb-arrow{
   background:var(--glass-2);border-color:var(--glass-line);box-shadow:var(--glass-hi)}
 .story{background:rgba(255,255,255,.025);border-color:var(--glass-line)}
@@ -969,6 +973,14 @@ details.feat[open] summary::before{transform:rotate(45deg)}
 @media (max-width:700px){.toc-chips{--chip-top:var(--ab-h)}}
 @media (min-width:701px){.toc-chips{--chip-top:var(--tabs-h,76px);margin:0 0 4px;padding:8px 0 12px}}
 .stack>.toc-chips+*{margin-top:4px}
+/* portrait photos in a landscape tile: keep the face in frame */
+.pics img[src*="tbn1-trophy"]{object-position:50% 12%}
+/* featured video project: two columns on wide screens (shorter page, smaller video to scroll past) */
+.proj-feat{display:grid;grid-template-columns:minmax(0,1fr);gap:4px}
+@media (max-width:991.98px){.proj-feat .pf-media{display:contents}.proj-feat .proj-video{order:1}.proj-feat .pf-body{order:2}.proj-feat .pf-media>.pics{order:3}}
+@media (min-width:992px){.proj-feat{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:26px;align-items:start}
+  .proj-feat .pf-media{position:sticky;top:calc(var(--tabs-h,72px) + 16px)}
+  .proj-feat .proj-video{margin:0;border-radius:12px}}
 /* ---- smoothness ---- */
 .is-scrolling main,.is-scrolling .hero{pointer-events:none}
 .appbar,.bnav,.to-top,.progress-top{will-change:transform}
@@ -1200,7 +1212,6 @@ const PROJECTS = [
         en:"Team project with 2 classmates (Natsaron Jaiyen, Wonlaphop Noicharoen); advisors: Teera Senma and Sarayut Wikhetkit, Uthaidhammanuwat Witthaya School"},
    result:{th:"🏅 ผลประเมินความพึงพอใจจากผู้เชี่ยวชาญ 5 ท่าน เฉลี่ย 4.82/5.00 อยู่ในเกณฑ์มากที่สุด",en:"🏅 Expert satisfaction rating: 4.82/5.00 (highest level), from 5 evaluators"},
    story:[
-     ["what",{th:"การแข่งขันวิทยาศาสตร์วิชาการ ครั้งที่ 3 ชิงถ้วยพระราชทานฯ ประเภทสิ่งประดิษฐ์ ระดับ ม.ปลาย (มิ.ย. 2567)",en:"3rd Academic Science Competition for the Royal Trophy — invention category, upper secondary (June 2024)"}],
      ["problem",{th:"เครื่องใช้ไฟฟ้าในองค์กร เช่น แอร์ พัดลม ทีวี และหลอดไฟ มักถูกเปิดก่อนเวลาหรือลืมปิด ทำให้สิ้นเปลืองพลังงาน",en:"Appliances in organisations — air conditioners, fans, TVs and lights — are often switched on too early or left on, wasting energy."}],
      ["role",{th:"ทำงานเป็นทีม 3 คน — รับหน้าที่ประกอบกล่องควบคุม ทั้งบัดกรีสายไฟ ต่อวงจร และเจาะกล่องเพื่อติดตั้งอุปกรณ์",en:"Team of 3 — I assembled the control box: soldering the wiring, connecting the circuits and drilling the enclosure to mount the parts."}],
      ["did",{th:"สร้างกล่องควบคุมไฟฟ้าด้วย NodeMCU ESP8266 และรีเลย์ 4 ช่อง ใช้งานได้ 4 แบบ ได้แก่ ตั้งเวลาเปิด-ปิด สั่งผ่านแอป Blynk กดสวิตช์ที่ตัวกล่อง และแจ้งสถานะพร้อมบันทึกการใช้งานแบบเรียลไทม์",en:"Built an electrical control box with a NodeMCU ESP8266 and a 4-channel relay that works 4 ways: scheduled on/off, control from the Blynk app, switches on the box, and real-time status with usage logging."}],
@@ -1507,17 +1518,24 @@ function render(){
         <div class="specs">${p.tags.map(t=>`<span class="chip">${t}</span>`).join("")}</div>
       </div>
     </article></div>`;
-    return `<div class="${p.featured?"col-12":"col-md-6"}"><article class="card h-100" data-item="Project: ${typeof p.title==="string"?p.title:p.title.en}">
-      ${p.video?`<div class="proj-video"><video controls preload="metadata" playsinline ${p.video.poster?`poster="${p.video.poster}"`:""} onloadedmetadata="if(!this.currentTime)this.currentTime=0.5"><source src="${p.video.src}" type="video/mp4"></video></div>`
-        :`<div class="media-top">${p.img?img(p.img,k,0):`<div class="bp">${ART.chassis}</div>`}</div>`}
-      ${p.badge?`<span class="tag-medal m-gold">🏆 ${T(p.badge)}</span>`:""}
+    const pMedia=p.video?`<div class="proj-video"><video controls preload="metadata" playsinline ${p.video.poster?`poster="${p.video.poster}"`:""} onloadedmetadata="if(!this.currentTime)this.currentTime=0.5"><source src="${p.video.src}" type="video/mp4"></video></div>`
+        :`<div class="media-top">${p.img?img(p.img,k,0):`<div class="bp">${ART.chassis}</div>`}</div>`;
+    const pMore=p.more?`<div class="pics n${Math.min(p.more.length,3)===3?2:p.more.length}" style="margin-top:10px">${p.more.slice(0,2).map((s,i)=>img(s,k,i+(p.img?1:0))).join("")}</div>`:"";
+    const pBody=`${p.badge?`<span class="tag-medal m-gold">🏆 ${T(p.badge)}</span>`:""}
       <h3>${T(p.title)}</h3><p class="muted" style="margin:6px 0">${T(p.text)}</p>
       ${p.story?storyHTML(p)+featHTML(p):(p.list?`<ul class="dots">${T(p.list).map(x=>`<li>${x}</li>`).join("")}</ul>`:"")}
       ${p.team?`<p class="proj-team"><b>${L==="th"?"ทีมงาน":"Team"}:</b> ${T(p.team)}</p>`:""}
       ${p.result&&!p.story?`<p class="proj-result">${T(p.result)}</p>`:""}
       <div class="specs">${p.tags.map(t=>`<span class="chip">${t}</span>`).join("")}</div>
-      ${p.pdf?`<a class="btn btn-soft pdf-btn" href="${p.pdf}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>${L==="th"?"อ่านรายงานฉบับเต็ม (PDF)":"Read the full report (PDF)"}</a>`:""}
-      ${p.more?`<div class="pics n${Math.min(p.more.length,3)===3?2:p.more.length}" style="margin-top:10px">${p.more.slice(0,2).map((s,i)=>img(s,k,i+(p.img?1:0))).join("")}</div>`:""}
+      ${p.pdf?`<a class="btn btn-soft pdf-btn" href="${p.pdf}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>${L==="th"?"อ่านรายงานฉบับเต็ม (PDF)":"Read the full report (PDF)"}</a>`:""}`;
+    /* the featured project with a video: video + photos on the left, the story on the right (wide screens) */
+    if(p.featured&&p.video) return `<div class="col-12"><article class="card proj-feat" data-item="Project: ${typeof p.title==="string"?p.title:p.title.en}">
+      <div class="pf-media">${pMedia}${pMore}</div><div class="pf-body">${pBody}</div>
+    </article></div>`;
+    return `<div class="${p.featured?"col-12":"col-md-6"}"><article class="card h-100" data-item="Project: ${typeof p.title==="string"?p.title:p.title.en}">
+      ${pMedia}
+      ${pBody}
+      ${pMore}
     </article></div>`}).join("")}</div>`;
 
   /* design */
@@ -1763,7 +1781,7 @@ if(matchMedia("(max-width:700px)").matches && !sessionStorage.getItem("hideSwipe
   let sx0=0, sy0=0, active=false, skip=false;
   mainEl.addEventListener("touchstart",e=>{
     if(lb.classList.contains("open")){active=false;return;}
-    skip=!!e.target.closest(".stl-viewer,.filters,.j-track,.vid,video,iframe"); /* let 3D models, chip rows, and video players (including their seek bar) handle their own gestures */
+    skip=!!e.target.closest(".stl-viewer,.filters,.toc-chips,.j-track,.vid,video,iframe"); /* let 3D models, chip rows, and video players (including their seek bar) handle their own gestures */
     if(skip){active=false;return;}
     sx0=e.touches[0].clientX; sy0=e.touches[0].clientY; active=true;
   },{passive:true});
@@ -2136,7 +2154,8 @@ if(GS && matchMedia("(hover:hover) and (pointer:fine)").matches){
   let pm=null, pmTick=false;
   document.addEventListener("pointermove",e=>{ pm=e; if(pmTick)return; pmTick=true; requestAnimationFrame(()=>{ pmTick=false;
     const c=pm.target.closest&&pm.target.closest(".card"); if(c){ const r=c.getBoundingClientRect();
-      c.style.setProperty("--mx",(pm.clientX-r.left)+"px"); c.style.setProperty("--my",(pm.clientY-r.top)+"px"); }
+      c.style.setProperty("--mx",(pm.clientX-r.left)+"px"); c.style.setProperty("--my",(pm.clientY-r.top)+"px");
+      if(r.height>900&&!c.classList.contains("tall")) c.classList.add("tall"); }
     const ct=pm.target.closest&&pm.target.closest(".cert.in"); if(ct){ const r=ct.getBoundingClientRect();
       const rx=((pm.clientY-r.top)/r.height-.5)*-8, ry=((pm.clientX-r.left)/r.width-.5)*8;
       gsap.to(ct,{rotationX:rx,rotationY:ry,y:-4,transformPerspective:800,duration:.35,ease:"power2.out",overwrite:"auto"}); }
