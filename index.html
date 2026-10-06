@@ -443,9 +443,9 @@ footer .priv{flex-basis:100%;font-size:.72rem;color:#6f7d88;opacity:.85}
 .to-top{background:conic-gradient(#e9fdff var(--p,0deg),rgba(6,34,43,.35) 0)}
 .to-top::before{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--cyan)}
 .to-top svg{position:relative}
-/* sliding highlight behind the active section tab (desktop) */
+/* sliding highlight behind the active section tab (tablet + desktop) */
 .tab-ink{display:none}
-@media (min-width:992px){
+@media (min-width:701px){
   .has-ink{position:relative}
   .has-ink .tab{position:relative;z-index:1}
   .has-ink .tab.on{background:transparent;border-color:transparent;box-shadow:none}
@@ -454,6 +454,7 @@ footer .priv{flex-basis:100%;font-size:.72rem;color:#6f7d88;opacity:.85}
     transition:transform .45s cubic-bezier(.22,.61,.36,1),width .45s cubic-bezier(.22,.61,.36,1),height .3s ease,opacity .3s;
     will-change:transform,width} /* own GPU layer: the slide keeps moving even while a big page is being laid out */
 }
+@media (min-width:701px) and (max-width:991.98px){.has-ink .tab-ink{border-radius:12px}}
 /* soft cyan spotlight that follows the mouse across cards (desktop) */
 @media (hover:hover) and (pointer:fine){
   .card::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s;
@@ -874,6 +875,77 @@ footer .priv{flex-basis:100%;font-size:.72rem;color:#6f7d88;opacity:.85}
   .sa svg{width:21px;height:21px;color:var(--cyan)}
   .sa-main{background:var(--cyan-soft);border-color:rgba(34,211,238,.45);color:var(--cyan-2)}
 }
+/* =====================================================================
+   GLASS — frosted cards over a soft coloured glow (no per-card blur, so it stays smooth on phones)
+   ===================================================================== */
+:root{--amb:rgba(34,211,238,.26);
+  --glass:linear-gradient(155deg,rgba(255,255,255,.09) 0%,rgba(255,255,255,.028) 38%,rgba(255,255,255,.012) 100%),rgba(21,26,32,.6);
+  --glass-2:linear-gradient(155deg,rgba(255,255,255,.06),rgba(255,255,255,.02)),rgba(28,34,41,.55);
+  --glass-line:rgba(255,255,255,.085);--glass-hi:inset 0 1px 0 rgba(255,255,255,.075);
+}
+/* the glow is painted into the page background itself (scrolls with the page): a fixed layer behind
+   see-through cards forced the browser to re-composite the whole screen on every scroll frame */
+html{background-color:var(--bg);background-repeat:no-repeat;
+  background-image:radial-gradient(900px 640px at 6% 0,var(--amb),transparent 70%),radial-gradient(760px 600px at 100% 120px,rgba(139,92,246,.14),transparent 70%)}
+body{background:transparent}
+.card{--bs-card-bg:transparent;background:var(--glass);border-color:var(--glass-line);box-shadow:var(--glass-hi)}
+@media (hover:hover){.card:hover{border-color:rgba(255,255,255,.16);box-shadow:var(--glass-hi),0 18px 40px -18px rgba(0,0,0,.85),0 0 0 1px rgba(34,211,238,.08)}}
+.cert,.hl-item,.filter,.tab-search,.lang,.chip,.qs-ic,.ph-nav button,.ab-btn,.sa:not(.sa-main),.sheet-grid .tab:not(.on),.mb-arrow{
+  background:var(--glass-2);border-color:var(--glass-line);box-shadow:var(--glass-hi)}
+.story{background:rgba(255,255,255,.025);border-color:var(--glass-line)}
+.filter.on{background:linear-gradient(155deg,rgba(34,211,238,.24),rgba(34,211,238,.08));border-color:rgba(34,211,238,.7);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 6px 18px -8px rgba(34,211,238,.6)}
+.btn-soft{--bs-btn-bg:transparent;background:var(--glass-2);--bs-btn-border-color:var(--glass-line);box-shadow:var(--glass-hi)}
+.btn-cyan{background-image:linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,0) 55%)}
+.ph-ic{box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 8px 20px -10px rgba(34,211,238,.5)}
+
+/* frosted bars and sheets: real blur only on these few fixed surfaces */
+.tabs{background:rgba(16,20,24,.58);-webkit-backdrop-filter:saturate(1.6) blur(18px);backdrop-filter:saturate(1.6) blur(18px);
+  border-bottom:1px solid rgba(255,255,255,.07);box-shadow:inset 0 -1px 0 rgba(0,0,0,.25)}
+@media (max-width:700px){.tabs{background:none;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none}}
+.qs-box,.sheet.offcanvas-bottom{background:linear-gradient(160deg,rgba(255,255,255,.07),rgba(255,255,255,.02)),rgba(22,27,33,.82);
+  -webkit-backdrop-filter:saturate(1.5) blur(20px);backdrop-filter:saturate(1.5) blur(20px);border-color:rgba(255,255,255,.1)}
+.sheet.offcanvas-bottom{--bs-offcanvas-bg:transparent;box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 -20px 50px -20px rgba(0,0,0,.9)}
+@media (max-width:700px){
+  .appbar,.bnav{background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015)),#14181d}
+  .appbar{border-bottom-color:rgba(255,255,255,.08)}
+  .bnav{border-top-color:rgba(255,255,255,.08);box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 -12px 30px -16px rgba(0,0,0,.95)}
+}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .tabs{background:rgba(16,20,24,.95)} .qs-box,.sheet.offcanvas-bottom{background:#1a2027}
+}
+
+/* the cover photo fades out with a mask (to transparent), so it melts into the coloured glow behind it
+   instead of ending on a flat dark band. The mask sits on the still photo only — never on the animated
+   canvas — so it is drawn once and costs nothing while scrolling. */
+.cover{background:transparent}
+.cover-img{-webkit-mask-image:linear-gradient(180deg,#000 50%,transparent 96%);mask-image:linear-gradient(180deg,#000 50%,transparent 96%)}
+.cover::after{background:linear-gradient(180deg,rgba(17,20,23,0) 0%,rgba(17,20,23,.1) 40%,rgba(17,20,23,.45) 75%,rgba(17,20,23,0) 100%)!important}
+/* ---- press & slide ---- */
+#tabs,#bnav{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+@media (min-width:701px){#tabs{touch-action:pan-y}}
+#tabs.scrubbing{cursor:grabbing}
+#tabs.scrubbing .tab-ink{transition:transform .22s cubic-bezier(.22,.61,.36,1),width .22s cubic-bezier(.22,.61,.36,1),height .2s ease;
+  box-shadow:0 6px 24px -4px rgba(34,211,238,.9),0 0 0 4px rgba(34,211,238,.14)}
+#tabs.scrubbing .tab.on:not(.hot){color:var(--muted)}
+#tabs.scrubbing .tab.hot{color:#06222b}
+#tabs .tab{transition:background .15s,color .15s,border-color .15s,transform .2s cubic-bezier(.34,1.56,.64,1)}
+#tabs.scrubbing .tab.hot{transform:translateY(-1px) scale(1.04)}
+@media (max-width:700px){
+  #bnav{touch-action:none}
+  .bn-ink{position:absolute;left:0;top:0;width:0;height:0;border-radius:999px;pointer-events:none;z-index:0;
+    background:linear-gradient(180deg,#5ee6f7,var(--cyan));box-shadow:0 4px 16px -4px rgba(34,211,238,.85),inset 0 1px 0 rgba(255,255,255,.45);
+    transition:transform .42s cubic-bezier(.34,1.32,.64,1),width .3s ease;will-change:transform}
+  .bn-ic{position:relative;z-index:1}
+  .bn.on .bn-ic{background:transparent;box-shadow:none}
+  #bnav.scrubbing .bn.on:not(.hot){color:var(--muted)}
+  #bnav.scrubbing .bn.on:not(.hot) .bn-ic{color:var(--muted)}
+  #bnav.scrubbing .bn.hot{color:var(--text)}
+  #bnav.scrubbing .bn.hot .bn-ic{color:#06222b}
+  #bnav.scrubbing .bn-ink{transition:transform .2s cubic-bezier(.22,.61,.36,1);box-shadow:0 4px 22px -2px rgba(34,211,238,.95),0 0 0 5px rgba(34,211,238,.15)}
+  #bnav.scrubbing .bn.hot .bn-ic svg{transform:translateY(-2px) scale(1.12)}
+  .bn.on .bn-ic{color:#06222b}
+}
+@media print{html{background-image:none!important}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -1936,13 +2008,13 @@ if(GS && matchMedia("(hover:hover) and (pointer:fine)").matches){
 /* The highlight is positioned with a CSS transition rather than a fixed-target tween: whenever the
    tabs shift (e.g. the name slides into the bar after a jump), the next call simply retargets the
    running transition, so the highlight always ends exactly on the active tab. */
-function moveInk(){
+function moveInk(target){
   const bar=document.getElementById("tabs"); if(!GS){ bar.classList.remove("has-ink"); return; }
   bar.classList.add("has-ink");
   let ink=bar.querySelector(".tab-ink"), fresh=false;
   if(!ink){ ink=document.createElement("span"); ink.className="tab-ink"; bar.prepend(ink); fresh=true;
     if(inkRO) bar.querySelectorAll(".tab").forEach(t=>inkRO.observe(t)); }
-  const on=bar.querySelector(".tab.on"); if(!on||on.offsetWidth===0) return;
+  const on=(target instanceof Element)?target:(bar.querySelector(".tab.hot")||bar.querySelector(".tab.on")); if(!on||on.offsetWidth===0) return;
   if(fresh) ink.style.transition="none";
   ink.style.transform=`translate(${on.offsetLeft}px,${on.offsetTop}px)`;
   ink.style.width=on.offsetWidth+"px"; ink.style.height=on.offsetHeight+"px";
@@ -2015,13 +2087,29 @@ const chevL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-w
 const chevR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>';
 function renderBnav(){
   const nav=document.getElementById("bnav"); if(!nav)return;
-  const inMore=!BN_MAIN.includes(cur);
-  nav.innerHTML=BN_MAIN.map(k=>`<button class="bn ${k===cur?"on":""}" data-t="${k}" aria-label="${T(UI[k])}"><span class="bn-ic">${tabIc[k]}</span><span>${T(UI[k])}</span></button>`).join("")
-    +`<button class="bn bn-more ${inMore?"on":""}" id="bnMore" aria-label="${L==="th"?"หมวดทั้งหมด":"All sections"}"><span class="bn-ic">${inMore?tabIc[cur]:moreIc}</span><span>${inMore?T(UI[cur]):(L==="th"?"เพิ่มเติม":"More")}</span></button>`;
+  nav.innerHTML=`<span class="bn-ink" aria-hidden="true"></span>`+BN_MAIN.map(k=>`<button class="bn" data-t="${k}" aria-label="${T(UI[k])}"><span class="bn-ic">${tabIc[k]}</span><span class="bn-l">${T(UI[k])}</span></button>`).join("")
+    +`<button class="bn bn-more" id="bnMore" aria-label="${L==="th"?"หมวดทั้งหมด":"All sections"}"><span class="bn-ic"></span><span class="bn-l"></span></button>`;
+  nav.dataset.fresh="1"; syncBnav();
 }
+function bnInk(el){
+  const nav=document.getElementById("bnav"), ink=nav&&nav.querySelector(".bn-ink"), ic=el&&el.querySelector(".bn-ic"); if(!ink||!ic||!ic.offsetWidth)return;
+  if(nav.dataset.fresh){ ink.style.transition="none"; }
+  ink.style.transform=`translate(${ic.offsetLeft}px,${ic.offsetTop}px)`; ink.style.width=ic.offsetWidth+"px"; ink.style.height=ic.offsetHeight+"px";
+  if(nav.dataset.fresh){ void ink.offsetWidth; ink.style.transition=""; delete nav.dataset.fresh; }
+}
+function syncBnav(){
+  const nav=document.getElementById("bnav"); if(!nav||!nav.firstChild)return;
+  const inMore=!BN_MAIN.includes(cur), more=document.getElementById("bnMore");
+  nav.querySelectorAll(".bn[data-t]").forEach(b=>b.classList.toggle("on",b.dataset.t===cur));
+  more.classList.toggle("on",inMore);
+  more.querySelector(".bn-ic").innerHTML=inMore?tabIc[cur]:moreIc;
+  more.querySelector(".bn-l").textContent=inMore?T(UI[cur]):(L==="th"?"เพิ่มเติม":"More");
+  bnInk(nav.querySelector(".bn.on"));
+}
+addEventListener("resize",()=>{ const n=document.getElementById("bnav"); if(n) bnInk(n.querySelector(".bn.hot")||n.querySelector(".bn.on")); });
 function updatePhoneUI(){
   const i=TABS.findIndex(x=>x[0]===cur);
-  renderBnav();
+  if(!document.querySelector("#bnav .bn-ink")) renderBnav(); else syncBnav();
   const sec=document.getElementById("abSec"); if(sec) sec.textContent=T(UI[cur]);
   const ph=document.getElementById("phead");
   if(ph) ph.innerHTML=`<span class="ph-ic">${tabIc[cur]}</span><div class="ph-t"><h2>${T(UI[cur])}</h2><small>${L==="th"?"หมวด":"Section"} ${i+1} / ${TABS.length}</small></div>
@@ -2036,6 +2124,7 @@ document.addEventListener("click",e=>{
 document.getElementById("abMe").addEventListener("click",()=>scrollTo({top:0,behavior:"smooth"}));
 function updateMinibar(){
   updatePhoneUI();
+  if(typeof AMB!=="undefined") document.documentElement.style.setProperty("--amb",AMB[cur]||AMB.home);
   const i=TABS.findIndex(x=>x[0]===cur);
   document.getElementById("mbCur").innerHTML=`${TABS[i][1]}<span class="mb-name">${T(UI[cur])}</span><span class="mb-count">${i+1}/${TABS.length}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>`;
   document.getElementById("mbPrev").disabled=i<=0;
@@ -2347,6 +2436,56 @@ function renderStats(range){
     const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"})); a.download="portfolio-stats.csv"; a.click(); };
 }
 addEventListener("keydown",e=>{ if(e.key==="Escape"&&document.getElementById("stats")) closeStats(); });
+
+/* =====================================================================
+   PRESS & SLIDE — hold a tab (or the phone's bottom bar) and slide to pick a section,
+   like the segmented controls in iOS. A normal tap/click still works exactly as before.
+   ===================================================================== */
+function scrubber(box,itemSel,{onHot,onPick,onEnd}){
+  let st=null, swallow=false;
+  const itemAt=x=>{ let best=null,bd=1e9;
+    box.querySelectorAll(itemSel).forEach(el=>{ const r=el.getBoundingClientRect(); if(!r.width)return;
+      const d=x<r.left?r.left-x:x>r.right?x-r.right:0; if(d<bd){bd=d;best=el;} }); return best; };
+  const setHot=(el,first)=>{ if(!el||(!first&&el===st.hot))return;
+    if(st.hot) st.hot.classList.remove("hot"); st.hot=el; el.classList.add("hot"); onHot(el);
+    if(!first&&navigator.vibrate&&st.type!=="mouse"){ try{navigator.vibrate(7);}catch(_){} } };
+  const start=()=>{ if(!st||st.on)return; st.on=true; box.classList.add("scrubbing");
+    try{ box.setPointerCapture(st.id); }catch(_){} setHot(st.hot,true); };
+  box.addEventListener("pointerdown",e=>{ if(e.button>0)return; const it=e.target.closest(itemSel); if(!it||!box.contains(it))return;
+    st={id:e.pointerId,x:e.clientX,y:e.clientY,on:false,hot:null,type:e.pointerType};
+    st.first=it; st.t=setTimeout(()=>{ if(st&&!st.on){ st.hot=st.first; start(); } },e.pointerType==="mouse"?280:230); });
+  box.addEventListener("pointermove",e=>{ if(!st||e.pointerId!==st.id)return; const dx=e.clientX-st.x, dy=e.clientY-st.y;
+    if(!st.on){ if(Math.abs(dx)>9&&Math.abs(dx)>Math.abs(dy)*1.2){ clearTimeout(st.t); st.hot=st.first; start(); }
+      else if(Math.abs(dy)>12){ clearTimeout(st.t); st=null; } return; }
+    setHot(itemAt(e.clientX)); });
+  const end=(e,cancel)=>{ if(!st||e.pointerId!==st.id)return; clearTimeout(st.t); const s=st; st=null; if(!s.on)return;
+    box.classList.remove("scrubbing"); if(s.hot) s.hot.classList.remove("hot");
+    swallow=true; setTimeout(()=>{swallow=false;},400);
+    if(cancel||!s.hot) onEnd(); else onPick(s.hot); };
+  box.addEventListener("pointerup",e=>end(e,false));
+  box.addEventListener("pointercancel",e=>end(e,true));
+  /* touch pointers start captured by the tapped icon; moving that capture to the bar fires a
+     lostpointercapture on the icon first, which must not end the slide */
+  box.addEventListener("lostpointercapture",e=>{ if(e.target===box&&st&&st.on&&e.pointerId===st.id) end(e,false); });
+  box.addEventListener("click",e=>{ if(swallow){ e.stopPropagation(); e.preventDefault(); swallow=false; } },true);
+  box.addEventListener("contextmenu",e=>{ if(box.classList.contains("scrubbing")||e.target.closest(itemSel)) e.preventDefault(); });
+}
+/* tablet + desktop tab bar: the cyan highlight follows your pointer */
+scrubber(document.getElementById("tabs"),".tab",{
+  onHot:el=>moveInk(el),
+  onPick:el=>{ NAV_VIA="press_slide"; if(el.dataset.t===cur) moveInk(); else go(el.dataset.t); },
+  onEnd:()=>moveInk()
+});
+/* phone bottom bar: the pill slides under your thumb, a tiny buzz on each section (Android) */
+scrubber(document.getElementById("bnav"),".bn",{
+  onHot:el=>bnInk(el),
+  onPick:el=>{ NAV_VIA="press_slide"; if(el.id==="bnMore"){ bnInk(document.querySelector("#bnav .bn.on")); openSheet(); } else if(el.dataset.t===cur) syncBnav(); else go(el.dataset.t); },
+  onEnd:()=>syncBnav()
+});
+
+/* each section tints the glow behind the glass a little differently */
+var AMB={home:"rgba(34,211,238,.26)",robots:"rgba(245,196,81,.2)",projects:"rgba(167,139,250,.24)",design:"rgba(45,212,191,.22)",
+  certs:"rgba(245,196,81,.2)",photos:"rgba(244,114,182,.2)",videos:"rgba(248,113,113,.19)",about:"rgba(56,189,248,.24)"};
 
 /* =====================================================================
    QUICK SEARCH — every robot, project, 3D model, certificate and video in one box
