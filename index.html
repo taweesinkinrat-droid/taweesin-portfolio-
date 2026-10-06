@@ -945,6 +945,9 @@ body{background:transparent}
   #bnav.scrubbing .bn.hot .bn-ic svg{transform:translateY(-2px) scale(1.12)}
   .bn.on .bn-ic{color:#06222b}
 }
+/* ---- smoothness ---- */
+.is-scrolling main,.is-scrolling .hero{pointer-events:none}
+.appbar,.bnav,.to-top,.progress-top{will-change:transform}
 @media print{html{background-image:none!important}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -1050,7 +1053,7 @@ body{background:transparent}
   <button class="lb-btn lb-close" id="lbClose" aria-label="close">✕</button>
   <button class="lb-btn lb-prev" id="lbPrev" aria-label="previous">‹</button>
   <button class="lb-btn lb-next" id="lbNext" aria-label="next">›</button>
-  <img id="lbImg" alt="">
+  <img id="lbImg" alt="" decoding="async">
   <div class="cap"><b id="lbT"></b><br><span id="lbS"></span></div>
 </div>
 
@@ -1308,7 +1311,11 @@ const ART={
 /* lightbox groups */
 const GROUPS={}; let gid=0;
 function grp(list){const k="g"+(gid++);GROUPS[k]=list;return k}
-const img=(src,k,i,alt="")=>`<img src="${src}" loading="lazy" alt="${alt}" data-g="${k}" data-i="${i}">`;
+/* grids and cards show a light 800px copy from images/thumbs/ (≈⅓ of the pixels to decode, so scrolling
+   stays smooth); the lightbox still opens the full-size original. If a thumb is missing, the original loads. */
+const TH=src=>String(src).replace(/^images\/(photos|certs)\//,"images/thumbs/$1/");
+window.thumbFail=el=>{ el.onerror=null; el.src=el.src.replace("/images/thumbs/","/images/"); };
+const img=(src,k,i,alt="")=>`<img src="${TH(src)}" loading="lazy" decoding="async" onerror="thumbFail(this)" alt="${alt}" data-g="${k}" data-i="${i}">`;
 function pics(list){const k=grp(list.map(s=>({src:s})));const n=Math.min(list.length,4);return `<div class="pics n${n}">${list.slice(0,4).map((s,i)=>img(s,k,i)).join("")}</div>`}
 
 function post(r){
@@ -1475,7 +1482,7 @@ function render(){
   document.getElementById("p-design").innerHTML=`<p class="lead-note" data-anchor="design-top">${L==="th"?"ออกแบบด้วย SketchUp และ Onshape แล้วพิมพ์ 3D ไปใช้กับหุ่นจริง — หมุนดูโมเดลแต่ละชิ้นได้เลย":"Designed in SketchUp and Onshape, then 3D-printed and tested on real robots. Rotate any model below to inspect it."}</p>
    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3 g-lg-4">${DESIGNS.map(d=>`<div class="col"><article class="card h-100" data-item="3D: ${d.title.en}"><div class="media-top">${
      d.stl?`<div class="stl-viewer" data-stl="${d.stl}"><span class="stl-tag">3D</span><div class="stl-loading">${L==="th"?"กำลังโหลดโมเดล 3D…":"Loading 3D model…"}</div></div>`
-     :d.src?`<img src="${d.src}">`:`<div class="bp">${ART[d.art]}</div>`
+     :d.src?`<img src="${TH(d.src)}" loading="lazy" decoding="async" onerror="thumbFail(this)" alt="">`:`<div class="bp">${ART[d.art]}</div>`
    }</div><h3>${T(d.title)}</h3><p class="muted">${T(d.text)}</p></article></div>`).join("")}</div>`;
 
   renderCerts();
@@ -1511,7 +1518,7 @@ function renderCerts(){
   const col={champ:"var(--gold)",award:"var(--silver)",join:"var(--cyan)",course:"#a78bfa"};
   const oldF=document.querySelector("#p-certs .filters"), keepX=oldF?oldF.scrollLeft:0;
   document.getElementById("p-certs").innerHTML=`<div class="filters" data-anchor="certs-top">${keys.map(x=>`<button class="filter ${x===certF?"on":""}" data-f="${x}">${T(UI[x])}<span class="n">${x==="all"?CERTS.length:CERTS.filter(c=>c.type===x).length}</span></button>`).join("")}</div>
-   <div class="row row-cols-2 row-cols-md-3 row-cols-xl-4 g-2 g-md-3">${list.map((c,i)=>`<div class="col"><div class="cert" data-g="${k}" data-i="${i}" data-name="Certificate: ${c.title.en.replace(/"/g,"'")} (${c.year})"><img src="${c.src}" loading="lazy" alt=""><div class="t"><b><span class="dot" style="background:${col[c.type]}"></span>${T(c.title)}</b><span>${L==="th"?"พ.ศ. ":""}${c.year}</span></div></div></div>`).join("")}</div>`;
+   <div class="row row-cols-2 row-cols-md-3 row-cols-xl-4 g-2 g-md-3">${list.map((c,i)=>`<div class="col"><div class="cert" data-g="${k}" data-i="${i}" data-name="Certificate: ${c.title.en.replace(/"/g,"'")} (${c.year})"><img src="${TH(c.src)}" loading="lazy" decoding="async" onerror="thumbFail(this)" alt=""><div class="t"><b><span class="dot" style="background:${col[c.type]}"></span>${T(c.title)}</b><span>${L==="th"?"พ.ศ. ":""}${c.year}</span></div></div></div>`).join("")}</div>`;
   { const f=document.querySelector("#p-certs .filters"), on=f&&f.querySelector(".filter.on");
     if(f){ f.scrollLeft=keepX; /* keep the chip row where it was, then nudge the chosen chip fully into view */
       if(on){ const l=on.getBoundingClientRect().left-f.getBoundingClientRect().left+f.scrollLeft, r=l+on.offsetWidth;
@@ -1605,7 +1612,7 @@ function scrollToAnchor(t,anchor){
 /* ---------- videos: click-to-play, only one plays at a time ---------- */
 let activeVideoEl=null;
 function posterHTML(yt){
-  return `<div class="vid-poster" data-yt="${yt}"><img src="https://img.youtube.com/vi/${yt}/hqdefault.jpg" loading="lazy" alt="">
+  return `<div class="vid-poster" data-yt="${yt}"><img src="https://img.youtube.com/vi/${yt}/hqdefault.jpg" loading="lazy" decoding="async" alt="">
     <span class="vid-play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span></div>`;
 }
 function stopActiveVideo(){
@@ -1645,6 +1652,7 @@ document.querySelectorAll(".lang button").forEach(b=>b.onclick=()=>{L=b.dataset.
 let LB=[],LI=0;const lb=document.getElementById("lb");
 function openLB(k,i){LB=GROUPS[k]||[];LI=i;showLB();lb.classList.add("open");document.body.style.overflow="hidden"}
 function showLB(){const it=LB[LI];if(!it)return;document.getElementById("lbImg").src=it.src;
+  [1,-1].forEach(d=>{ const n=LB[(LI+d+LB.length)%LB.length]; if(n&&n.src){ const pre=new Image(); pre.decoding="async"; pre.src=n.src; } });
   if(window.gsap&&!matchMedia("(prefers-reduced-motion: reduce)").matches) gsap.fromTo("#lbImg",{opacity:0,scale:.96},{opacity:1,scale:1,duration:.35,ease:"power2.out",overwrite:true});document.getElementById("lbT").textContent=it.t||"";document.getElementById("lbS").textContent=(it.s?it.s+" · ":"")+(LI+1)+" / "+LB.length}
 function closeLB(){lb.classList.remove("open");document.body.style.overflow=""}
 const step=d=>{LI=(LI+d+LB.length)%LB.length;showLB()};
@@ -1941,6 +1949,15 @@ function runSplash(){
   setTimeout(exit,Math.max(0,1900-(performance.now()-t0)));
 }
 
+/* ---------- while the page is scrolling ----------
+   · desktop: cards don't react to the mouse passing under them (no hover lift/glow repaints mid-scroll)
+   · the cover's particle animation holds still, leaving every frame to the scroll itself */
+var SCROLLING=false, scrollIdleT=0;
+const HOVER_DEV=matchMedia("(hover:hover) and (pointer:fine)").matches;
+addEventListener("scroll",()=>{
+  if(!SCROLLING){ SCROLLING=true; if(HOVER_DEV) document.documentElement.classList.add("is-scrolling"); }
+  clearTimeout(scrollIdleT); scrollIdleT=setTimeout(()=>{ SCROLLING=false; document.documentElement.classList.remove("is-scrolling"); },160);
+},{passive:true});
 /* ---------- living cover: a few drifting points joined by faint lines (paused when off-screen) ---------- */
 function initCoverFx(){
   const cv=document.getElementById("coverFx"); if(!cv||REDUCED_FX) return;
@@ -1950,7 +1967,7 @@ function initCoverFx(){
   const size=()=>{ const r=cv.getBoundingClientRect(); W=r.width; H=r.height; cv.width=W*dpr; cv.height=H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
     const n=Math.round(Math.min(46,Math.max(16,W/34)));
     pts=Array.from({length:n},()=>({x:Math.random()*W,y:Math.random()*H*.8,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.18,r:Math.random()*1.4+.6})); };
-  const frame=t=>{ raf=run?requestAnimationFrame(frame):0; if(t-last<33)return; last=t;
+  const frame=t=>{ raf=run?requestAnimationFrame(frame):0; if(t-last<33||SCROLLING)return; last=t;
     ctx.clearRect(0,0,W,H);
     for(const p of pts){ p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>W)p.vx*=-1; if(p.y<0||p.y>H*.85)p.vy*=-1; }
     for(const q of buckets) q.length=0;
