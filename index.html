@@ -945,6 +945,30 @@ body{background:transparent}
   #bnav.scrubbing .bn.hot .bn-ic svg{transform:translateY(-2px) scale(1.12)}
   .bn.on .bn-ic{color:#06222b}
 }
+.lb-stage{position:relative;line-height:0;touch-action:none;transform-origin:50% 50%;will-change:transform;cursor:zoom-in}
+.lb-stage.zoomed{cursor:grab}
+.lb-stage img{-webkit-user-drag:none;user-select:none}
+.lb-hint{position:absolute;left:50%;top:calc(18px + env(safe-area-inset-top));transform:translate(-50%,-8px);opacity:0;pointer-events:none;
+  padding:7px 14px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:.82rem;transition:opacity .3s,transform .3s;white-space:nowrap}
+.lb-hint.show{opacity:1;transform:translate(-50%,0)}
+/* project story + collapsible feature list */
+.proj-smart .story,.card .story{margin-top:10px}
+.srow.problem b{color:#fca5a5}
+details.feat{margin:2px 0 8px}
+details.feat summary{cursor:pointer;font-size:.86rem;font-weight:600;color:var(--cyan);list-style:none;display:inline-flex;align-items:center;gap:6px;padding:4px 0}
+details.feat summary::-webkit-details-marker{display:none}
+details.feat summary::before{content:"";width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg);transition:transform .2s}
+details.feat[open] summary::before{transform:rotate(45deg)}
+/* robots page: competition index as a sticky chip row (phones & tablets) */
+.toc-chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;position:sticky;top:var(--chip-top,0px);z-index:6;
+  margin:0 -16px 4px;padding:8px 16px 12px;background:linear-gradient(var(--bg) 86%,rgba(17,20,23,0));-webkit-overflow-scrolling:touch}
+.toc-chips::-webkit-scrollbar{display:none}
+.toc-chips button{flex:0 0 auto;white-space:nowrap;height:38px;padding:0 14px;border-radius:999px;font-size:.84rem;font-weight:600;color:#c9d4db;
+  background:var(--glass-2);border:1px solid var(--glass-line);box-shadow:var(--glass-hi);transition:color .2s,border-color .2s,background .2s}
+.toc-chips button.on{color:var(--cyan-2);border-color:rgba(34,211,238,.7);background:linear-gradient(155deg,rgba(34,211,238,.24),rgba(34,211,238,.08))}
+@media (max-width:700px){.toc-chips{--chip-top:var(--ab-h)}}
+@media (min-width:701px){.toc-chips{--chip-top:var(--tabs-h,76px);margin:0 0 4px;padding:8px 0 12px}}
+.stack>.toc-chips+*{margin-top:4px}
 /* ---- smoothness ---- */
 .is-scrolling main,.is-scrolling .hero{pointer-events:none}
 .appbar,.bnav,.to-top,.progress-top{will-change:transform}
@@ -1053,7 +1077,8 @@ body{background:transparent}
   <button class="lb-btn lb-close" id="lbClose" aria-label="close">✕</button>
   <button class="lb-btn lb-prev" id="lbPrev" aria-label="previous">‹</button>
   <button class="lb-btn lb-next" id="lbNext" aria-label="next">›</button>
-  <img id="lbImg" alt="" decoding="async">
+  <div class="lb-stage" id="lbStage"><img id="lbImg" alt="" decoding="async"></div>
+  <div class="lb-hint" id="lbHint"></div>
   <div class="cap"><b id="lbT"></b><br><span id="lbS"></span></div>
 </div>
 
@@ -1084,7 +1109,8 @@ const FLAG={"🇯🇵":'<svg class="flag" viewBox="0 0 30 20" aria-label="Japan"
 const flagify=t=>String(t).replace(/🇯🇵/g,FLAG["🇯🇵"]);
 const STORY_LABEL={
   what:{th:"การแข่งขัน",en:"WHAT"}, role:{th:"หน้าที่ของผม",en:"MY ROLE"}, how:{th:"วิธีทำ",en:"HOW"},
-  result:{th:"ผลลัพธ์",en:"RESULT"}, learned:{th:"สิ่งที่ได้เรียนรู้",en:"LEARNED"}
+  result:{th:"ผลลัพธ์",en:"RESULT"}, learned:{th:"สิ่งที่ได้เรียนรู้",en:"LEARNED"},
+  problem:{th:"ปัญหา",en:"PROBLEM"}, did:{th:"สิ่งที่ทำ",en:"WHAT I BUILT"}
 };
 const ROBOTS = [
   {date:{th:"7–9 ส.ค. 2569",en:"Aug 7–9, 2026"}, medal:"gold",
@@ -1157,6 +1183,12 @@ const PROJECTS = [
    text:{th:"กล้อง AI ในห้องเรียน ตรวจจับเหตุฉุกเฉินแล้วแจ้งเตือนครูทันที",en:"An AI camera for classrooms that detects emergencies and alerts teachers instantly."},
    list:{th:["ตรวจจับคนล้มด้วย YOLO11s-pose","ตรวจจับควัน ไฟ และผู้ต้องสงสัย (ถ่ายรูปและเทรนโมเดลเอง)","เซนเซอร์ MQ-2 และ PIR บน ESP32","เว็บแดชบอร์ด Flask อัปเดตเรียลไทม์ผ่าน MQTT over WebSocket"],
          en:["Fall detection with YOLO11s-pose","Smoke, fire and suspicious-person detection, trained on images I collected myself","MQ-2 and PIR sensors on ESP32","Flask dashboard with real-time MQTT over WebSocket"]},
+   story:[
+     ["problem",{th:"ห้องเรียนมีความเสี่ยงหลายอย่าง เช่น คนล้ม ไฟไหม้ และผู้บุกรุก แต่ครูไม่สามารถเฝ้าดูกล้องได้ตลอดเวลา",en:"Classrooms face many risks — falls, fires and intruders — but teachers can't watch the cameras all the time."}],
+     ["role",{th:"ออกแบบและพัฒนาทั้งระบบ ตั้งแต่เทรนโมเดล AI วงจรเซนเซอร์ ESP32 เซิร์ฟเวอร์ ไปจนถึงหน้าเว็บ",en:"Designed and built the whole system — training the AI models, the ESP32 sensor circuit, the server and the web dashboard."}],
+     ["did",{th:"เทรนโมเดล YOLO ตรวจจับคนล้ม ไฟ/ควัน และผู้บุกรุก แล้วใช้ร่วมกับเซนเซอร์แก๊สและ PIR เพื่อยืนยันเหตุการณ์ก่อนแจ้งเตือน ส่งข้อมูลผ่าน MQTT ไปยัง Raspberry Pi และแสดงผลบนเว็บแดชบอร์ดแบบเรียลไทม์",en:"Trained YOLO models to detect falls, fire/smoke and intruders, then combined them with gas and PIR sensors to confirm an event before alerting. Data travels over MQTT to a Raspberry Pi and appears on a real-time web dashboard."}],
+     ["result",{th:"ระบบแจ้งเตือนและสั่งไซเรนได้อัตโนมัติ ลดดีเลย์ของภาพจากราว 2 วินาทีเหลือต่ำกว่า 1 วินาที โดยเปลี่ยนจากการส่งวิดีโอซ้ำเป็นส่งแค่พิกัดกรอบ และรองรับการเพิ่มห้องใหม่ได้จากไฟล์ตั้งค่าไฟล์เดียว",en:"Alerts and the siren fire automatically. Video delay dropped from about 2 s to under 1 s by sending only bounding-box coordinates instead of re-streaming video, and a new classroom can be added from a single config file."}],
+     ["learned",{th:"โมเดล AI อย่างเดียวยังไม่พอ ต้องมีเงื่อนไขและเซนเซอร์อื่นช่วยยืนยันเพื่อลดการแจ้งเตือนผิด และได้ฝึกแก้ปัญหาที่เกิดข้ามหลายส่วนของระบบ ทั้งเครือข่าย ฐานข้อมูล และเซิร์ฟเวอร์",en:"An AI model alone isn't enough — extra rules and sensors are needed to confirm events and cut false alarms. I also practised fixing problems that span the whole system: network, database and server."}]],
    tags:["Python","YOLO11","ESP32","MQTT","Flask","Raspberry Pi 5"], more:[P+"sc-team.jpg",P+"sc-poster.jpg",P+"sc-regional-list.jpg"]},
   {featured:true, img:"", title:{th:"นวัตกรรม Electronic Control Box Perfect System",en:"Electronic Control Box Perfect System"},
    badge:{th:"โครงงานวิทยาศาสตร์ ประเภทสิ่งประดิษฐ์ ชิงถ้วยพระราชทานฯ ครั้งที่ 3",en:"Science Invention Project — Royal Trophy Competition, 3rd edition"},
@@ -1167,6 +1199,13 @@ const PROJECTS = [
    team:{th:"ทำร่วมกับเพื่อน 2 คน (ณัฐสรณ์ ใจเย็น, วลภพ น้อยเจริญ) ครูที่ปรึกษา: ครูธีระ เสนมา และครูสรายุทธ วิเขตกิจ โรงเรียนอุทัยธรรมานุวัตรวิทยา",
         en:"Team project with 2 classmates (Natsaron Jaiyen, Wonlaphop Noicharoen); advisors: Teera Senma and Sarayut Wikhetkit, Uthaidhammanuwat Witthaya School"},
    result:{th:"🏅 ผลประเมินความพึงพอใจจากผู้เชี่ยวชาญ 5 ท่าน เฉลี่ย 4.82/5.00 อยู่ในเกณฑ์มากที่สุด",en:"🏅 Expert satisfaction rating: 4.82/5.00 (highest level), from 5 evaluators"},
+   story:[
+     ["what",{th:"การแข่งขันวิทยาศาสตร์วิชาการ ครั้งที่ 3 ชิงถ้วยพระราชทานฯ ประเภทสิ่งประดิษฐ์ ระดับ ม.ปลาย (มิ.ย. 2567)",en:"3rd Academic Science Competition for the Royal Trophy — invention category, upper secondary (June 2024)"}],
+     ["problem",{th:"เครื่องใช้ไฟฟ้าในองค์กร เช่น แอร์ พัดลม ทีวี และหลอดไฟ มักถูกเปิดก่อนเวลาหรือลืมปิด ทำให้สิ้นเปลืองพลังงาน",en:"Appliances in organisations — air conditioners, fans, TVs and lights — are often switched on too early or left on, wasting energy."}],
+     ["role",{th:"ทำงานเป็นทีม 3 คน — รับหน้าที่ประกอบกล่องควบคุม ทั้งบัดกรีสายไฟ ต่อวงจร และเจาะกล่องเพื่อติดตั้งอุปกรณ์",en:"Team of 3 — I assembled the control box: soldering the wiring, connecting the circuits and drilling the enclosure to mount the parts."}],
+     ["did",{th:"สร้างกล่องควบคุมไฟฟ้าด้วย NodeMCU ESP8266 และรีเลย์ 4 ช่อง ใช้งานได้ 4 แบบ ได้แก่ ตั้งเวลาเปิด-ปิด สั่งผ่านแอป Blynk กดสวิตช์ที่ตัวกล่อง และแจ้งสถานะพร้อมบันทึกการใช้งานแบบเรียลไทม์",en:"Built an electrical control box with a NodeMCU ESP8266 and a 4-channel relay that works 4 ways: scheduled on/off, control from the Blynk app, switches on the box, and real-time status with usage logging."}],
+     ["result",{th:"ทดสอบกับอุปกรณ์ 4 ชนิด ทำงานปกติครบทุกระบบ ผลประเมินจากผู้เชี่ยวชาญ 5 ท่านได้ค่าเฉลี่ย 4.82 (S.D. 0.075) อยู่ในระดับมากที่สุด",en:"Tested with 4 kinds of appliances — every function worked. Rated 4.82 (S.D. 0.075) by 5 experts, the highest level."}],
+     ["learned",{th:"ได้ใช้ ESP8266 ควบคุมไฟฟ้าแรงดันสูงผ่านรีเลย์อย่างปลอดภัย เชื่อมต่ออุปกรณ์ IoT กับแอป และนำคำแนะนำจากกรรมการมาปรับปรุงงาน เช่น เพิ่มการควบคุมด้วยรีโมท",en:"Used the ESP8266 to switch mains-voltage devices safely through relays, connected IoT hardware to an app, and improved the project from the judges' feedback — for example adding remote control."}]],
    tags:["ESP8266 / NodeMCU","Blynk IoT","Relay module","Arduino (C)","Real-time monitoring"],
    video:{src:"videos/electronic-control-box-demo.mp4", poster:P+"ecb-poster.jpg"},
    pdf:"docs/electronic-control-box-report.pdf",
@@ -1318,6 +1357,9 @@ window.thumbFail=el=>{ el.onerror=null; el.src=el.src.replace("/images/thumbs/",
 const img=(src,k,i,alt="")=>`<img src="${TH(src)}" loading="lazy" decoding="async" onerror="thumbFail(this)" alt="${alt}" data-g="${k}" data-i="${i}">`;
 function pics(list){const k=grp(list.map(s=>({src:s})));const n=Math.min(list.length,4);return `<div class="pics n${n}">${list.slice(0,4).map((s,i)=>img(s,k,i)).join("")}</div>`}
 
+const storyHTML=p=>`<div class="story">${p.story.map(([k,v])=>`<div class="srow ${k}"><b>${T(STORY_LABEL[k])}</b><span>${T(v)}</span></div>`).join("")}</div>`;
+const featHTML=p=>p.list?`<details class="feat"><summary>${L==="th"?"ฟีเจอร์ทั้งหมด":"All features"}</summary><ul class="dots">${T(p.list).map(x=>`<li>${x}</li>`).join("")}</ul></details>`:"";
+
 function post(r){
   return `<article class="card post" data-item="Robot: ${r.title.en}">
     <div class="post-head"><div class="av" style="background-image:url(${P}profile.jpg)"></div><div><b>${T(ME.name)}</b><small>${T(r.date)}</small></div></div>
@@ -1448,7 +1490,7 @@ function render(){
   </div>`;
 
   /* robots */
-  document.getElementById("p-robots").innerHTML=`<div class="row justify-content-center g-4"><div class="col-xl-3 d-none d-xl-block"><nav class="toc"><p class="toc-h">${L==="th"?"รายการแข่งขัน":"Competitions"}</p>${ROBOTS.map((r,i)=>{const j=JOURNEY.find(x=>x.go==="robot-"+i&&x.kind!=="next");return `<button data-go="robots" data-anchor="robot-${i}"><span class="toc-d">${T(r.date)}</span><span class="toc-t">${j?T(j.t):T(r.title)}</span></button>`}).join("")}</nav></div><div class="col-lg-9 col-xl-8 stack">${ROBOTS.map((r,i)=>post(r).replace("<article",`<article data-anchor="robot-${i}"`)).join("")}</div></div>`;
+  document.getElementById("p-robots").innerHTML=`<div class="row justify-content-center g-4"><div class="col-xl-3 d-none d-xl-block"><nav class="toc"><p class="toc-h">${L==="th"?"รายการแข่งขัน":"Competitions"}</p>${ROBOTS.map((r,i)=>{const j=JOURNEY.find(x=>x.go==="robot-"+i&&x.kind!=="next");return `<button data-go="robots" data-anchor="robot-${i}"><span class="toc-d">${T(r.date)}</span><span class="toc-t">${j?T(j.t):T(r.title)}</span></button>`}).join("")}</nav></div><div class="col-lg-9 col-xl-8 stack"><nav class="toc-chips d-xl-none" aria-label="${L==="th"?"รายการแข่งขัน":"Competitions"}">${ROBOTS.map((r,i)=>{const j=JOURNEY.find(x=>x.go==="robot-"+i&&x.kind!=="next");return `<button data-go="robots" data-anchor="robot-${i}">${j?T(j.t):T(r.title)}</button>`}).join("")}</nav>${ROBOTS.map((r,i)=>post(r).replace("<article",`<article data-anchor="robot-${i}"`)).join("")}</div></div>`;
 
   /* projects */
   document.getElementById("p-projects").innerHTML=`<div class="row g-3 g-lg-4">${PROJECTS.map(p=>{
@@ -1461,7 +1503,7 @@ function render(){
       <div class="proj-smart-content">
         <span class="tag-medal m-gold">🏆 ${T(p.badge)}</span>
         <h3>${T(p.title)}</h3><p class="muted" style="margin:6px 0">${T(p.text)}</p>
-        <ul class="dots">${T(p.list).map(x=>`<li>${x}</li>`).join("")}</ul>
+        ${p.story?storyHTML(p)+featHTML(p):`<ul class="dots">${T(p.list).map(x=>`<li>${x}</li>`).join("")}</ul>`}
         <div class="specs">${p.tags.map(t=>`<span class="chip">${t}</span>`).join("")}</div>
       </div>
     </article></div>`;
@@ -1470,9 +1512,9 @@ function render(){
         :`<div class="media-top">${p.img?img(p.img,k,0):`<div class="bp">${ART.chassis}</div>`}</div>`}
       ${p.badge?`<span class="tag-medal m-gold">🏆 ${T(p.badge)}</span>`:""}
       <h3>${T(p.title)}</h3><p class="muted" style="margin:6px 0">${T(p.text)}</p>
-      ${p.list?`<ul class="dots">${T(p.list).map(x=>`<li>${x}</li>`).join("")}</ul>`:""}
+      ${p.story?storyHTML(p)+featHTML(p):(p.list?`<ul class="dots">${T(p.list).map(x=>`<li>${x}</li>`).join("")}</ul>`:"")}
       ${p.team?`<p class="proj-team"><b>${L==="th"?"ทีมงาน":"Team"}:</b> ${T(p.team)}</p>`:""}
-      ${p.result?`<p class="proj-result">${T(p.result)}</p>`:""}
+      ${p.result&&!p.story?`<p class="proj-result">${T(p.result)}</p>`:""}
       <div class="specs">${p.tags.map(t=>`<span class="chip">${t}</span>`).join("")}</div>
       ${p.pdf?`<a class="btn btn-soft pdf-btn" href="${p.pdf}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>${L==="th"?"อ่านรายงานฉบับเต็ม (PDF)":"Read the full report (PDF)"}</a>`:""}
       ${p.more?`<div class="pics n${Math.min(p.more.length,3)===3?2:p.more.length}" style="margin-top:10px">${p.more.slice(0,2).map((s,i)=>img(s,k,i+(p.img?1:0))).join("")}</div>`:""}
@@ -1593,7 +1635,9 @@ function go(t,anchor){
 function anchorTop(el){
   const phone=matchMedia("(max-width:700px)").matches;
   const offset=phone?70:document.querySelector(".tabs").offsetHeight+14; /* phones: bar is at the bottom; larger screens: clear the sticky top bar */
-  return Math.max(0,el.getBoundingClientRect().top+scrollY-offset);
+  const chips=el.closest("#p-robots")&&document.querySelector("#p-robots .toc-chips");
+  const extra=chips&&chips.offsetParent?chips.offsetHeight+6:0;
+  return Math.max(0,el.getBoundingClientRect().top+scrollY-offset-extra);
 }
 function scrollToAnchor(t,anchor){
   const el=document.querySelector(`#p-${t} [data-anchor="${anchor}"]:not([data-go])`); /* the target itself, never a link that points to it */
@@ -1650,25 +1694,68 @@ document.querySelectorAll(".lang button").forEach(b=>b.onclick=()=>{L=b.dataset.
 
 /* lightbox */
 let LB=[],LI=0;const lb=document.getElementById("lb");
-function openLB(k,i){LB=GROUPS[k]||[];LI=i;showLB();lb.classList.add("open");document.body.style.overflow="hidden"}
-function showLB(){const it=LB[LI];if(!it)return;document.getElementById("lbImg").src=it.src;
+function openLB(k,i){LB=GROUPS[k]||[];LI=i;showLB();lb.classList.add("open");document.body.style.overflow="hidden";lbHint()}
+function showLB(){const it=LB[LI];if(!it)return;if(typeof LBZ!=="undefined")LBZ.reset();document.getElementById("lbImg").src=it.src;
   [1,-1].forEach(d=>{ const n=LB[(LI+d+LB.length)%LB.length]; if(n&&n.src){ const pre=new Image(); pre.decoding="async"; pre.src=n.src; } });
   if(window.gsap&&!matchMedia("(prefers-reduced-motion: reduce)").matches) gsap.fromTo("#lbImg",{opacity:0,scale:.96},{opacity:1,scale:1,duration:.35,ease:"power2.out",overwrite:true});document.getElementById("lbT").textContent=it.t||"";document.getElementById("lbS").textContent=(it.s?it.s+" · ":"")+(LI+1)+" / "+LB.length}
-function closeLB(){lb.classList.remove("open");document.body.style.overflow=""}
+function closeLB(){lb.classList.remove("open");document.body.style.overflow="";LBZ.reset()}
 const step=d=>{LI=(LI+d+LB.length)%LB.length;showLB()};
 document.getElementById("lbClose").onclick=closeLB;
 document.getElementById("lbPrev").onclick=()=>step(-1);
 document.getElementById("lbNext").onclick=()=>step(1);
 lb.onclick=e=>{if(e.target===lb)closeLB()};
-addEventListener("keydown",e=>{if(!lb.classList.contains("open"))return;if(e.key==="Escape")closeLB();if(e.key==="ArrowLeft")step(-1);if(e.key==="ArrowRight")step(1)});
-let sx=0;lb.addEventListener("touchstart",e=>sx=e.touches[0].clientX,{passive:true});
-lb.addEventListener("touchend",e=>{const d=e.changedTouches[0].clientX-sx;if(Math.abs(d)>50)step(d>0?-1:1)});
+addEventListener("keydown",e=>{if(!lb.classList.contains("open"))return;if(e.key==="Escape")closeLB();if(LBZ.zoomed())return;if(e.key==="ArrowLeft")step(-1);if(e.key==="ArrowRight")step(1)});
+let sx=0, multi=false;
+lb.addEventListener("touchstart",e=>{ if(e.touches.length>1) multi=true; else { multi=false; sx=e.touches[0].clientX; } },{passive:true});
+lb.addEventListener("touchend",e=>{ if(multi||LBZ.zoomed()){ if(!e.touches.length) setTimeout(()=>{multi=false;},0); return; }
+  const d=e.changedTouches[0].clientX-sx; if(Math.abs(d)>50) step(d>0?-1:1); });
+
+/* zoom inside the lightbox — pinch with two fingers, double-tap / double-click, or the mouse wheel;
+   drag to look around while zoomed. Certificates become readable on a phone. */
+const LBZ=(function(){
+  const st=document.getElementById("lbStage"), im=document.getElementById("lbImg");
+  let s=1,tx=0,ty=0, pts=new Map(), pinch=null, pan=null, lastTap=0;
+  const apply=(anim)=>{ st.style.transition=anim?"transform .28s cubic-bezier(.22,.61,.36,1)":"none";
+    st.style.transform=`translate(${tx}px,${ty}px) scale(${s})`; st.classList.toggle("zoomed",s>1.01); };
+  const clamp=()=>{ const lx=Math.max(0,(s*im.offsetWidth-im.offsetWidth)/2), ly=Math.max(0,(s*im.offsetHeight-im.offsetHeight)/2);
+    tx=Math.min(lx,Math.max(-lx,tx)); ty=Math.min(ly,Math.max(-ly,ty)); };
+  const center=()=>{ const r=st.getBoundingClientRect(); return [r.left+r.width/2-tx, r.top+r.height/2-ty]; };
+  const zoomAt=(ns,px,py,anim,c)=>{ ns=Math.min(5,Math.max(1,ns)); const [cx,cy]=c||center();
+    tx=px-cx-(px-cx-tx)*ns/s; ty=py-cy-(py-cy-ty)*ns/s; s=ns; if(s<=1.01){s=1;tx=0;ty=0;} clamp(); apply(anim); };
+  const reset=()=>{ s=1;tx=0;ty=0; pts.clear(); pinch=null; pan=null; apply(false); };
+  let lastType="mouse";
+  st.addEventListener("pointerdown",e=>{ lastType=e.pointerType; pts.set(e.pointerId,[e.clientX,e.clientY]); try{st.setPointerCapture(e.pointerId);}catch(_){}
+    if(pts.size===2){ const [a,b]=[...pts.values()]; pinch={d:Math.hypot(a[0]-b[0],a[1]-b[1]),s,mx:(a[0]+b[0])/2,my:(a[1]+b[1])/2,tx,ty,c:center()}; pan=null; }
+    else if(pts.size===1&&s>1){ pan={x:e.clientX,y:e.clientY,tx,ty}; }
+    if(e.pointerType!=="mouse"&&pts.size===1){ const now=Date.now(); if(now-lastTap<300){ zoomAt(s>1.01?1:2.6,e.clientX,e.clientY,true); lastTap=0; } else lastTap=now; } });
+  st.addEventListener("pointermove",e=>{ if(!pts.has(e.pointerId))return; pts.set(e.pointerId,[e.clientX,e.clientY]);
+    if(pinch&&pts.size>=2){ const [a,b]=[...pts.values()], d=Math.hypot(a[0]-b[0],a[1]-b[1]), mx=(a[0]+b[0])/2, my=(a[1]+b[1])/2;
+      s=pinch.s; tx=pinch.tx; ty=pinch.ty; zoomAt(pinch.s*d/pinch.d,pinch.mx,pinch.my,false,pinch.c); tx+=mx-pinch.mx; ty+=my-pinch.my; clamp(); apply(false); }
+    else if(pan){ tx=pan.tx+e.clientX-pan.x; ty=pan.ty+e.clientY-pan.y; clamp(); apply(false); } });
+  const up=e=>{ pts.delete(e.pointerId); if(pts.size<2) pinch=null; if(!pts.size) pan=null;
+    else if(pts.size===1&&s>1){ const [p]=[...pts.values()]; pan={x:p[0],y:p[1],tx,ty}; } };
+  st.addEventListener("pointerup",up); st.addEventListener("pointercancel",up);
+  st.addEventListener("dblclick",e=>{ if(lastType!=="mouse")return; /* touch double-tap is handled above */ zoomAt(s>1.01?1:2.4,e.clientX,e.clientY,true); });
+  lb.addEventListener("wheel",e=>{ if(!lb.classList.contains("open"))return; e.preventDefault(); zoomAt(s*Math.exp(-e.deltaY*.0018),e.clientX,e.clientY,false); },{passive:false});
+  return {reset, zoomed:()=>s>1.01};
+})();
+let lbHintShown=false;
+function lbHint(){ if(lbHintShown)return; lbHintShown=true; const h=document.getElementById("lbHint");
+  h.textContent=HOVER_DEV?(L==="th"?"ดับเบิลคลิก หรือเลื่อนล้อเมาส์ เพื่อซูม":"Double-click or scroll to zoom"):(L==="th"?"ถ่างสองนิ้ว หรือแตะสองครั้ง เพื่อซูม":"Pinch or double-tap to zoom");
+  h.classList.add("show"); setTimeout(()=>h.classList.remove("show"),2600); }
 
 /* swipe hint (mobile) — shown once, hidden after first tab change or swipe */
 function setSwipeHintText(){document.getElementById("swipeHintTxt").textContent = L==="th"?"ปัดซ้าย-ขวาเพื่อเปลี่ยนหน้า":"Swipe left / right to switch pages";}
 function hideSwipeHint(){document.getElementById("swipeHint").classList.add("hide");sessionStorage.setItem("hideSwipeHint","1");}
 setSwipeHintText();
-if(!matchMedia("(max-width:820px)").matches || sessionStorage.getItem("hideSwipeHint")) document.getElementById("swipeHint").classList.add("hide");
+document.getElementById("swipeHint").classList.add("hide"); /* shown as a short toast instead (below) */
+if(matchMedia("(max-width:700px)").matches && !sessionStorage.getItem("hideSwipeHint")){
+  const showHint=()=>{ if(document.documentElement.classList.contains("splash")) return setTimeout(showHint,500);
+    if(sessionStorage.getItem("hideSwipeHint")) return;
+    try{ sessionStorage.setItem("hideSwipeHint","1"); }catch(e){}
+    if(typeof toast==="function") toast(L==="th"?"👆 ปัดซ้าย-ขวาเพื่อเปลี่ยนหมวด":"👆 Swipe left / right to change section"); };
+  setTimeout(showHint,2200);
+}
 
 /* swipe between tabs on main content, Reels-style */
 (function(){
@@ -2038,6 +2125,8 @@ function moveInk(target){
   if(fresh){ void ink.offsetWidth; ink.style.transition=""; }
 }
 let inkRO=null;
+const setTabsH=()=>document.documentElement.style.setProperty("--tabs-h",document.querySelector(".tabs").offsetHeight+"px");
+addEventListener("resize",setTabsH); addEventListener("load",setTabsH); setTimeout(setTabsH,0);
 if(window.ResizeObserver){ inkRO=new ResizeObserver(()=>moveInk()); inkRO.observe(document.getElementById("tabs")); }
 if(document.fonts){ document.fonts.ready.then(()=>moveInk()); document.fonts.addEventListener&&document.fonts.addEventListener("loadingdone",()=>moveInk()); }
 addEventListener("load",()=>moveInk());
@@ -2089,9 +2178,11 @@ document.addEventListener("click",e=>{ const a=e.target.closest(".j-arrow"); if(
 let tocIO=null;
 function initToc(){
   if(tocIO) tocIO.disconnect();
-  const links=[...document.querySelectorAll(".toc [data-anchor]")]; if(!links.length)return;
+  const links=[...document.querySelectorAll(".toc [data-anchor],.toc-chips [data-anchor]")]; if(!links.length)return;
   tocIO=new IntersectionObserver(es=>es.forEach(en=>{ if(!en.isIntersecting)return;
-    const a=en.target.dataset.anchor; links.forEach(l=>l.classList.toggle("on",l.dataset.anchor===a)); }),{rootMargin:"-35% 0px -60% 0px"});
+    const a=en.target.dataset.anchor; links.forEach(l=>l.classList.toggle("on",l.dataset.anchor===a));
+    const row=document.querySelector(".toc-chips"), c=row&&row.querySelector(".on");
+    if(c&&row.offsetParent){ const l=c.offsetLeft-row.clientWidth/2+c.offsetWidth/2; row.scrollTo({left:l,behavior:"smooth"}); } }),{rootMargin:"-35% 0px -60% 0px"});
   document.querySelectorAll("#p-robots article[data-anchor]").forEach(el=>tocIO.observe(el));
 }
 
@@ -2319,7 +2410,7 @@ document.addEventListener("click",e=>{
   else if(el.closest(".ph-nav")) NAV_VIA="section_arrows";
   else if(el.closest(".hl-item")) NAV_VIA="highlights";
   else if(el.closest(".j-item")) NAV_VIA="timeline";
-  else if(el.closest(".toc")) NAV_VIA="contents";
+  else if(el.closest(".toc,.toc-chips")) NAV_VIA="contents";
   else if(el.closest("[data-go]")) NAV_VIA="link";
   let x;
   if((x=el.closest("[data-resume]"))) track("resume_download",{link_location:where(x)});
