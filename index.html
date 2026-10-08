@@ -980,7 +980,7 @@ details.feat[open] summary::before{transform:rotate(45deg)}
 @media (min-width:701px){.toc-chips{--chip-top:var(--tabs-h,76px);margin:0 0 4px;padding:8px 0 12px}}
 .stack>.toc-chips+*{margin-top:4px}
 /* portrait photos in a landscape tile: keep the face in frame */
-.pics img[src*="tbn1-trophy"]{object-position:50% 12%}
+img[src*="tbn1-trophy"]{object-position:50% 12%!important}
 /* featured video project: two columns on wide screens (shorter page, smaller video to scroll past) */
 .proj-feat{display:grid;grid-template-columns:minmax(0,1fr);gap:4px}
 @media (max-width:991.98px){.proj-feat .pf-media{display:contents}.proj-feat .proj-video{order:1}.proj-feat .pf-body{order:2}.proj-feat .pf-media>.pics{order:3}}
@@ -1068,20 +1068,22 @@ details.feat[open] summary::before{transform:rotate(45deg)}
   padding:10px;background:linear-gradient(160deg,rgba(255,255,255,.14),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.16);
   box-shadow:0 40px 80px -30px rgba(0,0,0,.9),0 0 0 1px rgba(34,211,238,.1),0 0 60px -20px rgba(34,211,238,.5)}
 .c-portrait i{display:block;width:100%;height:100%;border-radius:20px;background:#223 center 35%/cover}
-.c-portrait span{position:absolute;left:50%;bottom:-18px;transform:translateX(-50%);white-space:nowrap;display:inline-flex;align-items:center;gap:7px;
+.c-portrait span{position:absolute;left:0;right:0;margin:0 auto;width:max-content;bottom:-18px;white-space:nowrap;display:inline-flex;align-items:center;gap:7px;
   padding:8px 16px;border-radius:999px;font-size:.82rem;font-weight:600;background:rgba(13,17,21,.92);border:1px solid rgba(255,255,255,.14);box-shadow:0 10px 30px -10px #000}
 .c-cue{position:absolute;left:50%;bottom:34px;z-index:3;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;
   font-size:.66rem;letter-spacing:.4em;color:var(--muted)}
 .c-cue i{width:22px;height:36px;border-radius:12px;border:1.5px solid rgba(255,255,255,.35);position:relative}
 .c-cue i::after{content:"";position:absolute;left:50%;top:7px;width:3px;height:7px;margin-left:-1.5px;border-radius:2px;background:var(--cyan);animation:cue 1.8s ease-in-out infinite}
 @keyframes cue{0%{transform:translateY(0);opacity:1}70%{transform:translateY(12px);opacity:0}100%{opacity:0}}
+.c-fx{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;opacity:0;animation:fxIn 1.6s ease .3s forwards}
+@keyframes fxIn{to{opacity:1}}
 /* intro: the tagline lights up word by word */
-.c-intro{height:230vh}
+.c-intro{height:270vh}
 .c-intro-in{height:100%;display:flex;flex-direction:column;justify-content:center;padding-top:64px}
-.c-words{font-size:clamp(2rem,3.9vw,3.9rem);font-weight:600;line-height:1.28;letter-spacing:-.015em;max-width:22ch;margin:0}
+.c-words{font-size:clamp(1.65rem,2.75vw,2.85rem);font-weight:600;line-height:1.42;letter-spacing:-.01em;max-width:31ch;margin:0}
 .c-words span{color:rgba(232,237,241,.13);transition:color .35s ease,text-shadow .35s ease}
 .c-words span.on{color:#eef6fa}
-.c-words span.on:last-child{color:var(--cyan-2);text-shadow:0 0 30px rgba(34,211,238,.35)}
+.c-words span.hi.on{color:var(--cyan-2);text-shadow:0 0 28px rgba(34,211,238,.35)}
 .c-facts{list-style:none;display:flex;flex-wrap:wrap;gap:12px;margin:42px 0 0;padding:0;opacity:0;will-change:transform,opacity}
 .c-facts li{display:flex;align-items:center;gap:10px;padding:12px 18px;border-radius:16px;background:var(--glass-2);border:1px solid var(--glass-line);box-shadow:var(--glass-hi);font-size:.95rem;color:#cfdae2}
 .c-facts svg{width:20px;height:20px;color:var(--cyan);flex:0 0 20px}
@@ -1315,6 +1317,8 @@ const P = "images/photos/", C = "images/certs/";
 const ME = {
   name:{th:"ทวีสิน กลิ่นรัตน์",en:"Taweesin Kinrat"},
   tagline:{th:"นักเรียนสาย Robotics & Engineering · ออกแบบ สร้าง และเขียนโปรแกรมหุ่นยนต์ด้วยตัวเอง",en:"Robotics & engineering student · I design, build and program my own robots"},
+  story:{th:"ทุกอย่างเริ่มจากหุ่นยนต์เดินตามเส้นตัวแรกที่ผมต่อเอง วินาทีที่มันวิ่งได้ด้วยโค้ดไม่กี่บรรทัด ผมก็รู้ว่านี่คือสิ่งที่อยากทำ จากสนามแข่งระดับโรงเรียน สู่ตัวแทนประเทศไทยที่ญี่ปุ่น ผมยังสนุกกับการออกแบบ สร้าง และเขียนโปรแกรมเองทุกชิ้น และอยากเรียน[[วิศวกรรมคอมพิวเตอร์ เพื่อสร้างหุ่นยนต์และระบบ AI ที่แก้ปัญหาได้จริง]]",
+         en:"It started with my first line-following robot. The moment it moved on a few lines of my own code, I knew this was what I wanted to do. From school competitions to representing Thailand in Japan, I still love designing, building and programming every part myself — and I want to study [[computer engineering to build robots and AI systems that solve real problems.]]"},
   badges:[{th:"🏆 ชนะเลิศ WRG Thailand 2026",en:"🏆 Champion — WRG Thailand 2026"},{th:"👑 ถ้วยพระราชทาน TO BE NUMBER ONE",en:"👑 Royal Trophy — TO BE NUMBER ONE"},{th:"🇯🇵 ตัวแทนประเทศไทย → WRG ญี่ปุ่น",en:"🇯🇵 Team Thailand → WRG Japan"}],
 };
 
@@ -1612,7 +1616,9 @@ function cine(HL){
   const feat=DESIGNS.find(d=>d.stl&&/life the cube/i.test(d.stl))||DESIGNS.find(d=>d.stl);
   const pg=grp(PHOTOS.slice(0,28).map(s=>({src:s})));
   const strip=(list,off)=>{ const h=list.map((s,i)=>img(s,pg,i+off)).join(""); return h+h; };
-  const words=segWords(T(ME.tagline));
+  /* story → word spans; text inside [[ ]] lights up in cyan */
+  const story=T(ME.story||ME.tagline), words=[];
+  story.split(/(\[\[.*?\]\])/).forEach(part=>{ const hi=/^\[\[/.test(part); segWords(hi?part.slice(2,-2):part).forEach(w=>words.push([w,hi])); });
   const facts=[[ic.school,th?"นักเรียนแผน SMT (วิทย์–คณิต–เทคโนโลยี) <b>โรงเรียนอุทัยธรรมานุวัตรวิทยา</b>":"Science–Math–Technology (SMT) program, <b>Uthaidhammanuwat Witthaya School</b>"],
     [ic.star,th?"เกรดเฉลี่ย 4 ภาคเรียน <b>3.46</b>":"GPAX (4 semesters) <b>3.46</b>"],[ic.pin,th?"จ.อุทัยธานี":"Uthai Thani, Thailand"]];
   const projRow=(p,anchor,pic)=>`<article class="c-proj c-rv" data-item="Home: ${e(typeof p.title==="string"?p.title:p.title.en)}">
@@ -1629,7 +1635,7 @@ function cine(HL){
         <p class="c-kicker"><span></span>PORTFOLIO · 2026</p>
         <h2 class="c-name">${T(ME.name)}</h2>
         <p class="c-tag">${T(ME.tagline)}</p>
-        <div class="c-badges">${ME.badges.map((b,i)=>`<span class="pill${i===0?" top":""}">${flagify(T(b))}</span>`).join("")}</div>
+        <div class="c-badges">${ME.badges.slice(0,2).map((b,i)=>`<span class="pill${i===0?" top":""}">${flagify(T(b))}</span>`).join("")}</div>
         <div class="c-cta"><a class="btn btn-cyan" href="mailto:Taweesinkinrat@gmail.com">${T(UI.contact)}</a>
           <button class="btn btn-soft" data-resume><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/></svg>Resume</button></div>
       </div>
@@ -1640,7 +1646,7 @@ function cine(HL){
 
   <section class="c-intro" data-scene="intro"><div class="c-stick"><div class="container-xl c-intro-in">
     <p class="c-label"><b>01</b>${T(UI.intro)}</p>
-    <p class="c-words">${words.map(w=>/^\s+$/.test(w)?w:`<span>${e(w)}</span>`).join("")}</p>
+    <p class="c-words">${words.map(([w,hi])=>/^\s+$/.test(w)?w:`<span${hi?' class="hi"':""}>${e(w)}</span>`).join("")}</p>
     <ul class="c-facts">${facts.map(([i,t])=>`<li>${i}<span>${t}</span></li>`).join("")}</ul>
   </div></div></section>
 
@@ -1936,7 +1942,7 @@ function go(t,anchor){
   }
   updateMinibar(); closeSheet(); moveInk(); markLoaded(); journeyState(); if(t==="robots") initToc(); if(typeof watchJourney==="function") watchJourney(); watchItems();
   initStlViewers();
-  if(t==="home"&&isPC()) requestAnimationFrame(()=>{ cineMeasure(); cineTick(true); });
+  if(t==="home"&&isPC()) requestAnimationFrame(()=>{ cineMeasure(); cineTick(true); if(CINE.fx) CINE.fx.start(); });
   setSwipeHintText();
   stopActiveVideo();
   document.querySelectorAll("#p-projects video").forEach(v=>v.pause());
@@ -2933,7 +2939,9 @@ function cineSetup(){
   /* hero entrance: plays once the splash screen has gone (instantly on later re-renders) */
   const enter=()=>{ if(document.documentElement.classList.contains("splash")) return setTimeout(enter,120); root.classList.add("cine-in"); CINE.entered=true; };
   if(CINE.entered) root.classList.add("cine-in"); else setTimeout(enter,60);
-  requestAnimationFrame(()=>{ cineMeasure(); cineTick(true); });
+  requestAnimationFrame(()=>{ cineMeasure(); cineTick(true);
+    if(!CINE.fx) initCineFX();
+    else{ const st=root.querySelector(".c-hero .c-stick"); if(st&&CINE.fx.canvas.parentNode!==st){ st.insertBefore(CINE.fx.canvas,st.querySelector(".c-grid")); CINE.fx.stop(); setTimeout(CINE.fx.start,50); } } });
 }
 function cineMeasure(){
   if(!CINE.root||!isPC())return;
@@ -2978,6 +2986,54 @@ function cinePeek(root){
   list.addEventListener("pointerover",e=>{ const r=e.target.closest(".c-hl-row"); if(!r)return; if(im.getAttribute("src")!==r.dataset.pic) im.src=r.dataset.pic; peek.classList.add("show"); on=true; if(!raf) raf=requestAnimationFrame(loop); });
   list.addEventListener("pointermove",e=>{ x=e.clientX+28; y=e.clientY-90; if(!on){ on=true; } if(!raf) raf=requestAnimationFrame(loop); },{passive:true});
   list.addEventListener("pointerleave",()=>{ on=false; peek.classList.remove("show"); });
+}
+
+/* ---------- PC hero: a living 3D field of light (Three.js) ----------
+   ~14k points on a wave surface; every point is moved by the GPU (vertex shader), so the CPU does
+   almost nothing per frame. Its own small render loop runs only while the hero is on screen. */
+function initCineFX(){
+  if(CINE.fx||typeof THREE==="undefined"||REDUCED_FX||!isPC()) return;
+  const stick=document.querySelector("#p-home .c-hero .c-stick"); if(!stick) return;
+  const cv=document.createElement("canvas"); cv.className="c-fx"; cv.setAttribute("aria-hidden","true");
+  let renderer; try{ renderer=new THREE.WebGLRenderer({canvas:cv,antialias:false,alpha:true,powerPreference:"high-performance"}); }catch(e){ return; }
+  renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5)); renderer.setClearColor(0x000000,0);
+  const scene=new THREE.Scene(), cam=new THREE.PerspectiveCamera(55,1,.1,200);
+  const NX=170, NZ=84, pos=new Float32Array(NX*NZ*3); let k=0;
+  for(let z=0;z<NZ;z++) for(let x=0;x<NX;x++){ pos[k++]=(x/(NX-1)-.5)*96; pos[k++]=0; pos[k++]=-z*0.9+8; }
+  const geo=new THREE.BufferGeometry(); geo.setAttribute("position",new THREE.BufferAttribute(pos,3));
+  const U={uT:{value:0},uM:{value:new THREE.Vector2(0,0)},uS:{value:0},uPx:{value:renderer.getPixelRatio()}};
+  const mat=new THREE.ShaderMaterial({uniforms:U,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,
+    vertexShader:`uniform float uT,uS,uPx; uniform vec2 uM; varying float vA; varying vec3 vC;
+      void main(){ vec3 p=position;
+        float w=sin(p.x*.16+uT*.9)*.9+cos(p.z*.21+uT*.7)*.8+sin((p.x+p.z)*.07-uT*.5)*1.5;
+        vec2 m=vec2(uM.x*40.,-14.-uM.y*12.); float d=distance(p.xz,m); w+=sin(d*.55-uT*3.)*1.3*exp(-d*.07);
+        p.y=w-3.2;
+        vec4 mv=modelViewMatrix*vec4(p,1.); gl_Position=projectionMatrix*mv;
+        float depth=-mv.z; gl_PointSize=uPx*(2.2+max(w,0.)*.6)*(26./depth);
+        float h=clamp((w+2.)/4.5,0.,1.);
+        vC=mix(vec3(.13,.83,.93),vec3(.96,.77,.32),smoothstep(.62,1.,h));
+        vA=smoothstep(78.,18.,depth)*(.32+h*.68)*(1.-uS*.7); }`,
+    fragmentShader:`varying float vA; varying vec3 vC;
+      void main(){ float d=length(gl_PointCoord-.5); if(d>.5) discard; gl_FragColor=vec4(vC,vA*smoothstep(.5,0.,d)); }`});
+  const pts=new THREE.Points(geo,mat); scene.add(pts);
+  stick.insertBefore(cv,stick.querySelector(".c-grid"));
+  let W=0,H=0,run=false,raf=0,t0=performance.now(),mx=0,my=0,tx=0,ty=0;
+  const size=()=>{ W=stick.clientWidth; H=stick.clientHeight; if(!W||!H)return; renderer.setSize(W,H,false); cam.aspect=W/H; cam.updateProjectionMatrix(); };
+  const frame=now=>{ raf=run?requestAnimationFrame(frame):0; if(!run)return;
+    if(!cineActive()||document.hidden){ stop(); return; }
+    tx+=(mx-tx)*.05; ty+=(my-ty)*.05;
+    const p=CINE.scenes[0]?Math.max(0,CINE.scenes[0].p):0;
+    U.uT.value=(now-t0)/1000; U.uM.value.set(tx,ty); U.uS.value=p;
+    cam.position.set(tx*3.5,7.5-p*3.5+ty*1.5,20-p*16); cam.lookAt(tx*2,-1.5-p*1.5,-24);
+    renderer.render(scene,cam); };
+  const start=()=>{ if(run||!cineActive()||document.hidden)return; run=true; size(); raf=requestAnimationFrame(frame); };
+  const stop=()=>{ run=false; };
+  new IntersectionObserver(([e])=>e.isIntersecting?start():stop()).observe(stick);
+  addEventListener("resize",()=>{ if(run) size(); });
+  document.addEventListener("visibilitychange",()=>document.hidden?stop():start());
+  stick.addEventListener("pointermove",e=>{ mx=e.clientX/innerWidth*2-1; my=e.clientY/innerHeight*2-1; },{passive:true});
+  CINE.fx={start,stop,canvas:cv};
+  start();
 }
 
 /* =====================================================================
