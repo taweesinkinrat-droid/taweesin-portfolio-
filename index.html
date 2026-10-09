@@ -657,6 +657,16 @@ footer .priv{flex-basis:100%;font-size:.72rem;color:#6f7d88;opacity:.85}
 #stats .st-tags span{font-size:.75rem;padding:1px 7px;border-radius:999px;background:#1e2a31;border:1px solid #29404a;color:#a5f3fc}
 #stats .st-tags span.g{background:#2b2513;border-color:#5a4a1c;color:#f5c451}
 #stats .st-login{max-width:340px;margin:18vh auto 0;display:grid;gap:10px;text-align:center}
+#stats .st-admin{margin-bottom:14px}
+#stats .st-admin summary{cursor:pointer;font-weight:600;color:#a5f3fc}
+#stats .st-adm{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px;margin-top:12px}#stats .st-adm .st-msg{align-self:center}
+#stats .st-adm label{display:flex;flex-direction:column;gap:4px;font-size:.8rem;color:#8796a1}
+#stats .st-adm input{width:120px}
+#stats .st-pri{background:#22d3ee;color:#06222b;border-color:#22d3ee;font-weight:700}
+#stats .st-danger{border-color:#7f1d1d;color:#fca5a5;background:#2a1414}
+#stats .st-danger:hover{border-color:#f87171}
+#stats .st-adm-danger{padding-top:12px;margin-top:6px;border-top:1px solid #232b33}
+#stats .st-msg{font-size:.82rem;color:#8796a1}#stats .st-msg.ok{color:#86efac}#stats .st-msg.bad{color:#fca5a5}
 #stats .st-err{color:#fca5a5;font-size:.85rem;min-height:1.2em}
 
 /* ---------- opening splash (first visit per session) ---------- */
@@ -1349,6 +1359,25 @@ const ME = {
   badges:[{th:"🏆 ชนะเลิศ WRG Thailand 2026",en:"🏆 Champion — WRG Thailand 2026"},{th:"👑 ถ้วยพระราชทาน TO BE NUMBER ONE",en:"👑 Royal Trophy — TO BE NUMBER ONE"},{th:"🇯🇵 ตัวแทนประเทศไทย → WRG ญี่ปุ่น",en:"🇯🇵 Team Thailand → WRG Japan"}],
 };
 
+/* GPA + number of semesters: editable from the private stats page (stored in the Apps Script back-end).
+   The last known values are cached so the page never flashes the old number. */
+const PDF_BAKED={gpa:"3.46",terms:4};   /* what the uploaded résumé PDFs were printed with */
+var CFG=(function(){ var c={gpa:PDF_BAKED.gpa,terms:PDF_BAKED.terms};
+  try{ var x=JSON.parse(localStorage.getItem("tk_cfg")||"null"); if(x&&x.gpa) c={gpa:Number(x.gpa).toFixed(2),terms:Math.max(1,Math.min(9,+x.terms||4))}; }catch(e){}
+  return c; })();
+const gpaH=()=>`<b class="js-gpa">${CFG.gpa}</b>`, termsH=()=>`<span class="js-terms">${CFG.terms}</span>`, semH=()=>`<span class="js-semw">semester${CFG.terms>1?"s":""}</span>`;
+function applyCfg(c){
+  if(!c||!c.gpa) return false;
+  const n={gpa:Number(c.gpa).toFixed(2),terms:Math.max(1,Math.min(9,Math.round(+c.terms)||4))};
+  try{ localStorage.setItem("tk_cfg",JSON.stringify(n)); }catch(e){}
+  if(n.gpa===CFG.gpa&&n.terms===CFG.terms) return false;
+  CFG=n;
+  document.querySelectorAll(".js-gpa").forEach(e=>e.textContent=n.gpa);
+  document.querySelectorAll(".js-terms").forEach(e=>e.textContent=n.terms);
+  document.querySelectorAll(".js-semw").forEach(e=>e.textContent="semester"+(n.terms>1?"s":""));
+  return true;
+}
+
 /* Windows has no flag emoji (it shows the letters "JP"), so flags are drawn as small SVGs */
 const FLAG={"🇯🇵":'<svg class="flag" viewBox="0 0 30 20" aria-label="Japan" role="img"><rect width="30" height="20" rx="2.5" fill="#fff"/><circle cx="15" cy="10" r="6" fill="#bc002d"/></svg>'};
 const flagify=t=>String(t).replace(/🇯🇵/g,FLAG["🇯🇵"]);
@@ -1618,7 +1647,7 @@ function intro(cls="h-100"){
   return `<div class="card ${cls}"><h2>${T(UI.intro)}</h2>
    <ul class="info">
     <li>${ic.school}<span>${L==="th"?"นักเรียนแผน SMT (วิทย์–คณิต–เทคโนโลยี) <b>โรงเรียนอุทัยธรรมานุวัตรวิทยา</b>":"Science–Math–Technology (SMT) program, <b>Uthaidhammanuwat Witthaya School</b>"}</span></li>
-    <li>${ic.star}<span>${L==="th"?"เกรดเฉลี่ย 4 ภาคเรียน <b>3.46</b>":"GPAX (4 semesters) <b>3.46</b>"}</span></li>
+    <li>${ic.star}<span>${L==="th"?`เกรดเฉลี่ย ${termsH()} ภาคเรียน ${gpaH()}`:`GPAX (${termsH()} ${semH()}) ${gpaH()}`}</span></li>
     <li>${ic.pin}<span>${L==="th"?"จ.อุทัยธานี":"Uthai Thani, Thailand"}</span></li>
     <li>${ic.mail}<a href="mailto:Taweesinkinrat@gmail.com">Taweesinkinrat@gmail.com</a></li>
     <li>${ic.ig}<a href="https://www.instagram.com/umamiumami_/" target="_blank" rel="noopener">@umamiumami_</a></li>
@@ -1647,7 +1676,7 @@ function cine(HL){
   const story=T(ME.story||ME.tagline), words=[];
   story.split(/(\[\[.*?\]\])/).forEach(part=>{ const hi=/^\[\[/.test(part); segWords(hi?part.slice(2,-2):part).forEach(w=>words.push([w,hi])); });
   const facts=[[ic.school,th?"นักเรียนแผน SMT (วิทย์–คณิต–เทคโนโลยี) <b>โรงเรียนอุทัยธรรมานุวัตรวิทยา</b>":"Science–Math–Technology (SMT) program, <b>Uthaidhammanuwat Witthaya School</b>"],
-    [ic.star,th?"เกรดเฉลี่ย 4 ภาคเรียน <b>3.46</b>":"GPAX (4 semesters) <b>3.46</b>"],[ic.pin,th?"จ.อุทัยธานี":"Uthai Thani, Thailand"]];
+    [ic.star,th?`เกรดเฉลี่ย ${termsH()} ภาคเรียน ${gpaH()}`:`GPAX (${termsH()} ${semH()}) ${gpaH()}`],[ic.pin,th?"จ.อุทัยธานี":"Uthai Thani, Thailand"]];
   const projRow=(p,anchor,pic)=>`<article class="c-proj c-rv" data-item="Home: ${e(typeof p.title==="string"?p.title:p.title.en)}">
       <div class="c-pimg"><img src="${TH(pic)}" loading="lazy" decoding="async" onerror="thumbFail(this)" alt=""></div>
       <div class="c-ptxt">${p.badge?`<span class="tag-medal m-gold">🏆 ${T(p.badge)}</span>`:""}<h3>${T(p.title)}</h3><p>${T(p.text)}</p>
@@ -1748,7 +1777,7 @@ function renderResume(){
    <div class="rs-body">
     <aside class="rs-side">
      <section><h2>${T(UI.edu)}</h2><ul>
-      <li><b>${th?"โรงเรียนอุทัยธรรมานุวัตรวิทยา":"Uthaidhammanuwat Witthaya School"}</b><br>${th?"แผน SMT (วิทยาศาสตร์–คณิตศาสตร์และเทคโนโลยี)":"Science–Math–Technology (SMT) program"}<br>${th?"เกรดเฉลี่ย 4 ภาคเรียน":"GPAX (4 semesters)"} <b>3.46</b></li>
+      <li><b>${th?"โรงเรียนอุทัยธรรมานุวัตรวิทยา":"Uthaidhammanuwat Witthaya School"}</b><br>${th?"แผน SMT (วิทยาศาสตร์–คณิตศาสตร์และเทคโนโลยี)":"Science–Math–Technology (SMT) program"}<br>${th?`เกรดเฉลี่ย ${termsH()} ภาคเรียน`:`GPAX (${termsH()} ${semH()})`} ${gpaH()}</li>
       <li><b>${th?"โรงเรียนไทยรัฐวิทยา ๕๘":"Thairath Wittaya 58 School"}</b><br>${th?"ประถมศึกษา":"Primary"}</li></ul></section>
      <section><h2>${T(UI.skills)}</h2><div class="rs-chips">${SKILLS.map(x=>`<span>${x}</span>`).join("")}</div></section>
      <section><h2>${th?"ผลงานโดยรวม":"At a glance"}</h2><ul>
@@ -1769,8 +1798,34 @@ function renderResume(){
 }
 /* Resume button: download the ready-made PDF (docs/resume-th.pdf / resume-en.pdf); if it isn't there,
    fall back to the browser's own "Save as PDF" of the same one-page layout */
+/* The PDFs on the site were printed with PDF_BAKED. When the back-office GPA differs, the browser loads
+   pdf-lib (only then, ~0.5 MB), covers the old numbers and writes the new ones in the same font, size and
+   colour at the exact same spot — the downloaded PDF looks identical, just with the current grade. */
+const PDF_SPOTS={th:{terms:{x:76.77,w:5.04,base:564.42},gpa:{x:117.42,w:17.71,base:564.42}},
+                 en:{terms:{x:65.57,w:5.04,base:591.42},gpa:{x:116.72,w:17.71,base:591.42}}};
+const loadJS=src=>new Promise((ok,no)=>{ if(document.querySelector(`script[src="${src}"]`)) return ok();
+  const sc=document.createElement("script"); sc.src=src; sc.onload=ok; sc.onerror=no; document.head.appendChild(sc); });
+async function patchedResume(url,lang){
+  if(typeof toast==="function") toast(lang==="th"?"กำลังเตรียม Resume ฉบับล่าสุด…":"Preparing the latest résumé…");
+  if(!window.PDFLib) await loadJS("https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js");
+  if(!window.fontkit) await loadJS("https://cdn.jsdelivr.net/npm/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js");
+  const F="https://cdn.jsdelivr.net/npm/@fontsource/ibm-plex-sans-thai@5/files/ibm-plex-sans-thai-latin-";
+  const [pdf,reg,bold]=await Promise.all([url,F+"400-normal.woff",F+"700-normal.woff"].map(u=>fetch(u).then(r=>{ if(!r.ok) throw new Error(u); return r.arrayBuffer(); })));
+  const {PDFDocument,rgb}=PDFLib, doc=await PDFDocument.load(pdf); doc.registerFontkit(window.fontkit);
+  const fr=await doc.embedFont(reg,{subset:true}), fb=await doc.embedFont(bold,{subset:true}), pg=doc.getPages()[0], S=PDF_SPOTS[lang];
+  const put=(sp,txt,font,color)=>{ const w=font.widthOfTextAtSize(txt,8.4);
+    pg.drawRectangle({x:sp.x-.4,y:sp.base-2.6,width:Math.max(sp.w,w)+.8,height:9.6,color:rgb(1,1,1)});
+    pg.drawText(txt,{x:sp.x,y:sp.base,size:8.4,font,color}); };
+  put(S.terms,String(CFG.terms),fr,rgb(.1137,.1529,.2));
+  put(S.gpa,CFG.gpa,fb,rgb(.051,.0863,.1255));
+  return new Blob([await doc.save()],{type:"application/pdf"});
+}
 async function downloadResume(){
-  const url=`docs/resume-${L}.pdf`;
+  const url=`docs/resume-${L}.pdf`, name=`Taweesin-Kinrat-Resume-${L.toUpperCase()}.pdf`;
+  if(CFG.gpa!==PDF_BAKED.gpa||CFG.terms!==PDF_BAKED.terms){
+    try{ const b=await patchedResume(url,L), a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=name;
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),60000); return; }
+    catch(e){ /* offline / blocked CDN: fall back to the uploaded file */ } }
   try{ const r=await fetch(url,{method:"HEAD",cache:"no-store"});
     if(r.ok){ const a=document.createElement("a"); a.href=url; a.download=`Taweesin-Kinrat-Resume-${L.toUpperCase()}.pdf`;
       document.body.appendChild(a); a.click(); a.remove(); return; } }catch(e){}
@@ -1890,7 +1945,7 @@ function render(){
         ?"ผมชอบคิด ออกแบบ ลงมือทำ และแก้ปัญหา มากกว่าการเรียนแค่ในตำรา สิ่งที่ชอบที่สุดคือได้เห็นหุ่นที่ตัวเองออกแบบและเขียนโปรแกรมทำงานได้จริง ถึงจะต้องแก้หลายรอบก็ตาม หุ่นทุกตัวที่แข่งผมทำเองทั้งหมด ตั้งแต่หาข้อมูลอุปกรณ์ ออกแบบโครงใน CAD พิมพ์ 3D ต่อวงจร จนถึงเขียนซอฟต์แวร์"
         :"I learn best by designing, building and solving real problems rather than from textbooks alone. My favourite moment is watching a robot I designed and programmed finally work, even after many rounds of fixes. I build every competition robot myself — from researching parts and CAD design to 3D printing, wiring and software."}</p></div>
       <div class="card"><h2>${T(UI.edu)}</h2><ul class="tl">
-        <li><b>${L==="th"?"โรงเรียนอุทัยธรรมานุวัตรวิทยา":"Uthaidhammanuwat Witthaya School"}</b><br><span class="muted">${L==="th"?"มัธยมศึกษา · แผน SMT (วิทยาศาสตร์–คณิตศาสตร์และเทคโนโลยี) · เกรดเฉลี่ย 4 ภาคเรียน 3.46":"Secondary · SMT program · GPAX 3.46 (4 semesters)"}</span></li>
+        <li><b>${L==="th"?"โรงเรียนอุทัยธรรมานุวัตรวิทยา":"Uthaidhammanuwat Witthaya School"}</b><br><span class="muted">${L==="th"?`มัธยมศึกษา · แผน SMT (วิทยาศาสตร์–คณิตศาสตร์และเทคโนโลยี) · เกรดเฉลี่ย ${termsH()} ภาคเรียน <span class="js-gpa">${CFG.gpa}</span>`:`Secondary · SMT program · GPAX <span class="js-gpa">${CFG.gpa}</span> (${termsH()} ${semH()})`}</span></li>
         <li><b>${L==="th"?"โรงเรียนไทยรัฐวิทยา ๕๘":"Thairath Wittaya 58 School"}</b><br><span class="muted">${L==="th"?"ประถมศึกษา":"Primary"}</span></li>
       </ul></div>
       <div class="card"><h2>${T(UI.skills)}</h2><div class="specs">${SKILLS.map(s=>`<span class="chip">${s}</span>`).join("")}</div></div>
@@ -2825,6 +2880,7 @@ async function loadStats(key){
     if(d.error){ try{ localStorage.removeItem("tk_dash_key"); }catch(e){} return loginForm("รหัสผ่านไม่ถูกต้อง"); }
     try{ localStorage.setItem("tk_dash_key",key); localStorage.setItem("tk_notrack","1"); }catch(e){}
     OWNER=true; stQ.length=0; /* this device is yours: stop counting it from now on */
+    if(d.config) applyCfg(d.config);
     const H=d.head; stData=d.rows.map(r=>Object.fromEntries(H.map((h,i)=>[h,r[i]]))).map(o=>(o.time=+o.time,o)).sort((a,b)=>a.time-b.time);
     renderStats("30");
   }catch(e){ box.innerHTML=`<div class="st-in"><div class="st-login"><p>โหลดสถิติไม่สำเร็จ — ตรวจอินเทอร์เน็ตแล้วลองใหม่</p><button id="stRetry">ลองใหม่</button><button id="stClose">ปิด</button></div></div>`;
@@ -2857,6 +2913,16 @@ function renderStats(range){
    <div class="st-top"><h2>📊 สถิติผู้เข้าชม</h2><div style="display:flex;gap:6px;flex-wrap:wrap">
      <select id="stRange"><option value="1">วันนี้</option><option value="7">7 วัน</option><option value="30">30 วัน</option><option value="all">ทั้งหมด</option></select>
      <button id="stRefresh">รีเฟรช</button><button id="stCsv">CSV</button><button id="stOut">ออกจากระบบ</button><button id="stClose">✕ ปิด</button></div></div>
+   <details class="st-box st-admin"><summary>⚙️ ตั้งค่าเว็บ — เกรดเฉลี่ย / ล้างประวัติการเข้าชม</summary>
+     <div class="st-adm">
+       <label>เกรดเฉลี่ย (GPAX)<input id="stGpa" inputmode="decimal" autocomplete="off" value="${CFG.gpa}"></label>
+       <label>จำนวนภาคเรียน<input id="stTerms" type="number" min="1" max="9" step="1" value="${CFG.terms}"></label>
+       <button id="stSave" class="st-pri">บันทึก</button><span id="stCfgMsg" class="st-msg"></span>
+     </div>
+     <p class="st-meta">ตัวเลขในหน้าเว็บ (หน้าแรก · เกี่ยวกับ) และใน Resume PDF ที่คนดาวน์โหลด จะเปลี่ยนตามทันที ทั้งภาษาไทยและอังกฤษ</p>
+     <div class="st-adm st-adm-danger"><button id="stClear" class="st-danger">🗑 ล้างประวัติการเข้าชมทั้งหมด</button><span id="stClrMsg" class="st-msg"></span></div>
+     <p class="st-meta">ลบข้อมูลการเข้าชมทั้งหมดในชีต events (กู้คืนไม่ได้) — แนะนำให้กด CSV เก็บไว้ก่อน</p>
+   </details>
    <div class="st-cards">
      <div class="st-card"><b>${V.length}</b><span>ครั้งที่เข้าชม</span></div>
      <div class="st-card"><b>${uniq}</b><span>คน (เครื่อง) ไม่ซ้ำ</span></div>
@@ -2889,6 +2955,24 @@ function renderStats(range){
   q("#stRefresh").onclick=()=>{ let k=""; try{ k=localStorage.getItem("tk_dash_key")||""; }catch(e){} loadStats(k); };
   q("#stOut").onclick=()=>{ try{ localStorage.removeItem("tk_dash_key"); }catch(e){} loginForm(""); };
   q("#stClose").onclick=closeStats;
+  const stKey=()=>{ try{ return localStorage.getItem("tk_dash_key")||""; }catch(e){ return ""; } };
+  const api=params=>fetch(STATS_URL+(STATS_URL.includes("?")?"&":"?")+new URLSearchParams(Object.assign({key:stKey()},params)),{cache:"no-store"}).then(r=>r.json());
+  q("#stSave").onclick=async()=>{ const m=q("#stCfgMsg"), g=parseFloat(String(q("#stGpa").value).replace(",",".")), t=parseInt(q("#stTerms").value,10);
+    if(!(g>=0&&g<=4)){ m.textContent="เกรดต้องอยู่ระหว่าง 0.00–4.00"; m.className="st-msg bad"; return; }
+    if(!(t>=1&&t<=9)){ m.textContent="จำนวนภาคเรียนต้องเป็น 1–9"; m.className="st-msg bad"; return; }
+    m.textContent="กำลังบันทึก…"; m.className="st-msg";
+    try{ const d=await api({action:"setcfg",gpa:g.toFixed(2),terms:t});
+      if(d.error){ m.textContent=d.error==="denied"?"รหัสผ่านไม่ถูกต้อง":"ค่าที่ใส่ไม่ถูกต้อง"; m.className="st-msg bad"; return; }
+      if(d.ok===undefined){ m.textContent="หลังบ้านยังเป็นเวอร์ชันเก่า — อัปเดตโค้ด Apps Script ก่อน"; m.className="st-msg bad"; return; }
+      applyCfg(d); q("#stGpa").value=CFG.gpa; m.textContent=`บันทึกแล้ว ✓ เกรด ${CFG.gpa} · ${CFG.terms} ภาคเรียน`; m.className="st-msg ok"; }
+    catch(e){ m.textContent="บันทึกไม่สำเร็จ — ตรวจอินเทอร์เน็ตแล้วลองใหม่"; m.className="st-msg bad"; } };
+  q("#stClear").onclick=async()=>{ const m=q("#stClrMsg");
+    const ans=prompt("ลบประวัติการเข้าชมทั้งหมด (กู้คืนไม่ได้)\nพิมพ์คำว่า  ลบ  เพื่อยืนยัน"); if((ans||"").trim()!=="ลบ"){ m.textContent="ยกเลิกแล้ว"; m.className="st-msg"; return; }
+    m.textContent="กำลังลบ…"; m.className="st-msg";
+    try{ const d=await api({action:"clear"});
+      if(!d.cleared){ m.textContent=d.error==="denied"?"รหัสผ่านไม่ถูกต้อง":"หลังบ้านยังเป็นเวอร์ชันเก่า — อัปเดตโค้ด Apps Script ก่อน"; m.className="st-msg bad"; return; }
+      loadStats(stKey()); }
+    catch(e){ m.textContent="ลบไม่สำเร็จ — ลองใหม่"; m.className="st-msg bad"; } };
   q("#stCsv").onclick=()=>{ const H=Object.keys(stData[0]||{}); const csv="\ufeff"+[H.join(",")].concat(stData.map(r=>H.map(h=>`"${String(h==="time"?new Date(r[h]).toISOString():r[h]).replace(/"/g,'""')}"`).join(","))).join("\n");
     const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"})); a.download="portfolio-stats.csv"; a.click(); };
 }
@@ -3168,6 +3252,10 @@ addEventListener("keydown",e=>{
     if(i>=0&&i<TABS.length){ NAV_VIA="keyboard"; go(TABS[i][0]); }
   }
 });
+
+/* current GPA / semesters from the back-office */
+addEventListener("load",()=>{ if(!STATS_URL) return;
+  setTimeout(()=>fetch(STATS_URL+(STATS_URL.includes("?")?"&":"?")+"action=config",{cache:"no-store"}).then(r=>r.json()).then(applyCfg).catch(()=>{}),400); });
 
 /* share this portfolio (phones: the system share sheet — LINE, Messenger…; elsewhere: copy the link) */
 const SHARE_URL="https://taweesinkinrat-droid.github.io/taweesin-portfolio-/?utm_source=share&utm_medium=share&utm_campaign=portfolio#home";
