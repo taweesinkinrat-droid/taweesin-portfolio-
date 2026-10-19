@@ -374,6 +374,28 @@ main{overflow-x:clip} /* the sideways slide never makes the page scroll horizont
 .stl-viewer.active .stl-hint{border-color:rgba(34,211,238,.55);color:var(--cyan)}
 @media (hover:hover){.stl-viewer.used .stl-hint{opacity:0}}
 .stl-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.85rem;text-align:center;padding:10px;gap:6px}
+.stl-full{position:absolute;top:7px;left:8px;z-index:3;display:none;align-items:center;gap:5px;height:28px;padding:0 10px;border-radius:999px;
+  background:rgba(10,14,18,.62);border:1px solid rgba(34,211,238,.35);color:#cffafe;font:600 .72rem/1 inherit;cursor:pointer;
+  transition:background .2s,border-color .2s,transform .2s}
+.stl-full svg{width:13px;height:13px}
+.stl-full:hover{background:rgba(34,211,238,.18);border-color:var(--cyan);transform:scale(1.04)}
+.stl-full:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+@media (min-width:701px){.stl-full{display:inline-flex}}
+html.sm-open,html.sm-open body{overflow:hidden}
+#stlModal{position:fixed;inset:0;z-index:2600;display:flex;flex-direction:column;
+  background:radial-gradient(80% 70% at 50% 45%,rgba(34,211,238,.10),transparent 70%),rgba(6,9,12,.985);
+  animation:smIn .28s cubic-bezier(.2,.8,.2,1)}
+@keyframes smIn{from{opacity:0;transform:scale(.985)}to{opacity:1;transform:none}}
+#stlModal .sm-bar{display:flex;align-items:center;gap:12px;padding:12px max(16px,env(safe-area-inset-right)) 12px max(16px,env(safe-area-inset-left));
+  border-bottom:1px solid rgba(255,255,255,.07)}
+#stlModal .sm-title{flex:1;min-width:0;font-weight:700;font-size:1.02rem;color:#e6f1f5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#stlModal .sm-hint{color:var(--muted);font-size:.8rem;white-space:nowrap}
+#stlModal .sm-btn{flex-shrink:0;height:36px;min-width:36px;padding:0 12px;border-radius:10px;border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.05);color:#e6f1f5;font:600 .85rem/1 inherit;cursor:pointer}
+#stlModal .sm-btn:hover{border-color:var(--cyan);color:var(--cyan)}
+#stlModal .stl-viewer.stl-big{flex:1;aspect-ratio:auto;border-radius:0;background:transparent;box-shadow:none;touch-action:none}
+#stlModal .stl-big .stl-hint,#stlModal .stl-big .stl-full{display:none}
+@media (max-width:900px){#stlModal .sm-hint{display:none}}
 .stl-tag{position:absolute;top:8px;right:8px;font-size:.7rem;padding:3px 9px;border-radius:999px;background:rgba(34,211,238,.15);border:1px solid rgba(34,211,238,.4);color:var(--cyan);font-weight:600;letter-spacing:.03em;pointer-events:none;z-index:2}
 #p-design .card h3{margin-bottom:4px}
 #p-design .card p{font-size:.92rem}
@@ -2165,7 +2187,7 @@ if(matchMedia("(max-width:700px)").matches && !sessionStorage.getItem("hideSwipe
   let sx0=0, sy0=0, active=false, skip=false;
   mainEl.addEventListener("touchstart",e=>{
     if(lb.classList.contains("open")){active=false;return;}
-    skip=!!e.target.closest(".stl-viewer,.filters,.toc-chips,.j-track,.vid,video,iframe"); /* let 3D models, chip rows, and video players (including their seek bar) handle their own gestures */
+    skip=!!e.target.closest("#stlModal,.stl-viewer,.filters,.toc-chips,.j-track,.vid,video,iframe"); /* let 3D models, chip rows, and video players (including their seek bar) handle their own gestures */
     if(skip){active=false;return;}
     sx0=e.touches[0].clientX; sy0=e.touches[0].clientY; active=true;
   },{passive:true});
@@ -2301,8 +2323,9 @@ function stlBuild(v,geo){
   if(STL_TOUCH) v.el.addEventListener("click",()=>stlActivate(v));
   else{
     v.el.addEventListener("click",()=>{ controls.enableZoom=true; });
-    v.el.addEventListener("mouseleave",()=>{ controls.enableZoom=false; });
+    v.el.addEventListener("mouseleave",()=>{ if(!v.big) controls.enableZoom=false; });
   }
+  if(v.big){ controls.enableZoom=true; controls.enablePan=true; controls.saveState(); if(STL_TOUCH){ v.ready=true; stlActivate(v); } }
   v.ro=new ResizeObserver(()=>stlSize(v)); v.ro.observe(v.el);
   stlClearMsg(v); stlSize(v); stlHint(v); stlKick();
 }
@@ -2362,7 +2385,7 @@ document.addEventListener("visibilitychange",()=>{
 });
 /* tap anywhere outside an active model → give scrolling back to the page */
 document.addEventListener("pointerdown",e=>{
-  STL.views.forEach(v=>{ if(v.active&&!v.el.contains(e.target)) stlDeactivate(v); });
+  STL.views.forEach(v=>{ if(v.active&&!v.big&&!v.el.contains(e.target)) stlDeactivate(v); });
 },{passive:true});
 /* on screen (with a small margin) → render;  off screen → stop rendering + release touch */
 const stlVisIO=new IntersectionObserver(es=>es.forEach(en=>{
@@ -2391,10 +2414,43 @@ function initStlViewers(){
   document.querySelectorAll(".stl-viewer[data-stl]").forEach(el=>{
     if(el._stl)return;
     if(!el.clientWidth||!el.clientHeight)return; /* panel hidden — retried next time the tab opens */
-    const v={el,src:el.dataset.stl,ready:false,loading:false,visible:false,near:false};
+    const v={el,src:el.dataset.stl,ready:false,loading:false,visible:false,near:false,big:el.classList.contains("stl-big")};
     el._stl=v; STL.views.push(v);
+    if(!v.big){ const b=document.createElement("button"); b.type="button"; b.className="stl-full";
+      b.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span>${L==="th"?"เต็มจอ":"Full screen"}</span>`;
+      b.setAttribute("aria-label",L==="th"?"ดูโมเดลแบบเต็มจอ":"View model full screen");
+      b.addEventListener("click",e=>{ e.stopPropagation(); openStlFull(el,b); });
+      el.appendChild(b);
+      if(!STL_TOUCH) el.addEventListener("dblclick",()=>{ if(innerWidth>700) openStlFull(el,b); }); }
     stlVisIO.observe(el); stlNearIO.observe(el);
   });
+}
+
+/* FULL-SCREEN 3D (tablet / desktop): opens the same model big, with zoom + pan on and a reset button.
+   It re-uses the shared renderer and the already-downloaded geometry, so it opens instantly. */
+function openStlFull(el,from){
+  if(document.getElementById("stlModal"))return;
+  const art=el.closest("article"), h=art&&art.querySelector("h3");
+  const title=h?h.textContent:"3D";
+  const th=L==="th";
+  const m=document.createElement("div"); m.id="stlModal"; m.setAttribute("role","dialog"); m.setAttribute("aria-modal","true"); m.setAttribute("aria-label",title);
+  m.innerHTML=`<div class="sm-bar"><div class="sm-title"></div>
+    <span class="sm-hint">${STL_TOUCH?(th?"ลากเพื่อหมุน · จีบนิ้วเพื่อซูม · สองนิ้วลากเพื่อเลื่อน":"Drag to rotate · pinch to zoom · two-finger drag to pan")
+      :(th?"ลากเพื่อหมุน · ลูกกลิ้งเพื่อซูม · คลิกขวาลากเพื่อเลื่อน":"Drag to rotate · scroll to zoom · right-drag to pan")}</span>
+    <button type="button" class="sm-btn sm-reset">${th?"⟲ มุมเริ่มต้น":"⟲ Reset view"}</button>
+    <button type="button" class="sm-btn sm-x" aria-label="${th?"ปิด":"Close"}">✕</button></div>
+    <div class="stl-viewer stl-big" data-stl="${el.dataset.stl}"><div class="stl-loading">${stlText("load")}</div></div>`;
+  m.querySelector(".sm-title").textContent=title;
+  document.body.appendChild(m); document.documentElement.classList.add("sm-open");
+  const close=()=>{ m.remove(); document.documentElement.classList.remove("sm-open"); removeEventListener("keydown",key,true);
+    initStlViewers(); if(from) from.focus({preventScroll:true}); };
+  const key=e=>{ if(e.key==="Escape"){ e.stopPropagation(); close(); } };
+  addEventListener("keydown",key,true);
+  m.querySelector(".sm-x").onclick=close;
+  m.querySelector(".sm-reset").onclick=()=>{ const v=m.querySelector(".stl-big")._stl; if(v&&v.ready){ v.controls.reset(); v.dirty=true; stlKick(); } };
+  m.querySelector(".sm-x").focus({preventScroll:true});
+  initStlViewers();
+  if(typeof track==="function") track("model_fullscreen",{item_name:title});
 }
 
 /* ---------- motion (GSAP) ---------- */
@@ -3250,7 +3306,7 @@ document.addEventListener("click",e=>{ if(e.target.closest("[data-search]")) ope
 /* keyboard: ← → switch section (tablet/desktop) · "/" also opens search */
 addEventListener("keydown",e=>{
   const typing=/^(INPUT|TEXTAREA|SELECT)$/.test((e.target.tagName||""))||e.target.isContentEditable;
-  const modal=qsEl.classList.contains("open")||lb.classList.contains("open")||document.getElementById("stats")&&document.getElementById("stats").offsetParent!==null||document.querySelector(".offcanvas.show");
+  const modal=qsEl.classList.contains("open")||lb.classList.contains("open")||document.getElementById("stlModal")||document.getElementById("stats")&&document.getElementById("stats").offsetParent!==null||document.querySelector(".offcanvas.show");
   if(typing||modal||e.altKey||e.ctrlKey||e.metaKey) return;
   if(e.key==="/"){ e.preventDefault(); openSearch(); return; }
   if((e.key==="ArrowRight"||e.key==="ArrowLeft")&&!e.target.closest(".j-track,.stl-viewer,video")){
