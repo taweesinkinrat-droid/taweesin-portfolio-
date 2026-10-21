@@ -2272,6 +2272,8 @@ function stlHint(v){
 }
 function stlSize(v){
   if(!v.cv)return;
+  if(v.own){ const w=Math.max(1,v.el.clientWidth), h=Math.max(1,v.el.clientHeight);
+    v.own.setSize(w,h,false); v.camera.aspect=w/h; v.camera.updateProjectionMatrix(); v.dirty=true; stlKick(); return; }
   const w=Math.max(1,Math.round(v.el.clientWidth*STL_DPR)), h=Math.max(1,Math.round(v.el.clientHeight*STL_DPR));
   if(v.cv.width!==w||v.cv.height!==h){
     v.cv.width=w; v.cv.height=h;
@@ -2307,9 +2309,15 @@ function stlBuild(v,geo){
   const bb=geo.boundingBox, tall=(bb.max.y-bb.min.y)>1.1*Math.max(bb.max.x-bb.min.x,bb.max.z-bb.min.z);
   if(tall) camera.position.set(r*2.05,r*1.0,r*2.05);   /* tall models: step back + lower so the top is never cut */
   else camera.position.set(r*1.7,r*1.3,r*1.7);
-  const cv=document.createElement("canvas"); cv.className="stl-canvas";
+  /* full-screen view: its own renderer drawing straight to the screen (no per-frame copy, no buffer
+     resizing tug-of-war with the small cards) — this is what keeps the big view smooth */
+  let own=null;
+  if(v.big){ try{ own=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:"high-performance"});
+    own.setPixelRatio(Math.min(window.devicePixelRatio||1,STL_TOUCH?1.5:2)); own.setClearColor(0x000000,0);
+    own.domElement.addEventListener("webglcontextlost",e=>e.preventDefault()); }catch(e){ own=null; } }
+  const cv=own?own.domElement:document.createElement("canvas"); cv.classList.add("stl-canvas");
   v.el.insertBefore(cv,v.el.firstChild);
-  const ctx=cv.getContext("2d");
+  const ctx=own?null:cv.getContext("2d");
   const controls=new THREE.OrbitControls(camera,cv);
   controls.enableDamping=true; controls.dampingFactor=.08;
   controls.autoRotate=true; controls.autoRotateSpeed=1.6;
@@ -2320,7 +2328,7 @@ function stlBuild(v,geo){
   controls.addEventListener("change",()=>{ v.dirty=true; stlKick(); });
   controls.target.set(0,0,0); controls.update();
   cv.addEventListener("contextrestored",()=>{ v.dirty=true; stlKick(); }); /* 2D canvas reset → just redraw */
-  Object.assign(v,{scene,camera,controls,cv,ctx,mesh,ready:true,dirty:true,active:false});
+  Object.assign(v,{scene,camera,controls,cv,ctx,mesh,own,ready:true,dirty:true,active:false});
   if(STL_TOUCH) v.el.addEventListener("click",()=>stlActivate(v));
   else{
     v.el.addEventListener("click",()=>{ controls.enableZoom=true; });
@@ -2358,14 +2366,27 @@ function stlEnqueue(v){
   stlMsg(v,stlText("wait")); STL.queue.push(v); stlPump();
 }
 function stlKick(){ if(!STL.raf) STL.raf=requestAnimationFrame(stlTick); }
+/* full-screen: if a slower computer can't keep ~45 fps, step the render resolution down a little
+   (never below 1×) until it can — the model itself is untouched, it just stays fluid */
+function stlAdapt(v){
+  const t=performance.now(), d=v.lastT?t-v.lastT:0; v.lastT=t;
+  if(!d||d>250){ v.frames=0; v.acc=0; return; }
+  v.frames=(v.frames||0)+1; v.acc=(v.acc||0)+d;
+  if(v.frames<24)return;
+  const avg=v.acc/v.frames, pr=v.own.getPixelRatio(); v.frames=0; v.acc=0;
+  if(avg>22&&pr>1){ v.own.setPixelRatio(Math.max(1,pr-.25)); stlSize(v); }
+}
 function stlTick(){
   STL.raf=0;
   if(document.hidden)return;
   let keep=false;
+  const full=STL.views.some(x=>x.own&&x.ready);  /* full-screen open → the cards behind it pause */
   for(const v of STL.views){
     if(!v.ready||!v.visible)continue;
+    if(full&&!v.own)continue;
     v.controls.update();                       /* fires 'change' while rotating/damping → dirty */
     if(v.controls.autoRotate) keep=true;
+    if(v.own){ if(v.dirty){ stlAdapt(v); v.own.render(v.scene,v.camera); v.dirty=false; keep=true; } continue; }
     if(!v.dirty||STL.lost)continue;
     const r=stlRenderer(); if(!r)break;
     /* the loss event arrives a moment after the GPU actually drops the context; never copy a
@@ -2409,6 +2430,7 @@ function initStlViewers(){
     if(v.el.isConnected)return true;
     stlVisIO.unobserve(v.el); stlNearIO.unobserve(v.el);
     if(v.ro)v.ro.disconnect();
+    if(v.own){ try{ v.controls.dispose(); v.own.dispose(); v.own.forceContextLoss(); }catch(e){} v.own=null; }
     const qi=STL.queue.indexOf(v); if(qi>=0)STL.queue.splice(qi,1);
     return false;
   });
@@ -2444,7 +2466,7 @@ function openStlFull(el,from){
   m.querySelector(".sm-title").textContent=title;
   document.body.appendChild(m); document.documentElement.classList.add("sm-open");
   const close=()=>{ m.remove(); document.documentElement.classList.remove("sm-open"); removeEventListener("keydown",key,true);
-    initStlViewers(); if(from) from.focus({preventScroll:true}); };
+    initStlViewers(); STL.views.forEach(v=>v.dirty=true); stlKick(); if(from) from.focus({preventScroll:true}); };
   const key=e=>{ if(e.key==="Escape"){ e.stopPropagation(); close(); } };
   addEventListener("keydown",key,true);
   m.querySelector(".sm-x").onclick=close;
