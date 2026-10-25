@@ -679,7 +679,7 @@ footer .priv{flex-basis:100%;font-size:.72rem;color:#6f7d88;opacity:.85}
 #stats .st-tags span{font-size:.75rem;padding:1px 7px;border-radius:999px;background:#1e2a31;border:1px solid #29404a;color:#a5f3fc}
 #stats .st-tags span.g{background:#2b2513;border-color:#5a4a1c;color:#f5c451}
 #stats .st-login{max-width:340px;margin:18vh auto 0;display:grid;gap:10px;text-align:center}
-#stats .st-admin{margin-bottom:14px}
+#stats .st-admin{margin-bottom:14px}#stats .st-note{margin:0 0 12px;padding:9px 12px;border-radius:10px;font-size:.82rem;line-height:1.55;color:#cbd5dc;background:rgba(34,211,238,.07);border:1px solid rgba(34,211,238,.22)}#stats .st-note b{color:#fca5a5}
 #stats .st-admin summary{cursor:pointer;font-weight:600;color:#a5f3fc}
 #stats .st-adm{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px;margin-top:12px}#stats .st-adm .st-msg{align-self:center}
 #stats .st-adm label{display:flex;flex-direction:column;gap:4px;font-size:.8rem;color:#8796a1}
@@ -2998,6 +2998,7 @@ function renderStats(range){
    <div class="st-top"><h2>📊 สถิติผู้เข้าชม</h2><div style="display:flex;gap:6px;flex-wrap:wrap">
      <select id="stRange"><option value="1">วันนี้</option><option value="7">7 วัน</option><option value="30">30 วัน</option><option value="all">ทั้งหมด</option></select>
      <button id="stRefresh">รีเฟรช</button><button id="stCsv">CSV</button><button id="stOut">ออกจากระบบ</button><button id="stClose">✕ ปิด</button></div></div>
+   <p class="st-note">📵 เบราว์เซอร์นี้ถูกตั้งเป็น "เครื่องของเจ้าของเว็บ" ตั้งแต่เข้าหน้านี้ — การเปิดเว็บจากเบราว์เซอร์นี้จะ<b>ไม่ถูกนับ</b>เป็นผู้เข้าชม (ทั้งที่นี่และ Google Analytics) · ถ้าจะทดสอบว่าระบบนับได้ไหม ให้เปิดลิงก์ในโหมดไม่ระบุตัวตน หรือจากเครื่อง/แอปอื่น เช่น เปิดในแชต LINE</p>
    <details class="st-box st-admin"><summary>⚙️ ตั้งค่าเว็บ — เกรดเฉลี่ย / ล้างประวัติการเข้าชม</summary>
      <div class="st-adm">
        <label>เกรดเฉลี่ย (GPAX)<input id="stGpa" inputmode="decimal" autocomplete="off" value="${CFG.gpa}"></label>
