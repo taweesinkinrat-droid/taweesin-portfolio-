@@ -563,14 +563,21 @@ footer .priv{flex-basis:100%;font-size:.72rem;color:#6f7d88;opacity:.85}
 .toc-t{display:block;font-size:.88rem;font-weight:600;line-height:1.35;color:#c9d4db}
 .toc button.on .toc-d{color:var(--cyan)}.toc button.on .toc-t{color:#fff}
 
-/* ---------- Photos: masonry — every photo keeps its own shape, nothing cropped ---------- */
-.masonry{columns:2;column-gap:8px}
-@media (min-width:768px){.masonry{columns:3;column-gap:12px}}
-@media (min-width:1200px){.masonry{columns:4}}
-.masonry img{width:100%;margin:0 0 8px;border-radius:12px;break-inside:avoid;cursor:zoom-in;display:block}
-@media (min-width:768px){.masonry img{margin-bottom:12px}}
-.masonry img:not(.ok){min-height:160px;background:linear-gradient(100deg,var(--card-2) 30%,#2c353f 50%,var(--card-2) 70%) 0 0/200% 100%;animation:shimmer 1.3s linear infinite}
-@media (hover:hover){.masonry img{transition:filter .2s,transform .3s cubic-bezier(.22,.61,.36,1)}.masonry img:hover{filter:brightness(1.1);transform:translateY(-2px)}}
+/* ---------- Photos: justified rows — every photo keeps its own shape (nothing cropped), rows line up evenly,
+   and each tile has its final size from the first frame, so nothing flickers or re-arranges while loading ---------- */
+.gal{--rh:112px;--gg:6px;display:flex;flex-wrap:wrap;gap:var(--gg)}
+.gal::after{content:"";flex-grow:9999}                       /* last row keeps natural size instead of stretching */
+@media (min-width:576px){.gal{--rh:150px;--gg:8px}}
+@media (min-width:992px){.gal{--rh:200px;--gg:10px}}
+@media (min-width:1400px){.gal{--rh:230px}}
+.gi{position:relative;flex:var(--ar) 1 calc(var(--ar) * var(--rh));aspect-ratio:var(--ar);max-width:100%;
+  border-radius:12px;overflow:hidden;background:var(--card-2);contain:layout paint}
+.gi::before{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.05) 50%,transparent 70%) 0 0/200% 100%;animation:shimmer 1.6s linear infinite}
+.gi img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in;opacity:0;transition:opacity .35s ease,transform .35s cubic-bezier(.22,.61,.36,1),filter .2s}
+.gi img.ok{opacity:1}
+.gi:has(img.ok)::before{display:none;animation:none}
+@media (hover:hover){.gi img:hover{transform:scale(1.035);filter:brightness(1.08)}}
+@media (prefers-reduced-motion:reduce){.gi img{transition:none}.gi::before{animation:none}}
 
 /* ---------- résumé (print / PDF only) ---------- */
 .btn-resume svg{width:17px;height:17px}
@@ -1592,9 +1599,15 @@ const VIDEOS = [ /* ใส่ YouTube ID ใน yt เช่น "dQw4w9WgXcQ" */
 
 const PHOTOS = [
   "wrg-stage","wrg-team","wrg-field","tbn1-trophy","tbn1-stage-1","tbn1-stage-2","ftc-team","grc-team","sc-team","sc-fall-detect",
+  ...Array.from({length:10},(_,i)=>String(21+i)),                 /* FTC · IRO · CPU ASEAN Grand Prix (added Oct 2026) */
   ...Array.from({length:17},(_,i)=>"gallery-"+String(i+1).padStart(2,"0")),
   ...Array.from({length:20},(_,i)=>String(i+1))
 ].map(n=>P+n+".jpg");
+const NEW_PHOTOS=Array.from({length:10},(_,i)=>P+(21+i)+".jpg");
+const PHOTOS_HOME=PHOTOS.filter(s=>!NEW_PHOTOS.includes(s));       /* PC home photo strip keeps its original set */
+/* width ÷ height of every photo, so the gallery is laid out at its final size before any picture downloads
+   (no jumping / re-arranging while they load). A photo missing here still works — it is measured on load. */
+const PH_AR={"wrg-stage":1.334,"wrg-team":1.334,"wrg-field":1.334,"tbn1-trophy":0.75,"tbn1-stage-1":1.5,"tbn1-stage-2":1.334,"ftc-team":1.334,"grc-team":1.333,"sc-team":1.5,"sc-fall-detect":1.7,"gallery-01":1.331,"gallery-02":1.331,"gallery-03":1.496,"gallery-04":1.331,"gallery-05":1.333,"gallery-06":1.331,"gallery-07":1.331,"gallery-08":1.331,"gallery-09":1.502,"gallery-10":0.668,"gallery-11":1.331,"gallery-12":1.496,"gallery-13":1.5,"gallery-14":1.502,"gallery-15":2.222,"gallery-16":1.331,"gallery-17":1.331,"1":1.5,"2":1.5,"3":1.5,"4":1.333,"5":0.667,"6":1.5,"7":1.5,"8":1.5,"9":1.5,"10":1.5,"11":0.667,"12":1.5,"13":1.5,"14":1.5,"15":1.499,"16":1.499,"17":1.333,"18":1.333,"19":0.75,"20":0.562,"21":2.224,"22":1.333,"23":1.773,"24":1.347,"25":1.536,"26":1.333,"27":1.333,"28":1.498,"29":1.498,"30":1.498};
 
 const SKILLS = ["C / C++","Python","Arduino","SketchUp"];
 
@@ -1697,7 +1710,7 @@ function cine(HL){
   const jPic=j=>{ const r=ROBOTS[+String(j.go).split("-")[1]]; if(!r||!r.pics)return P+"wrg-team.jpg"; return j.kind==="next"?(r.pics[1]||r.pics[0]):r.pics[0]; };
   const hlPic={"robots:robot-0":P+"wrg-stage.jpg","robots:robot-1":P+"tbn1-stage-1.jpg","projects:smart":P+"sc-fall-detect.jpg","design:design-top":P+"wrg-field.jpg","certs:certs-top":C+"champ-01-wrg-hitthebox-2026.jpg"};
   const feat=DESIGNS.find(d=>d.stl&&/life the cube/i.test(d.stl))||DESIGNS.find(d=>d.stl);
-  const pg=grp(PHOTOS.slice(0,28).map(s=>({src:s})));
+  const pg=grp(PHOTOS_HOME.slice(0,28).map(s=>({src:s})));
   const strip=(list,off)=>{ const h=list.map((s,i)=>img(s,pg,i+off)).join(""); return h+h; };
   /* story → word spans; text inside [[ ]] lights up in cyan */
   const story=T(ME.story||ME.tagline), words=[];
@@ -1760,7 +1773,7 @@ function cine(HL){
 
   <section class="c-sec c-photos"><div class="container-xl c-photos-head"><p class="c-label"><b>05</b>${T(UI.photos)}</p>
       <button class="c-link" data-go="photos">${T(UI.seeAll)}${arrow}</button></div>
-    <div class="c-marq"><div class="c-mrow">${strip(PHOTOS.slice(0,14),0)}</div><div class="c-mrow r2">${strip(PHOTOS.slice(14,28),14)}</div></div>
+    <div class="c-marq"><div class="c-mrow">${strip(PHOTOS_HOME.slice(0,14),0)}</div><div class="c-mrow r2">${strip(PHOTOS_HOME.slice(14,28),14)}</div></div>
   </section>
 
   <nav class="c-dots" aria-label="${th?"ฉากในหน้าแรก":"Home scenes"}">${[["c-hero",T(UI.home)],["c-intro",T(UI.intro)],["c-journey",th?"เส้นทางการแข่งขัน":"Journey"],["c-projects",T(UI.projects)],["c-hl",th?"ผลงานเด่น":"Highlights"],["c-photos",T(UI.photos)],["c-outro",T(UI.contact).replace(/^✉\s*/,"")]]
@@ -1958,7 +1971,8 @@ function render(){
 
   /* photos */
   const gk=grp(PHOTOS.map(s=>({src:s})));
-  document.getElementById("p-photos").innerHTML=`<div class="masonry">${PHOTOS.map((s,i)=>img(s,gk,i)).join("")}</div>`;
+  document.getElementById("p-photos").innerHTML=`<div class="gal">${PHOTOS.map((s,i)=>{ const ar=PH_AR[s.split("/").pop().replace(/\.jpg$/,"")];
+    return `<span class="gi${ar?"":" gi-m"}" style="--ar:${ar||1.5}">${img(s,gk,i)}</span>`; }).join("")}</div>`;
 
   /* videos */
   activeVideoEl=null;
@@ -2639,7 +2653,8 @@ if(GS && matchMedia("(hover:hover) and (pointer:fine)").matches){
 }
 
 /* stop the loading shimmer once each photo has arrived (or failed) */
-const markImg=e=>{ if(e.target.tagName==="IMG") e.target.classList.add("ok"); };
+const markImg=e=>{ const t=e.target; if(t.tagName!=="IMG")return; t.classList.add("ok");
+  const gi=t.parentNode; if(e.type==="load"&&gi&&gi.classList&&gi.classList.contains("gi-m")&&t.naturalHeight){ gi.style.setProperty("--ar",(t.naturalWidth/t.naturalHeight).toFixed(3)); gi.classList.remove("gi-m"); } };
 document.addEventListener("load",markImg,true); document.addEventListener("error",markImg,true);
 function markLoaded(){ document.querySelectorAll("img:not(.ok)").forEach(i=>{ if(i.complete) i.classList.add("ok"); }); }
 
