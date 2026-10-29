@@ -679,7 +679,10 @@ footer .priv{flex-basis:100%;font-size:.72rem;color:#6f7d88;opacity:.85}
 #stats .st-tags span{font-size:.75rem;padding:1px 7px;border-radius:999px;background:#1e2a31;border:1px solid #29404a;color:#a5f3fc}
 #stats .st-tags span.g{background:#2b2513;border-color:#5a4a1c;color:#f5c451}
 #stats .st-login{max-width:340px;margin:18vh auto 0;display:grid;gap:10px;text-align:center}
-#stats .st-admin{margin-bottom:14px}#stats .st-note{margin:0 0 12px;padding:9px 12px;border-radius:10px;font-size:.82rem;line-height:1.55;color:#cbd5dc;background:rgba(34,211,238,.07);border:1px solid rgba(34,211,238,.22)}#stats .st-note b{color:#fca5a5}
+#stats .st-admin{margin-bottom:14px}#stats .st-health{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 14px;margin:0 0 10px;padding:10px 12px;border-radius:10px;font-size:.85rem;line-height:1.55}
+#stats .st-health.ok{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.3);color:#bbf7d0}
+#stats .st-health.bad{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.45);color:#fecaca}
+#stats .st-health .st-ht{display:flex;align-items:center;gap:8px;flex-wrap:wrap}#stats .st-health button{font-size:.8rem}#stats .st-note{margin:0 0 12px;padding:9px 12px;border-radius:10px;font-size:.82rem;line-height:1.55;color:#cbd5dc;background:rgba(34,211,238,.07);border:1px solid rgba(34,211,238,.22)}#stats .st-note b{color:#fca5a5}
 #stats .st-admin summary{cursor:pointer;font-weight:600;color:#a5f3fc}
 #stats .st-adm{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px;margin-top:12px}#stats .st-adm .st-msg{align-self:center}
 #stats .st-adm label{display:flex;flex-direction:column;gap:4px;font-size:.8rem;color:#8796a1}
@@ -2938,7 +2941,7 @@ const SRC_TH={resume_pdf:"Resume PDF",qr_resume:"QR ใน Resume",qr_print:"QR 
   line_app:"แอป LINE",facebook_app:"แอป Facebook",instagram_app:"แอป IG",messenger_app:"แอป Messenger"};
 const fmtDur=s=>{ s=Math.round(s); return s<60?s+" วิ":Math.floor(s/60)+" นาที "+(s%60)+" วิ"; };
 const fmtTime=t=>new Date(t).toLocaleString("th-TH",{day:"numeric",month:"short",year:"2-digit",hour:"2-digit",minute:"2-digit"});
-let stData=null;
+let stData=null, stHealth=null;
 function openStats(){
   let box=document.getElementById("stats");
   if(!box){ box=document.createElement("div"); box.id="stats"; document.body.appendChild(box); }
@@ -2966,10 +2969,24 @@ async function loadStats(key){
     try{ localStorage.setItem("tk_dash_key",key); localStorage.setItem("tk_notrack","1"); }catch(e){}
     OWNER=true; stQ.length=0; /* this device is yours: stop counting it from now on */
     if(d.config) applyCfg(d.config);
+    stHealth={h:d.health||null,restored:+d.restored||0};
     const H=d.head; stData=d.rows.map(r=>Object.fromEntries(H.map((h,i)=>[h,r[i]]))).map(o=>(o.time=+o.time,o)).sort((a,b)=>a.time-b.time);
     renderStats("30");
   }catch(e){ box.innerHTML=`<div class="st-in"><div class="st-login"><p>โหลดสถิติไม่สำเร็จ — ตรวจอินเทอร์เน็ตแล้วลองใหม่</p><button id="stRetry">ลองใหม่</button><button id="stClose">ปิด</button></div></div>`;
     box.querySelector("#stRetry").onclick=()=>loadStats(key); box.querySelector("#stClose").onclick=closeStats; }
+}
+/* back-end health line: is the Apps Script actually saving visits right now? */
+function stHealthHTML(){
+  const H=stHealth&&stHealth.h, newest=stData&&stData.length?stData[stData.length-1].time:0;
+  const t=x=>new Date(x).toLocaleString("th-TH",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+  let cls="ok", msg;
+  if(!H){ cls="bad"; msg=`⚠ <b>หลังบ้าน (Apps Script) ยังเป็นโค้ดเวอร์ชันเก่าที่มีบั๊ก</b> — พอชีตครบ 1,000 แถว จะหยุดบันทึกผู้เข้าชมโดยไม่แจ้งเตือน · อัปเดตเป็น Code.gs เวอร์ชัน 3 แล้ว Deploy (New version)`; }
+  else if(H.restoreError){ cls="bad"; msg=`⚠ กู้ข้อมูลที่ค้างไม่สำเร็จ: ${esc(H.restoreError)}`; }
+  else if(H.lastError&&H.lastErrorTime&&H.lastErrorTime>newest){ cls="bad"; msg=`⚠ หลังบ้านบันทึกไม่สำเร็จล่าสุดเมื่อ ${t(H.lastErrorTime)} (${esc(H.lastError)}) — ข้อมูลถูกเก็บสำรองไว้แล้ว และจะกู้กลับอัตโนมัติ`; }
+  else msg=`✅ หลังบ้านบันทึกได้ปกติ · มีข้อมูล ${(+H.rows||0).toLocaleString()} แถว${newest?` · ล่าสุด ${t(newest)}`:""}`;
+  if(H&&H.backup>0&&!H.restoreError) msg+=` · รอกู้ ${H.backup} ชุด`;
+  if(stHealth&&stHealth.restored) msg+=`<br>♻️ กู้ข้อมูลที่ค้างกลับเข้าระบบแล้ว ${stHealth.restored} รายการ`;
+  return `<div class="st-health ${cls}"><span>${msg}</span><span class="st-ht"><button id="stTest" type="button">🩺 ทดสอบระบบบันทึก</button><span id="stTestMsg" class="st-msg"></span></span></div>`;
 }
 function renderStats(range){
   const box=document.getElementById("stats"); if(!box||!stData)return;
@@ -2998,6 +3015,7 @@ function renderStats(range){
    <div class="st-top"><h2>📊 สถิติผู้เข้าชม</h2><div style="display:flex;gap:6px;flex-wrap:wrap">
      <select id="stRange"><option value="1">วันนี้</option><option value="7">7 วัน</option><option value="30">30 วัน</option><option value="all">ทั้งหมด</option></select>
      <button id="stRefresh">รีเฟรช</button><button id="stCsv">CSV</button><button id="stOut">ออกจากระบบ</button><button id="stClose">✕ ปิด</button></div></div>
+   ${stHealthHTML()}
    <p class="st-note">📵 เบราว์เซอร์นี้ถูกตั้งเป็น "เครื่องของเจ้าของเว็บ" ตั้งแต่เข้าหน้านี้ — การเปิดเว็บจากเบราว์เซอร์นี้จะ<b>ไม่ถูกนับ</b>เป็นผู้เข้าชม (ทั้งที่นี่และ Google Analytics) · ถ้าจะทดสอบว่าระบบนับได้ไหม ให้เปิดลิงก์ในโหมดไม่ระบุตัวตน หรือจากเครื่อง/แอปอื่น เช่น เปิดในแชต LINE</p>
    <details class="st-box st-admin"><summary>⚙️ ตั้งค่าเว็บ — เกรดเฉลี่ย / ล้างประวัติการเข้าชม</summary>
      <div class="st-adm">
@@ -3007,7 +3025,7 @@ function renderStats(range){
      </div>
      <p class="st-meta">ตัวเลขในหน้าเว็บ (หน้าแรก · เกี่ยวกับ) และใน Resume PDF ที่คนดาวน์โหลด จะเปลี่ยนตามทันที ทั้งภาษาไทยและอังกฤษ</p>
      <div class="st-adm st-adm-danger"><button id="stClear" class="st-danger">🗑 ล้างประวัติการเข้าชมทั้งหมด</button><span id="stClrMsg" class="st-msg"></span></div>
-     <p class="st-meta">ลบข้อมูลการเข้าชมทั้งหมดในชีต events (กู้คืนไม่ได้) — แนะนำให้กด CSV เก็บไว้ก่อน</p>
+     <p class="st-meta">ลบข้อมูลการเข้าชมทั้งหมดในชีต events — แนะนำให้กด CSV เก็บไว้ก่อน (ถ้าลบพลาด กู้ได้จาก File → Version history ใน Google Sheet)</p>
    </details>
    <div class="st-cards">
      <div class="st-card"><b>${V.length}</b><span>ครั้งที่เข้าชม</span></div>
@@ -3052,6 +3070,13 @@ function renderStats(range){
       if(d.ok===undefined){ m.textContent="หลังบ้านยังเป็นเวอร์ชันเก่า — อัปเดตโค้ด Apps Script ก่อน"; m.className="st-msg bad"; return; }
       applyCfg(d); q("#stGpa").value=CFG.gpa; m.textContent=`บันทึกแล้ว ✓ เกรด ${CFG.gpa} · ${CFG.terms} ภาคเรียน`; m.className="st-msg ok"; }
     catch(e){ m.textContent="บันทึกไม่สำเร็จ — ตรวจอินเทอร์เน็ตแล้วลองใหม่"; m.className="st-msg bad"; } };
+  q("#stTest").onclick=async()=>{ const m=q("#stTestMsg"); m.textContent="กำลังทดสอบ…"; m.className="st-msg";
+    try{ const d=await api({action:"selftest"});
+      if(d.error==="denied"){ m.textContent="รหัสผ่านไม่ถูกต้อง"; m.className="st-msg bad"; return; }
+      if(d.ok===undefined){ m.textContent="หลังบ้านยังเป็นเวอร์ชันเก่า — อัปเดต Code.gs ก่อน"; m.className="st-msg bad"; return; }
+      if(d.ok){ m.textContent="บันทึกได้จริง ✓ (เขียนลงชีตแล้วอ่านกลับสำเร็จ)"; m.className="st-msg ok"; }
+      else{ m.textContent="บันทึกไม่ได้: "+d.error; m.className="st-msg bad"; } }
+    catch(e){ m.textContent="ติดต่อหลังบ้านไม่ได้ — ตรวจอินเทอร์เน็ตแล้วลองใหม่"; m.className="st-msg bad"; } };
   q("#stClear").onclick=async()=>{ const m=q("#stClrMsg");
     const ans=prompt("ลบประวัติการเข้าชมทั้งหมด (กู้คืนไม่ได้)\nพิมพ์คำว่า  ลบ  เพื่อยืนยัน"); if((ans||"").trim()!=="ลบ"){ m.textContent="ยกเลิกแล้ว"; m.className="st-msg"; return; }
     m.textContent="กำลังลบ…"; m.className="st-msg";
